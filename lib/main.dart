@@ -6,7 +6,7 @@ import 'app.dart';
 import 'core/constants/colors.dart';
 import 'core/get_it/get_it.dart';
 import 'core/window/window_config.dart';
-import 'infrastructure/project/project_cubit.dart';
+import 'infrastructure/project/cubit/project_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +23,9 @@ Future<void> main() async {
       useOnlyLangCode: true,
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(create: (context) => getIt<ProjectCubit>()),
+          BlocProvider(
+            create: (context) => getIt<ProjectCubit>()..init(),
+          ),
         ],
         child: const Plotweaver(),
       ),

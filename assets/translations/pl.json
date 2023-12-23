@@ -1,1 +1,15 @@
-{}
+{
+  "home": {
+    "plotweaver": "Plotweaver",
+    "recent": "Ostatnie",
+    "new": "Nowy",
+    "open": "Otwórz",
+    "weave_your_world": "Słowem tkaj światy",
+    "get_started": "Rozpocznij pracę",
+    "create_new_project": "Utwórz nowy projekt",
+    "open_recent_project": "Otwórz {}",
+    "open_from_finder": "Otwórz projekt z Findera",
+    "get_help": "Uzyskaj pomoc",
+    "pick_file": "Wybierz plik"
+  }
+}
