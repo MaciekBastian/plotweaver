@@ -23,4 +23,33 @@ class FileService {
             result(nil)
         }
     }
+    
+    func pickDirectory(result: FlutterResult) {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.titleVisibility = .visible
+        panel.title = "pick-folder"
+        panel.styleMask = .titled
+        panel.canHide = false
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        
+        if panel.runModal() == .OK {
+            result(panel.url?.absoluteString)
+        } else {
+            result(nil)
+        }
+    }
+    
+    func createNewProjectFile(result: FlutterResult) {
+        let panel = NSSavePanel()
+        panel.allowedFileTypes = [
+            "weave"
+        ]
+        if panel.runModal() == .OK {
+            result(panel.url?.absoluteString)
+        } else {
+            result(nil)
+        }
+    }
 }

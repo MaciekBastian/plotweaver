@@ -6,7 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as pp;
 
 import '../../../core/constants/values.dart';
-import '../../../domain/project/models/file_snippet_model.dart';
+import '../../../domain/global/models/file_snippet_model.dart';
 import '../../../domain/project/services/project_local_storage_service.dart';
 
 @LazySingleton(as: ProjectLocalStorageService)

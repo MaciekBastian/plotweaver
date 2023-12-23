@@ -19,8 +19,10 @@ class MainFlutterWindow: NSWindow {
           [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
           if call.method == "pick_file" {
              self?.fileService.pickFile(result: result)
-          } else if call.method == "pick_folder" {
-              result(nil)
+          } else if call.method == "pick_directory" {
+              self?.fileService.pickDirectory(result: result)
+          } else if call.method == "create_new_project_file" {
+              self?.fileService.createNewProjectFile(result: result)
           } else {
               result(FlutterMethodNotImplemented)
           }
