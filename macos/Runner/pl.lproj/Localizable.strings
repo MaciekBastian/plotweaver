@@ -1,0 +1,9 @@
+/* 
+  Localizable.strings
+  Runner
+
+  Created by Maciej Bastian on 23/12/2023.
+  
+*/
+"pick-file" = "Wybierz plik";
+"pick-folder" = "Wybierz folder";

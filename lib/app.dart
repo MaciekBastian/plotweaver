@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:macos_ui/macos_ui.dart';
 
-import 'core/constants/colors.dart';
 import 'core/get_it/get_it.dart';
 import 'core/router/router.dart';
 
@@ -11,12 +11,10 @@ class Plotweaver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = getIt<AppRouter>();
-    return CupertinoApp.router(
+    return MacosApp.router(
       routerConfig: router.config(),
-      theme: CupertinoThemeData(
+      theme: MacosThemeData(
         brightness: Brightness.light,
-        applyThemeToAll: true,
-        scaffoldBackgroundColor: getIt<AppColors>().background,
       ),
       debugShowCheckedModeBanner: false,
       title: 'Plotweaver',

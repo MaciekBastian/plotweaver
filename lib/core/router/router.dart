@@ -9,8 +9,15 @@ class AppRouter extends $AppRouter {
         AutoRoute(
           page: HomeRoute.page,
           initial: true,
-          type: const RouteType.adaptive(opaque: false),
           path: '/',
+        ),
+        AutoRoute(
+          page: ProjectSetupRoute.page,
+          path: '/project-setup',
+        ),
+        AutoRoute(
+          page: DefaultViewRoute.page,
+          path: '/main',
         ),
       ];
 }
