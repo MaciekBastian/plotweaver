@@ -36,5 +36,25 @@
     "book": "Książka",
     "movie": "Film",
     "series": "Serial"
+  },
+  "character_editor": {
+    "name": "Imię",
+    "age": "Wiek",
+    "appearance": "Wygląd zewnętrzny",
+    "description": "Opis bohatera",
+    "goals": "Cele bohatera",
+    "domicile": "Miejsce zamieszkania",
+    "gender": "Płeć",
+    "unspecified": "Nieustawione",
+    "male": "Mężczyzna",
+    "female": "Kobieta",
+    "other": "Inne",
+    "status": "Status",
+    "alive": "Żywy",
+    "deceased": "Zmarły",
+    "unknown": "Nieznany",
+    "occupation": "Zawód / zajęcie",
+    "portrayed_by": "Odtwórca roli",
+    "unnamed_character": "Nienazwany Bohater"
   }
 }

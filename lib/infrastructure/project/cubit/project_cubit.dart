@@ -3,11 +3,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../core/constants/values.dart';
+import '../../../core/get_it/get_it.dart';
 import '../../../domain/global/models/file_snippet_model.dart';
 import '../../../domain/project/models/project_info_model.dart';
 import '../../../domain/project/models/project_template.dart';
 import '../../../domain/project/repository/project_repository.dart';
 import '../../../domain/weave_file/repository/weave_file_repository.dart';
+import '../../characters/cubit/characters_cubit.dart';
+import '../../global/cubit/view_cubit.dart';
 
 part 'project_cubit.freezed.dart';
 part 'project_state.dart';
@@ -35,6 +38,8 @@ class ProjectCubit extends Cubit<ProjectState> {
     final projectInfo = await _weaveFileRepository.openFile(file);
     await _projectRepository.addToRecent(file);
     final recent = await _projectRepository.getRecent();
+    getIt<ViewCubit>().openProjectTab();
+    getIt<CharactersCubit>().init();
 
     emit(
       state.copyWith(

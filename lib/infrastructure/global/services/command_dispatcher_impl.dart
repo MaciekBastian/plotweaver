@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import '../../../core/get_it/get_it.dart';
 import '../../../domain/global/models/command.dart';
 import '../../../domain/global/services/command_dispatcher.dart';
+import '../../characters/cubit/characters_cubit.dart';
 import '../../project/cubit/project_cubit.dart';
 import '../cubit/view_cubit.dart';
 import '../models/tab_type.dart';
@@ -51,6 +52,9 @@ class CommandDispatcherImpl implements CommandDispatcher {
         }
         if (openedTab.type == TabType.project) {
           await getIt<ProjectCubit>().save();
+        }
+        if (openedTab.type == TabType.character) {
+          await getIt<CharactersCubit>().save();
         }
         break;
       case PlotweaverCommand.delete:

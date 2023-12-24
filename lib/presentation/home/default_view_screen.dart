@@ -15,6 +15,7 @@ import '../../infrastructure/global/models/tab_type.dart';
 import '../project/edit_project_tab.dart';
 import 'widgets/app_logo_widget.dart';
 import 'widgets/sidebar_widget.dart';
+import 'widgets/tab_switcher_widget.dart';
 
 @RoutePage(name: 'DefaultViewRoute')
 class DefaultViewScreen extends StatelessWidget {
@@ -79,7 +80,7 @@ class DefaultViewScreen extends StatelessWidget {
                     case TabType.project:
                       icon = CupertinoIcons.doc;
                     case TabType.character:
-                      icon = CupertinoIcons.person_3;
+                      icon = CupertinoIcons.person;
                     case TabType.thread:
                       icon = CupertinoIcons.helm;
                     case TabType.fragment:
@@ -94,6 +95,7 @@ class DefaultViewScreen extends StatelessWidget {
               title: Text(
                 currentTab?.title ?? LocaleKeys.home_plotweaver.tr(),
               ),
+              titleWidth: mq.size.width * 0.3,
               padding: const EdgeInsets.symmetric(
                 vertical: 4,
                 horizontal: 15,
@@ -106,7 +108,7 @@ class DefaultViewScreen extends StatelessWidget {
                 builder: (context, scrollController) {
                   return Column(
                     children: [
-                      // TODO: tabbed navigation
+                      const TabSwitcherWidget(),
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 8,
