@@ -16,9 +16,9 @@ class AppLogoWidget extends StatelessWidget {
       width: width,
       height: height,
       color: Colors.blue[200],
-      child: const Icon(
+      child: Icon(
         Icons.edit,
-        size: 30,
+        size: height / 2,
       ),
     );
   }

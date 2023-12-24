@@ -14,6 +14,27 @@
     "open_recent_project": "Otwórz {}",
     "open_from_finder": "Otwórz projekt z Findera",
     "get_help": "Uzyskaj pomoc",
-    "pick_file": "Wybierz plik"
+    "pick_file": "Wybierz plik",
+    "search": "Szukaj",
+    "project": "Projekt",
+    "characters": "Bohaterowie",
+    "threads": "Wątki",
+    "chapters": "Rozdziały",
+    "scenes": "Sceny",
+    "episodes": "Odcinki",
+    "timeline": "Oś czasu"
+  },
+  "commands": {
+    "save": "Zapisz",
+    "add": "Dodaj",
+    "delete": "Usuń"
+  },
+  "project_editor": {
+    "title": "Tytuł projektu",
+    "author": "Autor",
+    "template": "Szablon",
+    "book": "Książka",
+    "movie": "Film",
+    "series": "Serial"
   }
 }

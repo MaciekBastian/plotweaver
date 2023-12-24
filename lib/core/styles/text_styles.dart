@@ -36,6 +36,11 @@ class PlotweaverTextStyles {
     fontWeight: FontWeight.normal,
   );
 
+  static const fieldTitle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+  );
+
   static const body = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,

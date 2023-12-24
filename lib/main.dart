@@ -6,6 +6,7 @@ import 'app.dart';
 import 'core/constants/colors.dart';
 import 'core/get_it/get_it.dart';
 import 'core/window/window_config.dart';
+import 'infrastructure/global/cubit/view_cubit.dart';
 import 'infrastructure/project/cubit/project_cubit.dart';
 
 Future<void> main() async {
@@ -26,6 +27,7 @@ Future<void> main() async {
           BlocProvider(
             create: (context) => getIt<ProjectCubit>()..init(),
           ),
+          BlocProvider(create: (context) => getIt<ViewCubit>()),
         ],
         child: const Plotweaver(),
       ),

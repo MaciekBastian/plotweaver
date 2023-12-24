@@ -9,8 +9,9 @@ import '../../core/get_it/get_it.dart';
 import '../../core/router/router.gr.dart';
 import '../../core/styles/text_styles.dart';
 import '../../generated/locale_keys.g.dart';
+import '../../infrastructure/global/cubit/view_cubit.dart';
 import '../../infrastructure/project/cubit/project_cubit.dart';
-import 'widgets/app_logo_widet.dart';
+import 'widgets/app_logo_widget.dart';
 
 @RoutePage(name: 'HomeRoute')
 class HomeScreen extends StatelessWidget {
@@ -22,6 +23,7 @@ class HomeScreen extends StatelessWidget {
       bloc: BlocProvider.of<ProjectCubit>(context),
       listener: (context, state) {
         if (state.openedProject != null) {
+          BlocProvider.of<ViewCubit>(context).openProjectTab();
           AutoRouter.of(context).replaceAll([
             const DefaultViewRoute(),
           ]);

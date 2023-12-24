@@ -5,10 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/colors.dart';
 import '../../core/get_it/get_it.dart';
+import '../../core/router/router.gr.dart';
 import '../../core/styles/text_styles.dart';
 import '../../generated/locale_keys.g.dart';
+import '../../infrastructure/global/cubit/view_cubit.dart';
 import '../../infrastructure/project/cubit/project_cubit.dart';
-import 'widgets/app_logo_widet.dart';
+import 'widgets/app_logo_widget.dart';
 
 @RoutePage(name: 'ProjectSetupRoute')
 class ProjectSetupScreen extends StatefulWidget {
@@ -22,7 +24,7 @@ class _ProjectSetupScreenState extends State<ProjectSetupScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       BlocProvider.of<ProjectCubit>(context).createProjectFile();
     });
   }
@@ -67,8 +69,10 @@ class _ProjectSetupScreenState extends State<ProjectSetupScreen> {
                 CupertinoButton.filled(
                   child: Text(LocaleKeys.home_continue.tr()),
                   onPressed: () {
-                    // TODO: navigate to project
-                    AutoRouter.of(context).pop();
+                    BlocProvider.of<ViewCubit>(context).openProjectTab();
+                    AutoRouter.of(context).replaceAll([
+                      const DefaultViewRoute(),
+                    ]);
                   },
                 ),
               ],
