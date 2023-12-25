@@ -36,5 +36,31 @@
     "book": "Książka",
     "movie": "Film",
     "series": "Serial"
+  },
+  "alerts": {
+    "do_you_want_to_delete": "Czy chcesz usunąć {name}?",
+    "your_data_will_be_lost": "Dane zostaną usunięte i nie będzie można ich przywrócić",
+    "delete": "Usuń",
+    "cancel": "Anuluj"
+  },
+  "character_editor": {
+    "name": "Imię",
+    "age": "Wiek",
+    "appearance": "Wygląd zewnętrzny",
+    "description": "Opis bohatera",
+    "goals": "Cele bohatera",
+    "domicile": "Miejsce zamieszkania",
+    "gender": "Płeć",
+    "unspecified": "Nieustawione",
+    "gender_male": "Mężczyzna",
+    "gender_female": "Kobieta",
+    "gender_other": "Inne",
+    "status": "Status",
+    "alive": "Żywy",
+    "deceased": "Zmarły",
+    "unknown": "Nieznany",
+    "occupation": "Zawód / zajęcie",
+    "portrayed_by": "Odtwórca roli",
+    "unnamed_character": "Nienazwany Bohater"
   }
 }

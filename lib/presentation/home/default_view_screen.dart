@@ -11,10 +11,13 @@ import '../../domain/global/models/command.dart';
 import '../../domain/global/services/command_dispatcher.dart';
 import '../../generated/locale_keys.g.dart';
 import '../../infrastructure/global/cubit/view_cubit.dart';
+import '../../infrastructure/global/models/tab_model.dart';
 import '../../infrastructure/global/models/tab_type.dart';
+import '../characters/character_tab.dart';
 import '../project/edit_project_tab.dart';
 import 'widgets/app_logo_widget.dart';
 import 'widgets/sidebar_widget.dart';
+import 'widgets/tab_switcher_widget.dart';
 
 @RoutePage(name: 'DefaultViewRoute')
 class DefaultViewScreen extends StatelessWidget {
@@ -79,7 +82,7 @@ class DefaultViewScreen extends StatelessWidget {
                     case TabType.project:
                       icon = CupertinoIcons.doc;
                     case TabType.character:
-                      icon = CupertinoIcons.person_3;
+                      icon = CupertinoIcons.person;
                     case TabType.thread:
                       icon = CupertinoIcons.helm;
                     case TabType.fragment:
@@ -94,43 +97,30 @@ class DefaultViewScreen extends StatelessWidget {
               title: Text(
                 currentTab?.title ?? LocaleKeys.home_plotweaver.tr(),
               ),
+              titleWidth: mq.size.width * 0.3,
               padding: const EdgeInsets.symmetric(
                 vertical: 4,
                 horizontal: 15,
               ),
               enableBlur: true,
-              actions: _getToolbarActions,
+              actions: _getToolbarActions(context),
             ),
             children: [
               ContentArea(
                 builder: (context, scrollController) {
                   return Column(
                     children: [
-                      // TODO: tabbed navigation
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 15,
-                        ),
-                        child: Builder(
-                          builder: (context) {
-                            if (currentTab == null) {
-                              return Container();
-                            }
-
-                            switch (currentTab.type) {
-                              case TabType.project:
-                                return const EditProjectTab();
-                              case TabType.character:
-                                return Container();
-                              case TabType.thread:
-                                return Container();
-                              case TabType.fragment:
-                                return Container();
-                              case TabType.timeline:
-                                return Container();
-                            }
-                          },
+                      const TabSwitcherWidget(),
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            bottom: 5,
+                            left: 15,
+                            right: 5,
+                          ),
+                          child: _buildView(currentTab),
                         ),
                       ),
                     ],
@@ -144,7 +134,33 @@ class DefaultViewScreen extends StatelessWidget {
     );
   }
 
-  List<ToolbarItem> get _getToolbarActions {
+  Builder _buildView(TabModel? currentTab) {
+    return Builder(
+      builder: (context) {
+        if (currentTab == null) {
+          return Container();
+        }
+
+        switch (currentTab.type) {
+          case TabType.project:
+            return const EditProjectTab();
+          case TabType.character:
+            return CharacterTab(
+              key: Key(currentTab.id),
+              characterId: currentTab.associatedContentId ?? '',
+            );
+          case TabType.thread:
+            return Container();
+          case TabType.fragment:
+            return Container();
+          case TabType.timeline:
+            return Container();
+        }
+      },
+    );
+  }
+
+  List<ToolbarItem> _getToolbarActions(BuildContext context) {
     return [
       ToolBarIconButton(
         label: LocaleKeys.commands_save.tr(),
@@ -168,7 +184,52 @@ class DefaultViewScreen extends StatelessWidget {
         icon: const MacosIcon(CupertinoIcons.delete),
         showLabel: true,
         onPressed: () {
-          getIt<CommandDispatcher>().sendIntent(PlotweaverCommand.delete);
+          final canDelete = getIt<CommandDispatcher>().isCommandAvailable(
+            PlotweaverCommand.delete,
+          );
+          final currentTab = BlocProvider.of<ViewCubit>(context).currentTab;
+          if (canDelete) {
+            showMacosAlertDialog(
+              context: context,
+              builder: (context) {
+                return MacosAlertDialog(
+                  appIcon: const AppLogoWidget(
+                    width: 64,
+                    height: 64,
+                  ),
+                  title: Text(
+                    LocaleKeys.alerts_do_you_want_to_delete.tr(
+                      namedArgs: {
+                        'name': currentTab?.title ?? '',
+                      },
+                    ),
+                  ),
+                  message: Text(
+                    LocaleKeys.alerts_your_data_will_be_lost.tr(),
+                    style: PlotweaverTextStyles.body,
+                  ),
+                  primaryButton: PushButton(
+                    controlSize: ControlSize.large,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      getIt<CommandDispatcher>().sendIntent(
+                        PlotweaverCommand.delete,
+                      );
+                    },
+                    child: Text(LocaleKeys.alerts_delete.tr()),
+                  ),
+                  secondaryButton: PushButton(
+                    controlSize: ControlSize.large,
+                    secondary: true,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(LocaleKeys.alerts_cancel.tr()),
+                  ),
+                );
+              },
+            );
+          }
         },
       ),
     ];

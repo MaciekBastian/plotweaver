@@ -40,4 +40,25 @@ class ViewCubit extends Cubit<ViewState> {
     final tabs = [...state.openedTabs, tab];
     emit(state.copyWith(currentTabId: tab.id, openedTabs: tabs));
   }
+
+  void closeTab(String tabId) {
+    if (state.openedTabs.any((element) => element.id == tabId)) {
+      final index = state.openedTabs.indexWhere((el) => el.id == tabId);
+      final newOpenedTabs = [...state.openedTabs]..removeAt(index);
+      if (newOpenedTabs.isEmpty) {
+        emit(ViewState());
+        openProjectTab();
+      } else {
+        final newOpened = newOpenedTabs.length == index
+            ? newOpenedTabs[newOpenedTabs.length - 1]
+            : newOpenedTabs[index];
+        emit(
+          state.copyWith(
+            openedTabs: newOpenedTabs,
+            currentTabId: newOpened.id,
+          ),
+        );
+      }
+    }
+  }
 }

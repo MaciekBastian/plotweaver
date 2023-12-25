@@ -3,8 +3,10 @@ import 'package:injectable/injectable.dart';
 import '../../../core/get_it/get_it.dart';
 import '../../../domain/global/models/command.dart';
 import '../../../domain/global/services/command_dispatcher.dart';
+import '../../characters/cubit/characters_cubit.dart';
 import '../../project/cubit/project_cubit.dart';
 import '../cubit/view_cubit.dart';
+import '../models/tab_model.dart';
 import '../models/tab_type.dart';
 
 @LazySingleton(as: CommandDispatcher)
@@ -26,7 +28,8 @@ class CommandDispatcherImpl implements CommandDispatcher {
         if (openedTab == null) {
           return false;
         }
-        if (openedTab.type == TabType.character) {
+        if (openedTab.type == TabType.character &&
+            openedTab.associatedContentId != null) {
           return true;
         }
         return false;
@@ -51,13 +54,40 @@ class CommandDispatcherImpl implements CommandDispatcher {
         }
         if (openedTab.type == TabType.project) {
           await getIt<ProjectCubit>().save();
+          break;
+        }
+        if (openedTab.type == TabType.character) {
+          await getIt<CharactersCubit>().save();
+          break;
         }
         break;
       case PlotweaverCommand.delete:
-        // TODO: implement
+        if (openedTab == null) {
+          break;
+        }
+        if (openedTab.type == TabType.character &&
+            openedTab.associatedContentId != null) {
+          getIt<ViewCubit>().closeTab(openedTab.id);
+          getIt<CharactersCubit>().delete(openedTab.associatedContentId!);
+          break;
+        }
         break;
       case PlotweaverCommand.add:
-        // TODO: implement
+        if (openedTab == null) {
+          break;
+        }
+        if (openedTab.type == TabType.character) {
+          final character = getIt<CharactersCubit>().createNew();
+          getIt<ViewCubit>().openTab(
+            TabModel(
+              id: 'character_${character.id}',
+              title: character.name,
+              type: TabType.character,
+              associatedContentId: character.id,
+            ),
+          );
+          break;
+        }
         break;
     }
   }
