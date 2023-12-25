@@ -37,6 +37,12 @@
     "movie": "Film",
     "series": "Serial"
   },
+  "alerts": {
+    "do_you_want_to_delete": "Czy chcesz usunąć {name}?",
+    "your_data_will_be_lost": "Dane zostaną usunięte i nie będzie można ich przywrócić",
+    "delete": "Usuń",
+    "cancel": "Anuluj"
+  },
   "character_editor": {
     "name": "Imię",
     "age": "Wiek",
@@ -46,9 +52,9 @@
     "domicile": "Miejsce zamieszkania",
     "gender": "Płeć",
     "unspecified": "Nieustawione",
-    "male": "Mężczyzna",
-    "female": "Kobieta",
-    "other": "Inne",
+    "gender_male": "Mężczyzna",
+    "gender_female": "Kobieta",
+    "gender_other": "Inne",
     "status": "Status",
     "alive": "Żywy",
     "deceased": "Zmarły",

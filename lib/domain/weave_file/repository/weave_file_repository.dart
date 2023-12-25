@@ -10,5 +10,8 @@ abstract class WeaveFileRepository {
 
   Future<bool> saveProjectChange(ProjectInfoModel projectInfoModel);
 
-  Future<bool> saveCharactersChanges(List<CharacterModel> modifiedCharacters);
+  Future<bool> saveCharactersChanges(
+    List<CharacterModel> modifiedCharacters,
+    List<String> removedCharacterIds,
+  );
 }

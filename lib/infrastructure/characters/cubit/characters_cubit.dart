@@ -55,14 +55,69 @@ class CharactersCubit extends Cubit<CharactersState> {
     return snippet;
   }
 
-  Future<void> save() async {
+  void delete(String characterId) {
+    if (state.characters.any((element) => element.id == characterId)) {
+      final newCharacters = [...state.characters]
+        ..removeWhere((element) => element.id == characterId);
+      final newOpened = [...state.openedCharacters]
+        ..removeWhere((element) => element.id == characterId);
+
+      emit(
+        state.copyWith(
+          characters: newCharacters,
+          hasUnsavedChanges: true,
+          openedCharacters: newOpened,
+        ),
+      );
+      save(characterId);
+    }
+  }
+
+  Future<void> save([String? deleted]) async {
     if (state.hasUnsavedChanges) {
       final result = await _weaveRepository.saveCharactersChanges(
         state.openedCharacters,
+        deleted == null ? [] : [deleted],
       );
       if (result) {
         emit(state.copyWith(hasUnsavedChanges: false));
       }
+    }
+  }
+
+  CharacterModel? getCharacter(String id) {
+    if (state.openedCharacters.any((element) => element.id == id)) {
+      return state.openedCharacters.firstWhere((element) => element.id == id);
+    } else {
+      if (_weaveRepository.openedFile == null) {
+        return null;
+      }
+      if (_weaveRepository.openedFile!.characters == null) {
+        return null;
+      }
+      if (_weaveRepository.openedFile!.characters!.any((el) => el.id == id)) {
+        final data = _weaveRepository.openedFile!.characters!
+            .firstWhere((element) => element.id == id);
+        emit(
+          state.copyWith(openedCharacters: [...state.openedCharacters, data]),
+        );
+        return data;
+      }
+      return null;
+    }
+  }
+
+  void editCharacter(CharacterModel newModel) {
+    if (state.openedCharacters.any((element) => element.id == newModel.id)) {
+      final newOpened = [...state.openedCharacters]
+        ..removeWhere((element) => element.id == newModel.id)
+        ..add(newModel);
+      emit(
+        state.copyWith(
+          openedCharacters: newOpened,
+          hasUnsavedChanges: true,
+        ),
+      );
     }
   }
 }

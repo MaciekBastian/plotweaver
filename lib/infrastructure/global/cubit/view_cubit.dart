@@ -46,7 +46,8 @@ class ViewCubit extends Cubit<ViewState> {
       final index = state.openedTabs.indexWhere((el) => el.id == tabId);
       final newOpenedTabs = [...state.openedTabs]..removeAt(index);
       if (newOpenedTabs.isEmpty) {
-        emit(ViewState(currentTabId: null, openedTabs: []));
+        emit(ViewState());
+        openProjectTab();
       } else {
         final newOpened = newOpenedTabs.length == index
             ? newOpenedTabs[newOpenedTabs.length - 1]

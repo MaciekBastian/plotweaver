@@ -21,7 +21,7 @@ class TabSwitcherWidget extends StatelessWidget {
       builder: (context, state) {
         return Column(
           children: [
-            Container(
+            SizedBox(
               width: double.infinity,
               height: 35,
               child: Row(
@@ -101,7 +101,7 @@ class _TabWidget extends StatelessWidget {
           onTap: () {
             BlocProvider.of<ViewCubit>(context).openTab(tab);
           },
-          child: Container(
+          child: SizedBox(
             width: 200,
             child: Row(
               children: [

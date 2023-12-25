@@ -72,6 +72,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
   @override
   Future<bool> saveCharactersChanges(
     List<CharacterModel> modifiedCharacters,
+    List<String> removedCharacterIds,
   ) async {
     if (_openedFile == null || _openedProjectPath == null) {
       return false;
@@ -93,6 +94,15 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
           characters
             ..removeAt(index)
             ..insert(index, person);
+        }
+      }
+
+      for (final personId in removedCharacterIds) {
+        final index = characters.indexWhere(
+          (element) => element.id == personId,
+        );
+        if (index >= 0) {
+          characters.removeAt(index);
         }
       }
 
