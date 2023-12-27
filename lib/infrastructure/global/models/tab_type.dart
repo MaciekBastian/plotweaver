@@ -1,7 +1,7 @@
 enum TabType {
   project('project'),
   character('character'),
-  thread('thread'),
+  plot('plot'),
   fragment('fragment'),
   timeline('timeline');
 

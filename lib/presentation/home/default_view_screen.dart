@@ -14,10 +14,12 @@ import '../../infrastructure/global/cubit/view_cubit.dart';
 import '../../infrastructure/global/models/tab_model.dart';
 import '../../infrastructure/global/models/tab_type.dart';
 import '../characters/character_tab.dart';
+import '../plots/plot_tab.dart';
 import '../project/edit_project_tab.dart';
 import 'widgets/app_logo_widget.dart';
 import 'widgets/sidebar_widget.dart';
 import 'widgets/tab_switcher_widget.dart';
+import 'widgets/toolbar_help_button.dart';
 
 @RoutePage(name: 'DefaultViewRoute')
 class DefaultViewScreen extends StatelessWidget {
@@ -83,7 +85,7 @@ class DefaultViewScreen extends StatelessWidget {
                       icon = CupertinoIcons.doc;
                     case TabType.character:
                       icon = CupertinoIcons.person;
-                    case TabType.thread:
+                    case TabType.plot:
                       icon = CupertinoIcons.helm;
                     case TabType.fragment:
                       icon = CupertinoIcons.collections;
@@ -149,8 +151,11 @@ class DefaultViewScreen extends StatelessWidget {
               key: Key(currentTab.id),
               characterId: currentTab.associatedContentId ?? '',
             );
-          case TabType.thread:
-            return Container();
+          case TabType.plot:
+            return PlotTab(
+              key: Key(currentTab.id),
+              plotId: currentTab.associatedContentId ?? '',
+            );
           case TabType.fragment:
             return Container();
           case TabType.timeline:
@@ -230,6 +235,13 @@ class DefaultViewScreen extends StatelessWidget {
               },
             );
           }
+        },
+      ),
+      const ToolBarSpacer(),
+      CustomToolbarItem(
+        tooltipMessage: LocaleKeys.commands_help.tr(),
+        inToolbarBuilder: (context) {
+          return const ToolbarHelpButton();
         },
       ),
     ];

@@ -2,8 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:macos_ui/macos_ui.dart';
 
+import '../../core/constants/colors.dart';
+import '../../core/constants/images.dart';
+import '../../core/get_it/get_it.dart';
 import '../../core/styles/text_styles.dart';
 import '../../domain/characters/models/character_enums.dart';
 import '../../domain/characters/models/character_model.dart';
@@ -35,6 +39,8 @@ class _CharacterTabState extends State<CharacterTab> {
   final _appearanceFocus = FocusNode();
   late final TextEditingController _goalsController;
   final _goalsFocus = FocusNode();
+  late final TextEditingController _lessonController;
+  final _lessonFocus = FocusNode();
   late final TextEditingController _ageController;
   final _ageFocus = FocusNode();
   late final TextEditingController _portrayedByController;
@@ -66,6 +72,7 @@ class _CharacterTabState extends State<CharacterTab> {
     );
     _appearanceController = TextEditingController(text: character?.appearance);
     _goalsController = TextEditingController(text: character?.goals);
+    _lessonController = TextEditingController(text: character?.lesson);
     _occupationController = TextEditingController(text: character?.occupation);
     _domicileController = TextEditingController(text: character?.domicile);
     _status = character?.status ?? CharacterStatus.unspecified;
@@ -75,6 +82,7 @@ class _CharacterTabState extends State<CharacterTab> {
     _descriptionFocus.addListener(_save);
     _appearanceFocus.addListener(_save);
     _goalsFocus.addListener(_save);
+    _lessonFocus.addListener(_save);
     _ageFocus.addListener(_save);
     _portrayedByFocus.addListener(_save);
     _domicileFocus.addListener(_save);
@@ -92,6 +100,7 @@ class _CharacterTabState extends State<CharacterTab> {
       description: _descriptionController.text,
       appearance: _appearanceController.text,
       goals: _goalsController.text,
+      lesson: _lessonController.text,
       gender: _gender,
       status: _status,
       portrayedBy: _portrayedByController.text.trim().isEmpty
@@ -157,6 +166,13 @@ class _CharacterTabState extends State<CharacterTab> {
             ),
           ],
         ),
+        const SizedBox(height: 10),
+        Text(
+          LocaleKeys.character_editor_description_info.tr(),
+          style: PlotweaverTextStyles.body.copyWith(
+            color: getIt<AppColors>().textGrey,
+          ),
+        ),
         const SizedBox(height: 5),
         SizedBox(
           width: double.infinity,
@@ -181,6 +197,13 @@ class _CharacterTabState extends State<CharacterTab> {
               style: PlotweaverTextStyles.fieldTitle,
             ),
           ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          LocaleKeys.character_editor_appearance_info.tr(),
+          style: PlotweaverTextStyles.body.copyWith(
+            color: getIt<AppColors>().textGrey,
+          ),
         ),
         const SizedBox(height: 5),
         SizedBox(
@@ -207,6 +230,13 @@ class _CharacterTabState extends State<CharacterTab> {
             ),
           ],
         ),
+        const SizedBox(height: 10),
+        Text(
+          LocaleKeys.character_editor_goals_info.tr(),
+          style: PlotweaverTextStyles.body.copyWith(
+            color: getIt<AppColors>().textGrey,
+          ),
+        ),
         const SizedBox(height: 5),
         SizedBox(
           width: double.infinity,
@@ -221,6 +251,46 @@ class _CharacterTabState extends State<CharacterTab> {
             placeholder: LocaleKeys.character_editor_goals.tr(),
           ),
         ),
+        const SizedBox(height: 30),
+        Row(
+          children: [
+            SvgPicture.asset(
+              PlotweaverImages.tacticIcon,
+              height: 18,
+              colorFilter: const ColorFilter.mode(
+                CupertinoColors.activeBlue,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              LocaleKeys.character_editor_lesson.tr(),
+              style: PlotweaverTextStyles.fieldTitle,
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          LocaleKeys.character_editor_lesson_info.tr(),
+          style: PlotweaverTextStyles.body.copyWith(
+            color: getIt<AppColors>().textGrey,
+          ),
+        ),
+        const SizedBox(height: 5),
+        SizedBox(
+          width: double.infinity,
+          child: MacosTextField(
+            controller: _lessonController,
+            focusNode: _lessonFocus,
+            onChanged: (value) {
+              _edit();
+            },
+            minLines: 5,
+            maxLines: 15,
+            placeholder: LocaleKeys.character_editor_lesson.tr(),
+          ),
+        ),
+        const SizedBox(height: 30),
       ],
     );
   }

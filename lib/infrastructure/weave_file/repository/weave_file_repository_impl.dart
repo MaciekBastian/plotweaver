@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../../core/constants/weave_file.dart';
 import '../../../domain/characters/models/character_model.dart';
 import '../../../domain/global/models/file_snippet_model.dart';
+import '../../../domain/plots/models/plot_model.dart';
 import '../../../domain/project/models/project_info_model.dart';
 import '../../../domain/weave_file/models/general_info_model.dart';
 import '../../../domain/weave_file/models/weave_file_model.dart';
@@ -47,6 +48,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         generalInfo: generalInfo,
         projectInfo: projectInfoModel,
         characters: _openedFile!.characters,
+        plots: _openedFile!.plots,
       );
       final content = weave.toJson();
       final encoded = json.encode(content);
@@ -110,6 +112,60 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         generalInfo: generalInfo,
         projectInfo: _openedFile!.projectInfo,
         characters: characters,
+        plots: _openedFile!.plots,
+      );
+      final content = weave.toJson();
+      final encoded = json.encode(content);
+      final file = File(_openedProjectPath!);
+      await file.writeAsString(encoded);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> savePlotsChanges(
+    List<PlotModel> modifiedPlots,
+    List<String> removedPlotsIds,
+  ) async {
+    if (_openedFile == null || _openedProjectPath == null) {
+      return false;
+    }
+    try {
+      final generalInfo = await _getGeneralInfo(
+        _openedFile!.generalInfo.createdAt,
+      );
+      final List<PlotModel> plots =
+          _openedFile!.plots == null ? [] : [..._openedFile!.plots!];
+
+      for (final person in modifiedPlots) {
+        final index = plots.indexWhere(
+          (element) => element.id == person.id,
+        );
+        if (index == -1) {
+          plots.add(person);
+        } else {
+          plots
+            ..removeAt(index)
+            ..insert(index, person);
+        }
+      }
+
+      for (final personId in removedPlotsIds) {
+        final index = plots.indexWhere(
+          (element) => element.id == personId,
+        );
+        if (index >= 0) {
+          plots.removeAt(index);
+        }
+      }
+
+      final weave = WeaveFileModel(
+        generalInfo: generalInfo,
+        projectInfo: _openedFile!.projectInfo,
+        characters: _openedFile!.characters,
+        plots: plots,
       );
       final content = weave.toJson();
       final encoded = json.encode(content);

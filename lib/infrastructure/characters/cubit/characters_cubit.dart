@@ -112,10 +112,14 @@ class CharactersCubit extends Cubit<CharactersState> {
       final newOpened = [...state.openedCharacters]
         ..removeWhere((element) => element.id == newModel.id)
         ..add(newModel);
+      final newSnippets = [...state.characters]
+        ..removeWhere((element) => element.id == newModel.id)
+        ..add(CharacterSnippet(id: newModel.id, name: newModel.name));
       emit(
         state.copyWith(
           openedCharacters: newOpened,
           hasUnsavedChanges: true,
+          characters: newSnippets,
         ),
       );
     }
