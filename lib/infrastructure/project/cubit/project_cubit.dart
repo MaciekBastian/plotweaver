@@ -11,6 +11,7 @@ import '../../../domain/project/repository/project_repository.dart';
 import '../../../domain/weave_file/repository/weave_file_repository.dart';
 import '../../characters/cubit/characters_cubit.dart';
 import '../../global/cubit/view_cubit.dart';
+import '../../plots/cubit/plots_cubit.dart';
 
 part 'project_cubit.freezed.dart';
 part 'project_state.dart';
@@ -40,6 +41,7 @@ class ProjectCubit extends Cubit<ProjectState> {
     final recent = await _projectRepository.getRecent();
     getIt<ViewCubit>().openProjectTab();
     getIt<CharactersCubit>().init();
+    getIt<PlotsCubit>().init();
 
     emit(
       state.copyWith(

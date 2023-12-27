@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../characters/models/character_model.dart';
+import '../../plots/models/plot_model.dart';
 import '../../project/models/project_info_model.dart';
 import 'general_info_model.dart';
 
@@ -12,6 +13,7 @@ class WeaveFileModel {
     required this.generalInfo,
     required this.projectInfo,
     this.characters,
+    this.plots,
   });
 
   factory WeaveFileModel.fromJson(Map<String, dynamic> json) => WeaveFileModel(
@@ -36,15 +38,28 @@ class WeaveFileModel {
                   ),
                 )
                 .toList(),
+        plots: json['plots'] == null
+            ? null
+            : (json['plots'] as List)
+                .map(
+                  (e) => PlotModel.fromJson(
+                    (e as Map).map(
+                      (key, value) => MapEntry(key.toString(), value),
+                    ),
+                  ),
+                )
+                .toList(),
       );
 
   final GeneralInfoModel generalInfo;
   final ProjectInfoModel projectInfo;
   final List<CharacterModel>? characters;
+  final List<PlotModel>? plots;
 
   Map<String, dynamic> toJson() => {
         'general': generalInfo.toJson(),
         'project': projectInfo.toJson(),
         'characters': characters?.map((e) => e.toJson()).toList(),
+        'plots': plots?.map((e) => e.toJson()).toList(),
       };
 }

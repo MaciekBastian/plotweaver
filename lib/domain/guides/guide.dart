@@ -1,0 +1,4 @@
+enum PlotweaverGuide {
+  characterDevelopment,
+  plotDevelopment,
+}

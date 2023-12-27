@@ -19,5 +19,9 @@ class AppRouter extends $AppRouter {
           page: DefaultViewRoute.page,
           path: '/main',
         ),
+        AutoRoute(
+          page: GuideRoute.page,
+          path: '/guides',
+        ),
       ];
 }

@@ -45,4 +45,9 @@ class PlotweaverTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.normal,
   );
+
+  static const body2 = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+  );
 }

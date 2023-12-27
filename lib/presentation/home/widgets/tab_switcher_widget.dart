@@ -38,7 +38,7 @@ class TabSwitcherWidget extends StatelessWidget {
                             icon = CupertinoIcons.doc;
                           case TabType.character:
                             icon = CupertinoIcons.person;
-                          case TabType.thread:
+                          case TabType.plot:
                             icon = CupertinoIcons.helm;
                           case TabType.fragment:
                             icon = CupertinoIcons.collections;
@@ -105,15 +105,7 @@ class _TabWidget extends StatelessWidget {
             width: 200,
             child: Row(
               children: [
-                const SizedBox(width: 15),
-                MacosIcon(icon),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    tab.title,
-                    style: PlotweaverTextStyles.body,
-                  ),
-                ),
+                const SizedBox(width: 5),
                 if (state.openedTabs.length > 1)
                   MacosIconButton(
                     hoverColor:
@@ -126,6 +118,19 @@ class _TabWidget extends StatelessWidget {
                       BlocProvider.of<ViewCubit>(context).closeTab(tab.id);
                     },
                   ),
+                const SizedBox(width: 5),
+                MacosIcon(icon),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    tab.title,
+                    style: PlotweaverTextStyles.body,
+                    maxLines: 1,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Container(
                   width: 1,
                   height: double.infinity,

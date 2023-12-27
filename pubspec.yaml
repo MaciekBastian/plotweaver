@@ -25,6 +25,7 @@ dependencies:
   path_provider: ^2.1.1
   package_info_plus: ^4.2.0
   macos_ui: ^2.0.2
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
@@ -40,6 +41,7 @@ flutter:
 
   assets:
     - assets/translations/
+    - assets/icons/
   #   - images/a_dot_ham.jpeg
 
   # fonts:

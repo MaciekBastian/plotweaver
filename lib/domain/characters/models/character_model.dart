@@ -13,6 +13,7 @@ class CharacterModel {
     this.status = CharacterStatus.unspecified,
     this.appearance = '',
     this.description = '',
+    this.lesson = '',
     this.goals = '',
     this.age,
     this.domicile,
@@ -24,11 +25,12 @@ class CharacterModel {
         id: json['id'],
         name: json['name'],
         age: json['age'],
-        appearance: json['appearance'],
-        description: json['description'],
+        appearance: json['appearance'] ?? '',
+        description: json['description'] ?? '',
+        goals: json['goals'] ?? '',
+        lesson: json['lesson'] ?? '',
         domicile: json['domicile'],
         gender: CharacterGender.fromCodeName(json['gender']),
-        goals: json['goals'],
         occupation: json['occupation'],
         portrayedBy: json['portrayed_by'],
         status: CharacterStatus.fromCodeName(json['status']),
@@ -44,17 +46,19 @@ class CharacterModel {
   final String description;
   final String goals;
   final String appearance;
+  final String lesson;
   final String? occupation;
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'age': age,
-        'appearance': appearance,
-        'description': description,
+        if (appearance.isNotEmpty) 'appearance': appearance,
+        if (description.isNotEmpty) 'description': description,
+        if (lesson.isNotEmpty) 'lesson': lesson,
         'domicile': domicile,
         'gender': gender.codeName,
-        'goals': goals,
+        if (goals.isNotEmpty) 'goals': goals,
         'occupation': occupation,
         'portrayed_by': portrayedBy,
         'status': status.codeName,
