@@ -50,6 +50,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         characters: _openedFile!.characters,
         plots: _openedFile!.plots,
       );
+      _openedFile = weave;
       final content = weave.toJson();
       final encoded = json.encode(content);
       final file = File(_openedProjectPath!);
@@ -114,6 +115,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         characters: characters,
         plots: _openedFile!.plots,
       );
+      _openedFile = weave;
       final content = weave.toJson();
       final encoded = json.encode(content);
       final file = File(_openedProjectPath!);
@@ -167,6 +169,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         characters: _openedFile!.characters,
         plots: plots,
       );
+      _openedFile = weave;
       final content = weave.toJson();
       final encoded = json.encode(content);
       final file = File(_openedProjectPath!);

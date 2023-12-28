@@ -46,11 +46,27 @@ class TabSwitcherWidget extends StatelessWidget {
                             icon = CupertinoIcons.time;
                         }
 
-                        return _TabWidget(
-                          icon: icon,
-                          state: state,
-                          tab: tab,
-                          key: Key('opened_tab_${tab.id}'),
+                        return Draggable(
+                          feedback: SizedBox(
+                            height: 35,
+                            child: Opacity(
+                              opacity: 0.5,
+                              child: _TabWidget(
+                                tab: tab,
+                                icon: icon,
+                                state: state,
+                                key: Key(
+                                  'dragged_${tab.id}',
+                                ),
+                              ),
+                            ),
+                          ),
+                          child: _TabWidget(
+                            icon: icon,
+                            state: state,
+                            tab: tab,
+                            key: Key('opened_tab_${tab.id}'),
+                          ),
                         );
                       }).toList(),
                     ),
@@ -71,7 +87,7 @@ class TabSwitcherWidget extends StatelessWidget {
   }
 }
 
-class _TabWidget extends StatelessWidget {
+class _TabWidget extends StatefulWidget {
   const _TabWidget({
     required this.tab,
     required this.icon,
@@ -84,11 +100,17 @@ class _TabWidget extends StatelessWidget {
   final TabModel tab;
 
   @override
+  State<_TabWidget> createState() => _TabWidgetState();
+}
+
+class _TabWidgetState extends State<_TabWidget> {
+  bool _hovering = false;
+  @override
   Widget build(BuildContext context) {
     final currentTab = BlocProvider.of<ViewCubit>(context).currentTab;
 
     return Container(
-      color: tab.id == currentTab?.id
+      color: widget.tab.id == currentTab?.id
           ? CupertinoColors.activeBlue.withOpacity(0.2)
           : Colors.transparent,
       child: Material(
@@ -99,14 +121,19 @@ class _TabWidget extends StatelessWidget {
           highlightColor: Colors.transparent,
           hoverColor: getIt<AppColors>().dividerColor.withOpacity(0.3),
           onTap: () {
-            BlocProvider.of<ViewCubit>(context).openTab(tab);
+            BlocProvider.of<ViewCubit>(context).openTab(widget.tab);
+          },
+          onHover: (value) {
+            setState(() {
+              _hovering = value;
+            });
           },
           child: SizedBox(
             width: 200,
             child: Row(
               children: [
                 const SizedBox(width: 5),
-                if (state.openedTabs.length > 1)
+                if (widget.state.openedTabs.length > 1 && _hovering)
                   MacosIconButton(
                     hoverColor:
                         getIt<AppColors>().dividerColor.withOpacity(0.5),
@@ -115,15 +142,18 @@ class _TabWidget extends StatelessWidget {
                     onPressed: () {
                       getIt<CommandDispatcher>()
                           .sendIntent(PlotweaverCommand.save);
-                      BlocProvider.of<ViewCubit>(context).closeTab(tab.id);
+                      BlocProvider.of<ViewCubit>(context)
+                          .closeTab(widget.tab.id);
                     },
-                  ),
+                  )
+                else
+                  const SizedBox(width: 30),
                 const SizedBox(width: 5),
-                MacosIcon(icon),
+                MacosIcon(widget.icon),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    tab.title,
+                    widget.tab.title,
                     style: PlotweaverTextStyles.body,
                     maxLines: 1,
                     overflow: TextOverflow.fade,

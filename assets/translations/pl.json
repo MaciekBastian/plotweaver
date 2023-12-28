@@ -77,6 +77,17 @@
     "episodic_characters": "Bohaterowie epizodyczni",
     "episodic_characters_description": "Nie każdy bohater musi zostać szczegółowo opisany. Mniej istotne postaci nie muszą mieć wyraźnie zdefiniowanego celu lub przejść przemiany w trakcie trwania fabuły, aby znaleźć się w historii. Warto zapisać podstawowe cechy epizodycznych bohaterów, aby łatwiej wracać do nich na przestrzeni całej książki lub całego filmu, ale jeśli nie mają znacznego wpływu na przebieg zdarzeń, wystarczą podstawowe informacje.",
     "relationships": "Relacje",
+    "family_relationships": "Relacje rodzinne",
+    "edit_family_relationships_in_relationship_editor": "Edytuj relacje rodzinne w edytorze relacji",
+    "family_relationships_info": "Jeśli w swojej historii masz wielu bohaterów, którzy mają między sobą różne powiązania, warto dodać pokrewieństwo i relacje rodzinne, aby mieć te informacje zapisane w jednym miejscu. Plotweaver automatycznie uzupełnia relację dla drugiej osoby np.: dodając jedną osobę jako rodzica, Plotweaver doda rodzicowi Twojego bohatera jako dziecko.",
+    "edit": "Edytuj",
+    "parents": "Rodzice",
+    "children": "Dzieci",
+    "spouses": "Małżonkowie",
+    "siblings": "Rodzeństwo",
+    "pick_parent": "Wybierz rodzica",
+    "pick_child": "Wybierz dziecko",
+    "pick_spouse": "Wybierz małżonka/małżonkę",
     "relationships_description": "Pomyśl o swoim bohaterze jak o prawdziwej osobie. Zapisz, jakie ma odczucia wobec innych bohaterów — których lubi, a za którymi nie przepada. Oznacz wrogów i przyjaciół, czyli osoby sprzyjające bohaterowi i te przeciwne mu. Pozwoli Ci to na łatwiejsze zaplanowanie losów postaci. Dobrze poprowadzone przyjaźnie podobają się odbiorcom, a konsekwencja w relacjach pozytywnie wpływa na ogół fabuły."
   },
   "plots_editor": {

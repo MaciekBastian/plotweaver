@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/material.dart' show Icons, Material, InkWell, Colors;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:macos_ui/macos_ui.dart';
@@ -11,10 +11,15 @@ import '../../core/get_it/get_it.dart';
 import '../../core/styles/text_styles.dart';
 import '../../domain/characters/models/character_enums.dart';
 import '../../domain/characters/models/character_model.dart';
+import '../../domain/characters/models/character_snippet.dart';
 import '../../domain/project/models/project_template.dart';
 import '../../generated/locale_keys.g.dart';
 import '../../infrastructure/characters/cubit/characters_cubit.dart';
+import '../../infrastructure/global/cubit/view_cubit.dart';
+import '../../infrastructure/global/models/tab_model.dart';
+import '../../infrastructure/global/models/tab_type.dart';
 import '../../infrastructure/project/cubit/project_cubit.dart';
+import 'widgets/family_relationships_editor.dart';
 
 class CharacterTab extends StatefulWidget {
   const CharacterTab({
@@ -51,6 +56,9 @@ class _CharacterTabState extends State<CharacterTab> {
   final _domicileFocus = FocusNode();
   late CharacterStatus _status;
   late CharacterGender _gender;
+  late List<String> _parents;
+  late List<String> _children;
+  late List<String> _spouses;
 
   @override
   void initState() {
@@ -77,6 +85,9 @@ class _CharacterTabState extends State<CharacterTab> {
     _domicileController = TextEditingController(text: character?.domicile);
     _status = character?.status ?? CharacterStatus.unspecified;
     _gender = character?.gender ?? CharacterGender.unspecified;
+    _children = character?.children ?? [];
+    _spouses = character?.spouses ?? [];
+    _parents = character?.parents ?? [];
 
     _nameFocus.addListener(_save);
     _descriptionFocus.addListener(_save);
@@ -115,6 +126,9 @@ class _CharacterTabState extends State<CharacterTab> {
       domicile: _domicileController.text.trim().isEmpty
           ? null
           : _domicileController.text.trim(),
+      children: _children,
+      parents: _parents,
+      spouses: _spouses,
     );
     BlocProvider.of<CharactersCubit>(context).editCharacter(model);
   }
@@ -297,6 +311,7 @@ class _CharacterTabState extends State<CharacterTab> {
 
   Column _buildLeftPane() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
@@ -586,6 +601,262 @@ class _CharacterTabState extends State<CharacterTab> {
           ],
         ),
         const SizedBox(height: 30),
+        Row(
+          children: [
+            const MacosIcon(Icons.diversity_1_rounded),
+            const SizedBox(width: 8),
+            Text(
+              LocaleKeys.character_editor_family_relationships.tr(),
+              style: PlotweaverTextStyles.fieldTitle,
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        Text(
+          LocaleKeys.character_editor_family_relationships_info.tr(),
+          style: PlotweaverTextStyles.body.copyWith(
+            color: getIt<AppColors>().textGrey,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Text(
+              LocaleKeys
+                  .character_editor_edit_family_relationships_in_relationship_editor
+                  .tr(),
+              style: PlotweaverTextStyles.body.copyWith(
+                color: getIt<AppColors>().textGrey,
+              ),
+            ),
+            const SizedBox(width: 20),
+            PushButton(
+              secondary: true,
+              controlSize: ControlSize.regular,
+              onPressed: () {
+                openFamilyRelationshipsEditor(context, _id).whenComplete(() {
+                  final refreshed = BlocProvider.of<CharactersCubit>(context)
+                      .getCharacter(_id);
+                  if (refreshed == null) {
+                    return;
+                  }
+
+                  setState(() {
+                    _children = refreshed.children;
+                    _spouses = refreshed.spouses;
+                    _parents = refreshed.parents;
+                  });
+                  _save();
+                });
+              },
+              child: Text(LocaleKeys.character_editor_edit.tr()),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+        BlocBuilder<CharactersCubit, CharactersState>(
+          bloc: BlocProvider.of<CharactersCubit>(context),
+          builder: (context, state) {
+            final parents = _parents
+                .map((e) {
+                  return state.characters.where((element) {
+                    return element.id == e;
+                  }).firstOrNull;
+                })
+                .whereType<CharacterSnippet>()
+                .toList();
+            final children = _children
+                .map((e) {
+                  return state.characters.where((element) {
+                    return element.id == e;
+                  }).firstOrNull;
+                })
+                .whereType<CharacterSnippet>()
+                .toList();
+            final spouses = _spouses
+                .map((e) {
+                  return state.characters.where((element) {
+                    return element.id == e;
+                  }).firstOrNull;
+                })
+                .whereType<CharacterSnippet>()
+                .toList();
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const MacosIcon(
+                            Icons.family_restroom_rounded,
+                            size: 15,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            LocaleKeys.character_editor_parents.tr(),
+                            style: PlotweaverTextStyles.body2,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      ...parents.map(
+                        (e) {
+                          return Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                BlocProvider.of<ViewCubit>(context).openTab(
+                                  TabModel(
+                                    id: 'character_${e.id}',
+                                    title: e.name,
+                                    type: TabType.character,
+                                    associatedContentId: e.id,
+                                  ),
+                                );
+                              },
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              mouseCursor: SystemMouseCursors.click,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 3,
+                                ),
+                                child: Text(
+                                  e.name,
+                                  style: PlotweaverTextStyles.body,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: false,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ).toList(),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const MacosIcon(
+                            CupertinoIcons.heart_fill,
+                            size: 15,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            LocaleKeys.character_editor_spouses.tr(),
+                            style: PlotweaverTextStyles.body2,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      ...spouses.map(
+                        (e) {
+                          return Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                BlocProvider.of<ViewCubit>(context).openTab(
+                                  TabModel(
+                                    id: 'character_${e.id}',
+                                    title: e.name,
+                                    type: TabType.character,
+                                    associatedContentId: e.id,
+                                  ),
+                                );
+                              },
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              mouseCursor: SystemMouseCursors.click,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 3,
+                                ),
+                                child: Text(
+                                  e.name,
+                                  style: PlotweaverTextStyles.body,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: false,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ).toList(),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const MacosIcon(
+                            Icons.child_friendly_rounded,
+                            size: 15,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            LocaleKeys.character_editor_children.tr(),
+                            style: PlotweaverTextStyles.body2,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      ...children.map(
+                        (e) {
+                          return Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                BlocProvider.of<ViewCubit>(context).openTab(
+                                  TabModel(
+                                    id: 'character_${e.id}',
+                                    title: e.name,
+                                    type: TabType.character,
+                                    associatedContentId: e.id,
+                                  ),
+                                );
+                              },
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              mouseCursor: SystemMouseCursors.click,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 3,
+                                ),
+                                child: Text(
+                                  e.name,
+                                  style: PlotweaverTextStyles.body,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: false,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ).toList(),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ],
     );
   }

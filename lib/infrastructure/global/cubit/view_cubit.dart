@@ -55,7 +55,8 @@ class ViewCubit extends Cubit<ViewState> {
         emit(
           state.copyWith(
             openedTabs: newOpenedTabs,
-            currentTabId: newOpened.id,
+            currentTabId:
+                state.currentTabId != tabId ? state.currentTabId : newOpened.id,
           ),
         );
       }
