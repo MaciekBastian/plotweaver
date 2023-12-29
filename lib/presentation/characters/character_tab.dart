@@ -1,25 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Icons, Material, InkWell, Colors;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:macos_ui/macos_ui.dart';
 
-import '../../core/constants/colors.dart';
-import '../../core/constants/images.dart';
-import '../../core/get_it/get_it.dart';
 import '../../core/styles/text_styles.dart';
 import '../../domain/characters/models/character_enums.dart';
 import '../../domain/characters/models/character_model.dart';
-import '../../domain/characters/models/character_snippet.dart';
 import '../../domain/project/models/project_template.dart';
 import '../../generated/locale_keys.g.dart';
 import '../../infrastructure/characters/cubit/characters_cubit.dart';
 import '../../infrastructure/global/cubit/view_cubit.dart';
-import '../../infrastructure/global/models/tab_model.dart';
-import '../../infrastructure/global/models/tab_type.dart';
 import '../../infrastructure/project/cubit/project_cubit.dart';
-import 'widgets/family_relationships_editor.dart';
+import 'widgets/character_tab_right_pane.dart';
+import 'widgets/family_relationships_section.dart';
+import 'widgets/friends_and_enemies_section.dart';
 
 class CharacterTab extends StatefulWidget {
   const CharacterTab({
@@ -59,6 +54,10 @@ class _CharacterTabState extends State<CharacterTab> {
   late List<String> _parents;
   late List<String> _children;
   late List<String> _spouses;
+  late List<String> _friends;
+  late List<String> _enemies;
+  String? _newFriendId;
+  String? _newEnemyId;
 
   @override
   void initState() {
@@ -88,6 +87,8 @@ class _CharacterTabState extends State<CharacterTab> {
     _children = character?.children ?? [];
     _spouses = character?.spouses ?? [];
     _parents = character?.parents ?? [];
+    _friends = character?.friends ?? [];
+    _enemies = character?.enemies ?? [];
 
     _nameFocus.addListener(_save);
     _descriptionFocus.addListener(_save);
@@ -129,8 +130,11 @@ class _CharacterTabState extends State<CharacterTab> {
       children: _children,
       parents: _parents,
       spouses: _spouses,
+      friends: _friends,
+      enemies: _enemies,
     );
     BlocProvider.of<CharactersCubit>(context).editCharacter(model);
+    BlocProvider.of<ViewCubit>(context).leavePreviewState();
   }
 
   @override
@@ -157,155 +161,23 @@ class _CharacterTabState extends State<CharacterTab> {
               const SizedBox(width: 15),
               Expanded(
                 flex: 2,
-                child: _buildRightPane(),
+                child: CharacterTabRightPane(
+                  edit: _edit,
+                  appearanceController: _appearanceController,
+                  appearanceFocus: _appearanceFocus,
+                  descriptionController: _descriptionController,
+                  descriptionFocus: _descriptionFocus,
+                  goalsController: _goalsController,
+                  goalsFocus: _goalsFocus,
+                  lessonController: _lessonController,
+                  lessonFocus: _lessonFocus,
+                ),
               ),
               const SizedBox(width: 15),
             ],
           ),
         ],
       ),
-    );
-  }
-
-  Column _buildRightPane() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const MacosIcon(CupertinoIcons.text_alignleft),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.character_editor_description.tr(),
-              style: PlotweaverTextStyles.fieldTitle,
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          LocaleKeys.character_editor_description_info.tr(),
-          style: PlotweaverTextStyles.body.copyWith(
-            color: getIt<AppColors>().textGrey,
-          ),
-        ),
-        const SizedBox(height: 5),
-        SizedBox(
-          width: double.infinity,
-          child: MacosTextField(
-            controller: _descriptionController,
-            focusNode: _descriptionFocus,
-            onChanged: (value) {
-              _edit();
-            },
-            minLines: 5,
-            maxLines: 15,
-            placeholder: LocaleKeys.character_editor_description.tr(),
-          ),
-        ),
-        const SizedBox(height: 30),
-        Row(
-          children: [
-            const MacosIcon(CupertinoIcons.person_alt),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.character_editor_appearance.tr(),
-              style: PlotweaverTextStyles.fieldTitle,
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          LocaleKeys.character_editor_appearance_info.tr(),
-          style: PlotweaverTextStyles.body.copyWith(
-            color: getIt<AppColors>().textGrey,
-          ),
-        ),
-        const SizedBox(height: 5),
-        SizedBox(
-          width: double.infinity,
-          child: MacosTextField(
-            controller: _appearanceController,
-            focusNode: _appearanceFocus,
-            onChanged: (value) {
-              _edit();
-            },
-            minLines: 5,
-            maxLines: 15,
-            placeholder: LocaleKeys.character_editor_appearance.tr(),
-          ),
-        ),
-        const SizedBox(height: 30),
-        Row(
-          children: [
-            const MacosIcon(CupertinoIcons.flag),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.character_editor_goals.tr(),
-              style: PlotweaverTextStyles.fieldTitle,
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          LocaleKeys.character_editor_goals_info.tr(),
-          style: PlotweaverTextStyles.body.copyWith(
-            color: getIt<AppColors>().textGrey,
-          ),
-        ),
-        const SizedBox(height: 5),
-        SizedBox(
-          width: double.infinity,
-          child: MacosTextField(
-            controller: _goalsController,
-            focusNode: _goalsFocus,
-            onChanged: (value) {
-              _edit();
-            },
-            minLines: 5,
-            maxLines: 15,
-            placeholder: LocaleKeys.character_editor_goals.tr(),
-          ),
-        ),
-        const SizedBox(height: 30),
-        Row(
-          children: [
-            SvgPicture.asset(
-              PlotweaverImages.tacticIcon,
-              height: 18,
-              colorFilter: const ColorFilter.mode(
-                CupertinoColors.activeBlue,
-                BlendMode.srcIn,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.character_editor_lesson.tr(),
-              style: PlotweaverTextStyles.fieldTitle,
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          LocaleKeys.character_editor_lesson_info.tr(),
-          style: PlotweaverTextStyles.body.copyWith(
-            color: getIt<AppColors>().textGrey,
-          ),
-        ),
-        const SizedBox(height: 5),
-        SizedBox(
-          width: double.infinity,
-          child: MacosTextField(
-            controller: _lessonController,
-            focusNode: _lessonFocus,
-            onChanged: (value) {
-              _edit();
-            },
-            minLines: 5,
-            maxLines: 15,
-            placeholder: LocaleKeys.character_editor_lesson.tr(),
-          ),
-        ),
-        const SizedBox(height: 30),
-      ],
     );
   }
 
@@ -601,262 +473,99 @@ class _CharacterTabState extends State<CharacterTab> {
           ],
         ),
         const SizedBox(height: 30),
-        Row(
-          children: [
-            const MacosIcon(Icons.diversity_1_rounded),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.character_editor_family_relationships.tr(),
-              style: PlotweaverTextStyles.fieldTitle,
-            ),
-          ],
-        ),
-        const SizedBox(height: 5),
-        Text(
-          LocaleKeys.character_editor_family_relationships_info.tr(),
-          style: PlotweaverTextStyles.body.copyWith(
-            color: getIt<AppColors>().textGrey,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Row(
-          children: [
-            Text(
-              LocaleKeys
-                  .character_editor_edit_family_relationships_in_relationship_editor
-                  .tr(),
-              style: PlotweaverTextStyles.body.copyWith(
-                color: getIt<AppColors>().textGrey,
-              ),
-            ),
-            const SizedBox(width: 20),
-            PushButton(
-              secondary: true,
-              controlSize: ControlSize.regular,
-              onPressed: () {
-                openFamilyRelationshipsEditor(context, _id).whenComplete(() {
-                  final refreshed = BlocProvider.of<CharactersCubit>(context)
-                      .getCharacter(_id);
-                  if (refreshed == null) {
-                    return;
-                  }
+        FamilyRelationshipsSection(
+          characterId: _id,
+          characterChildren: _children,
+          characterParents: _parents,
+          characterSpouses: _spouses,
+          refreshFamily: () {
+            final refreshed = BlocProvider.of<CharactersCubit>(
+              context,
+            ).getCharacter(_id);
 
-                  setState(() {
-                    _children = refreshed.children;
-                    _spouses = refreshed.spouses;
-                    _parents = refreshed.parents;
-                  });
-                  _save();
-                });
-              },
-              child: Text(LocaleKeys.character_editor_edit.tr()),
-            ),
-          ],
-        ),
-        const SizedBox(height: 15),
-        BlocBuilder<CharactersCubit, CharactersState>(
-          bloc: BlocProvider.of<CharactersCubit>(context),
-          builder: (context, state) {
-            final parents = _parents
-                .map((e) {
-                  return state.characters.where((element) {
-                    return element.id == e;
-                  }).firstOrNull;
-                })
-                .whereType<CharacterSnippet>()
-                .toList();
-            final children = _children
-                .map((e) {
-                  return state.characters.where((element) {
-                    return element.id == e;
-                  }).firstOrNull;
-                })
-                .whereType<CharacterSnippet>()
-                .toList();
-            final spouses = _spouses
-                .map((e) {
-                  return state.characters.where((element) {
-                    return element.id == e;
-                  }).firstOrNull;
-                })
-                .whereType<CharacterSnippet>()
-                .toList();
+            if (refreshed == null) {
+              return;
+            }
 
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const MacosIcon(
-                            Icons.family_restroom_rounded,
-                            size: 15,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            LocaleKeys.character_editor_parents.tr(),
-                            style: PlotweaverTextStyles.body2,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      ...parents.map(
-                        (e) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                BlocProvider.of<ViewCubit>(context).openTab(
-                                  TabModel(
-                                    id: 'character_${e.id}',
-                                    title: e.name,
-                                    type: TabType.character,
-                                    associatedContentId: e.id,
-                                  ),
-                                );
-                              },
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              mouseCursor: SystemMouseCursors.click,
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 3,
-                                ),
-                                child: Text(
-                                  e.name,
-                                  style: PlotweaverTextStyles.body,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: false,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ).toList(),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const MacosIcon(
-                            CupertinoIcons.heart_fill,
-                            size: 15,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            LocaleKeys.character_editor_spouses.tr(),
-                            style: PlotweaverTextStyles.body2,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      ...spouses.map(
-                        (e) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                BlocProvider.of<ViewCubit>(context).openTab(
-                                  TabModel(
-                                    id: 'character_${e.id}',
-                                    title: e.name,
-                                    type: TabType.character,
-                                    associatedContentId: e.id,
-                                  ),
-                                );
-                              },
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              mouseCursor: SystemMouseCursors.click,
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 3,
-                                ),
-                                child: Text(
-                                  e.name,
-                                  style: PlotweaverTextStyles.body,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: false,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ).toList(),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const MacosIcon(
-                            Icons.child_friendly_rounded,
-                            size: 15,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            LocaleKeys.character_editor_children.tr(),
-                            style: PlotweaverTextStyles.body2,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      ...children.map(
-                        (e) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                BlocProvider.of<ViewCubit>(context).openTab(
-                                  TabModel(
-                                    id: 'character_${e.id}',
-                                    title: e.name,
-                                    type: TabType.character,
-                                    associatedContentId: e.id,
-                                  ),
-                                );
-                              },
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              mouseCursor: SystemMouseCursors.click,
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 3,
-                                ),
-                                child: Text(
-                                  e.name,
-                                  style: PlotweaverTextStyles.body,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: false,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ).toList(),
-                    ],
-                  ),
-                ),
-              ],
-            );
+            setState(() {
+              _children = refreshed.children;
+              _spouses = refreshed.spouses;
+              _parents = refreshed.parents;
+            });
+            _save();
           },
         ),
+        const SizedBox(height: 30),
+        FriendsAndEnemiesSection(
+          characterId: _id,
+          enemies: _enemies,
+          friends: _friends,
+          newEnemyId: _newEnemyId,
+          newFriendId: _newFriendId,
+          setNewEnemyId: (characterId) {
+            setState(() {
+              _newEnemyId = characterId;
+            });
+          },
+          setNewFriendId: (characterId) {
+            setState(() {
+              _newFriendId = characterId;
+            });
+          },
+          addEnemy: () {
+            if (_newEnemyId == null || _newEnemyId == '') {
+              return;
+            }
+            if (_enemies.contains(_newEnemyId)) {
+              return;
+            }
+            _enemies.add(_newEnemyId!);
+            BlocProvider.of<CharactersCubit>(context).addEnemy(
+              _id,
+              _newEnemyId!,
+            );
+            setState(() {
+              _newEnemyId = null;
+            });
+          },
+          addFriend: () {
+            if (_newFriendId == null || _newFriendId == '') {
+              return;
+            }
+            if (_friends.contains(_newFriendId)) {
+              return;
+            }
+            _friends.add(_newFriendId!);
+            BlocProvider.of<CharactersCubit>(context).addFriend(
+              _id,
+              _newFriendId!,
+            );
+            setState(() {
+              _newFriendId = null;
+            });
+          },
+          removeFriend: (characterId) {
+            BlocProvider.of<CharactersCubit>(context).removeFriend(
+              _id,
+              characterId,
+            );
+            _friends.remove(characterId);
+            setState(() {
+              _newFriendId = null;
+            });
+          },
+          removeEnemy: (characterId) {
+            BlocProvider.of<CharactersCubit>(context).removeEnemy(
+              _id,
+              characterId,
+            );
+            _enemies.remove(characterId);
+            setState(() {
+              _newEnemyId = null;
+            });
+          },
+        ),
+        const SizedBox(height: 30),
       ],
     );
   }

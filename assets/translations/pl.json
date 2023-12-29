@@ -30,7 +30,17 @@
     "delete": "Usuń",
     "help": "Pomoc i podpowiedzi",
     "done": "Gotowe",
-    "read_more": "Czytaj dalej"
+    "read_more": "Czytaj dalej",
+    "add_character": "Dodaj bohatera",
+    "add_plot": "Dodaj wątek",
+    "add_chapter": "Dodaj rozdział",
+    "add_scene": "Dodaj scenę",
+    "add_episode": "Dodaj odcinek",
+    "more": "Więcej",
+    "close_current_tab": "Zamknij tę kartę",
+    "close_other_tabs": "Zamknij inne karty",
+    "pin": "Przypnij",
+    "unpin": "Odepnij"
   },
   "project_editor": {
     "title": "Tytuł projektu",
@@ -88,7 +98,14 @@
     "pick_parent": "Wybierz rodzica",
     "pick_child": "Wybierz dziecko",
     "pick_spouse": "Wybierz małżonka/małżonkę",
-    "relationships_description": "Pomyśl o swoim bohaterze jak o prawdziwej osobie. Zapisz, jakie ma odczucia wobec innych bohaterów — których lubi, a za którymi nie przepada. Oznacz wrogów i przyjaciół, czyli osoby sprzyjające bohaterowi i te przeciwne mu. Pozwoli Ci to na łatwiejsze zaplanowanie losów postaci. Dobrze poprowadzone przyjaźnie podobają się odbiorcom, a konsekwencja w relacjach pozytywnie wpływa na ogół fabuły."
+    "relationships_description": "Pomyśl o swoim bohaterze jak o prawdziwej osobie. Zapisz, jakie ma odczucia wobec innych bohaterów — których lubi, a za którymi nie przepada. Oznacz wrogów i przyjaciół, czyli osoby sprzyjające bohaterowi i te przeciwne mu. Pozwoli Ci to na łatwiejsze zaplanowanie losów postaci. Dobrze poprowadzone przyjaźnie podobają się odbiorcom, a konsekwencja w relacjach pozytywnie wpływa na ogół fabuły.",
+    "friends": "Przyjaciele",
+    "friends_info": "Wybierz bohaterów, którzy mają przyjacielskie relacje z tym bohaterem",
+    "enemies": "Wrogowie",
+    "enemies_info": "Wybierz bohaterów, którzy są przeciwko temu bohaterowi lub się z nim nie lubią",
+    "select_character": "Wybierz bohatera",
+    "add": "Dodaj",
+    "remove": "Usuń"
   },
   "plots_editor": {
     "plot": "Wątek",

@@ -9,10 +9,12 @@ import '../../core/get_it/get_it.dart';
 import '../../core/styles/text_styles.dart';
 import '../../domain/global/models/command.dart';
 import '../../domain/global/services/command_dispatcher.dart';
+import '../../domain/project/models/project_template.dart';
 import '../../generated/locale_keys.g.dart';
 import '../../infrastructure/global/cubit/view_cubit.dart';
 import '../../infrastructure/global/models/tab_model.dart';
 import '../../infrastructure/global/models/tab_type.dart';
+import '../../infrastructure/project/cubit/project_cubit.dart';
 import '../characters/character_tab.dart';
 import '../plots/plot_tab.dart';
 import '../project/edit_project_tab.dart';
@@ -166,6 +168,11 @@ class DefaultViewScreen extends StatelessWidget {
   }
 
   List<ToolbarItem> _getToolbarActions(BuildContext context) {
+    final template =
+        BlocProvider.of<ProjectCubit>(context).state.projectInfo?.template ??
+            ProjectTemplate.book;
+    final currentTab = BlocProvider.of<ViewCubit>(context).currentTab;
+
     return [
       ToolBarIconButton(
         label: LocaleKeys.commands_save.tr(),
@@ -236,6 +243,72 @@ class DefaultViewScreen extends StatelessWidget {
             );
           }
         },
+      ),
+      ToolBarPullDownButton(
+        label: LocaleKeys.commands_more.tr(),
+        icon: CupertinoIcons.ellipsis_circle,
+        items: [
+          MacosPulldownMenuItem(
+            title: Text(LocaleKeys.commands_close_current_tab.tr()),
+            onTap: () {
+              getIt<CommandDispatcher>().sendIntent(
+                PlotweaverCommand.closeCurrentTab,
+              );
+            },
+          ),
+          MacosPulldownMenuItem(
+            enabled: getIt<CommandDispatcher>().isCommandAvailable(
+              PlotweaverCommand.closeOtherTabs,
+            ),
+            title: Text(LocaleKeys.commands_close_other_tabs.tr()),
+            onTap: () {
+              getIt<CommandDispatcher>().sendIntent(
+                PlotweaverCommand.closeOtherTabs,
+              );
+            },
+          ),
+          MacosPulldownMenuItem(
+            title: Text(
+              (currentTab?.isPinned ?? false)
+                  ? LocaleKeys.commands_unpin.tr()
+                  : LocaleKeys.commands_pin.tr(),
+            ),
+            onTap: () {
+              getIt<CommandDispatcher>().sendIntent(
+                PlotweaverCommand.togglePinStateOfCurrentTab,
+              );
+            },
+          ),
+          const MacosPulldownMenuDivider(),
+          MacosPulldownMenuItem(
+            title: Text(LocaleKeys.commands_add_character.tr()),
+            onTap: () {
+              getIt<CommandDispatcher>().sendIntent(
+                PlotweaverCommand.addCharacter,
+              );
+            },
+          ),
+          MacosPulldownMenuItem(
+            title: Text(LocaleKeys.commands_add_plot.tr()),
+            onTap: () {
+              getIt<CommandDispatcher>().sendIntent(PlotweaverCommand.addPlot);
+            },
+          ),
+          MacosPulldownMenuItem(
+            title: Text(
+              template == ProjectTemplate.book
+                  ? LocaleKeys.commands_add_chapter.tr()
+                  : template == ProjectTemplate.movie
+                      ? LocaleKeys.commands_add_scene.tr()
+                      : LocaleKeys.commands_add_episode.tr(),
+            ),
+            onTap: () {
+              getIt<CommandDispatcher>().sendIntent(
+                PlotweaverCommand.addFragment,
+              );
+            },
+          ),
+        ],
       ),
       const ToolBarSpacer(),
       CustomToolbarItem(

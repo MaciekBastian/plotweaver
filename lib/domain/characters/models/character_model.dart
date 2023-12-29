@@ -23,6 +23,8 @@ class CharacterModel {
     this.spouses = const [],
     this.children = const [],
     this.parents = const [],
+    this.friends = const [],
+    this.enemies = const [],
   });
 
   factory CharacterModel.fromJson(Map<String, dynamic> json) => CharacterModel(
@@ -47,6 +49,12 @@ class CharacterModel {
         spouses: json['spouses'] == null
             ? []
             : (json['spouses'] as List).map((e) => e.toString()).toList(),
+        friends: json['friends'] == null
+            ? []
+            : (json['friends'] as List).map((e) => e.toString()).toList(),
+        enemies: json['enemies'] == null
+            ? []
+            : (json['enemies'] as List).map((e) => e.toString()).toList(),
       );
 
   final String id;
@@ -64,6 +72,8 @@ class CharacterModel {
   final List<String> children;
   final List<String> parents;
   final List<String> spouses;
+  final List<String> friends;
+  final List<String> enemies;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -81,6 +91,8 @@ class CharacterModel {
         if (children.isNotEmpty) 'children': children,
         if (parents.isNotEmpty) 'parents': parents,
         if (spouses.isNotEmpty) 'spouses': spouses,
+        if (friends.isNotEmpty) 'friends': friends,
+        if (enemies.isNotEmpty) 'enemies': enemies,
       };
 
   CharacterModel copyWith({
@@ -98,6 +110,8 @@ class CharacterModel {
     List<String>? children,
     List<String>? parents,
     List<String>? spouses,
+    List<String>? friends,
+    List<String>? enemies,
   }) =>
       CharacterModel(
         id: id,
@@ -115,6 +129,8 @@ class CharacterModel {
         portrayedBy: portrayedBy ?? this.portrayedBy,
         spouses: spouses ?? this.spouses,
         status: status ?? this.status,
+        friends: friends ?? this.friends,
+        enemies: enemies ?? this.enemies,
       );
 
   CharacterSnippet toSnippet() => CharacterSnippet(
