@@ -22,9 +22,7 @@ class CharactersCubit extends Cubit<CharactersState> {
 
   void init() {
     final characters = _weaveRepository.openedFile?.characters ?? [];
-    final snippets = characters
-        .map((e) => CharacterSnippet(id: e.id, name: e.name))
-        .toList();
+    final snippets = characters.map((e) => e.toSnippet()).toList();
 
     emit(
       state.copyWith(
@@ -40,7 +38,7 @@ class CharactersCubit extends Cubit<CharactersState> {
       id: randomId(),
       name: LocaleKeys.character_editor_unnamed_character.tr(),
     );
-    final snippet = CharacterSnippet(id: character.id, name: character.name);
+    final snippet = character.toSnippet();
     emit(
       state.copyWith(
         characters: [...state.characters, snippet],
@@ -114,7 +112,7 @@ class CharactersCubit extends Cubit<CharactersState> {
         ..add(newModel);
       final newSnippets = [...state.characters]
         ..removeWhere((element) => element.id == newModel.id)
-        ..add(CharacterSnippet(id: newModel.id, name: newModel.name));
+        ..add(newModel.toSnippet());
       emit(
         state.copyWith(
           openedCharacters: newOpened,
@@ -123,5 +121,261 @@ class CharactersCubit extends Cubit<CharactersState> {
         ),
       );
     }
+  }
+
+  void addFamilyRelationship(String parentId, String childId) {
+    final parent = getCharacter(parentId);
+    final child = getCharacter(childId);
+
+    if (parent == null || child == null) {
+      return;
+    }
+    final newChildren = {...parent.children, childId}.toList();
+    final newParents = {...child.parents, parentId}.toList();
+    final newParent = parent.copyWith(children: newChildren);
+    final newChild = child.copyWith(parents: newParents);
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == parentId || el.id == childId)
+      ..add(newChild)
+      ..add(newParent);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == parentId || el.id == childId)
+      ..add(newChild.toSnippet())
+      ..add(newParent.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
+  }
+
+  void deleteFamilyRelationship(String parentId, String childId) {
+    final parent = getCharacter(parentId);
+    final child = getCharacter(childId);
+
+    if (parent == null || child == null) {
+      return;
+    }
+    final newChildren =
+        {...parent.children}.where((element) => element != childId).toList();
+    final newParents =
+        {...child.parents}.where((element) => element != parentId).toList();
+    final newParent = parent.copyWith(children: newChildren);
+    final newChild = child.copyWith(parents: newParents);
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == parentId || el.id == childId)
+      ..add(newChild)
+      ..add(newParent);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == parentId || el.id == childId)
+      ..add(newChild.toSnippet())
+      ..add(newParent.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
+  }
+
+  void addSpouse(String spouse1, String spouse2) {
+    final s1 = getCharacter(spouse1);
+    final s2 = getCharacter(spouse2);
+
+    if (s1 == null || s2 == null) {
+      return;
+    }
+
+    final newS1 = s1.copyWith(spouses: {...s1.spouses, spouse2}.toList());
+    final newS2 = s2.copyWith(spouses: {...s2.spouses, spouse1}.toList());
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == spouse1 || el.id == spouse2)
+      ..add(newS1)
+      ..add(newS2);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == spouse1 || el.id == spouse2)
+      ..add(newS1.toSnippet())
+      ..add(newS2.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
+  }
+
+  void deleteSpouse(String spouse1, String spouse2) {
+    final s1 = getCharacter(spouse1);
+    final s2 = getCharacter(spouse2);
+
+    if (s1 == null || s2 == null) {
+      return;
+    }
+
+    final newS1 = s1.copyWith(
+      spouses: {...s1.spouses}.where((element) => element != spouse2).toList(),
+    );
+    final newS2 = s2.copyWith(
+      spouses: {...s2.spouses}.where((element) => element != spouse1).toList(),
+    );
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == spouse1 || el.id == spouse2)
+      ..add(newS1)
+      ..add(newS2);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == spouse1 || el.id == spouse2)
+      ..add(newS1.toSnippet())
+      ..add(newS2.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
+  }
+
+  void addFriend(String character1, String character2) {
+    final c1 = getCharacter(character1);
+    final c2 = getCharacter(character2);
+
+    if (c1 == null || c2 == null) {
+      return;
+    }
+
+    final newC1 = c1.copyWith(friends: {...c1.friends, character2}.toList());
+    final newC2 = c2.copyWith(friends: {...c2.friends, character1}.toList());
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newC1)
+      ..add(newC2);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newC1.toSnippet())
+      ..add(newC2.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
+  }
+
+  void removeFriend(String character1, String character2) {
+    final c1 = getCharacter(character1);
+    final c2 = getCharacter(character2);
+
+    if (c1 == null || c2 == null) {
+      return;
+    }
+
+    final newS1 = c1.copyWith(
+      friends: {...c1.friends}.where((el) => el != character2).toList(),
+    );
+    final newS2 = c2.copyWith(
+      friends: {...c2.friends}.where((el) => el != character1).toList(),
+    );
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newS1)
+      ..add(newS2);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newS1.toSnippet())
+      ..add(newS2.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
+  }
+
+  void addEnemy(String character1, String character2) {
+    final c1 = getCharacter(character1);
+    final c2 = getCharacter(character2);
+
+    if (c1 == null || c2 == null) {
+      return;
+    }
+
+    final newC1 = c1.copyWith(enemies: {...c1.enemies, character2}.toList());
+    final newC2 = c2.copyWith(enemies: {...c2.enemies, character1}.toList());
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newC1)
+      ..add(newC2);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newC1.toSnippet())
+      ..add(newC2.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
+  }
+
+  void removeEnemy(String character1, String character2) {
+    final c1 = getCharacter(character1);
+    final c2 = getCharacter(character2);
+
+    if (c1 == null || c2 == null) {
+      return;
+    }
+
+    final newS1 = c1.copyWith(
+      enemies: {...c1.enemies}.where((el) => el != character2).toList(),
+    );
+    final newS2 = c2.copyWith(
+      enemies: {...c2.enemies}.where((el) => el != character1).toList(),
+    );
+
+    final newOpened = [...state.openedCharacters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newS1)
+      ..add(newS2);
+    final newSnippets = [...state.characters]
+      ..removeWhere((el) => el.id == character1 || el.id == character2)
+      ..add(newS1.toSnippet())
+      ..add(newS2.toSnippet());
+
+    emit(
+      state.copyWith(
+        openedCharacters: newOpened,
+        characters: newSnippets,
+        hasUnsavedChanges: true,
+      ),
+    );
+    save();
   }
 }

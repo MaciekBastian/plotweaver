@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:macos_ui/macos_ui.dart';
 
@@ -127,7 +128,7 @@ class SidebarWidget extends StatelessWidget {
         ),
         SidebarItem(
           label: Text(LocaleKeys.home_plots.tr()),
-          leading: const MacosIcon(CupertinoIcons.doc_append),
+          leading: const MacosIcon(Icons.sailing_outlined),
           trailing: Text('${plots.length}'),
           disclosureItems: plots.isEmpty
               ? null

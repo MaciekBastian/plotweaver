@@ -11,7 +11,9 @@ import '../../core/styles/text_styles.dart';
 import '../../domain/plots/models/plot_model.dart';
 import '../../generated/locale_keys.g.dart';
 import '../../infrastructure/characters/cubit/characters_cubit.dart';
+import '../../infrastructure/global/cubit/view_cubit.dart';
 import '../../infrastructure/plots/cubit/plots_cubit.dart';
+import '../characters/widgets/character_link_widget.dart';
 
 class PlotTab extends StatefulWidget {
   const PlotTab({
@@ -77,6 +79,7 @@ class _PlotTabState extends State<PlotTab> {
       subplots: _subplots,
     );
     BlocProvider.of<PlotsCubit>(context).editPlot(model);
+    BlocProvider.of<ViewCubit>(context).leavePreviewState();
   }
 
   @override
@@ -304,7 +307,11 @@ class _PlotTabState extends State<PlotTab> {
                 ..._charactersInvolved.map((e) {
                   final character = BlocProvider.of<CharactersCubit>(
                     context,
-                  ).getCharacter(e);
+                  )
+                      .state
+                      .characters
+                      .where((element) => element.id == e)
+                      .firstOrNull;
 
                   if (character == null) {
                     Future.delayed(const Duration(milliseconds: 200), () {
@@ -325,13 +332,7 @@ class _PlotTabState extends State<PlotTab> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            character.name,
-                            style: PlotweaverTextStyles.body,
-                            maxLines: 1,
-                            overflow: TextOverflow.fade,
-                            softWrap: false,
-                          ),
+                          child: CharacterLinkWidget(character: character),
                         ),
                         const SizedBox(width: 15),
                         PushButton(

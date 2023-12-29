@@ -9,6 +9,7 @@ import '../../domain/global/models/command.dart';
 import '../../domain/global/services/command_dispatcher.dart';
 import '../../domain/project/models/project_template.dart';
 import '../../generated/locale_keys.g.dart';
+import '../../infrastructure/global/cubit/view_cubit.dart';
 import '../../infrastructure/project/cubit/project_cubit.dart';
 
 class EditProjectTab extends StatefulWidget {
@@ -75,6 +76,7 @@ class _EditProjectTabState extends State<EditProjectTab> {
                 BlocProvider.of<ProjectCubit>(context).editTitle(
                   value.trim(),
                 );
+                BlocProvider.of<ViewCubit>(context).leavePreviewState();
               },
               maxLines: 1,
               placeholder: LocaleKeys.project_editor_title.tr(),
@@ -101,6 +103,7 @@ class _EditProjectTabState extends State<EditProjectTab> {
                 BlocProvider.of<ProjectCubit>(context).editAuthor(
                   value.trim(),
                 );
+                BlocProvider.of<ViewCubit>(context).leavePreviewState();
               },
               onEditingComplete: _save,
               onSubmitted: (_) => _save(),
@@ -133,6 +136,7 @@ class _EditProjectTabState extends State<EditProjectTab> {
                 _template = value;
               });
               _save();
+              BlocProvider.of<ViewCubit>(context).leavePreviewState();
             },
             items: [
               MacosPopupMenuItem(

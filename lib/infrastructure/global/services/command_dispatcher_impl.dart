@@ -57,6 +57,19 @@ class CommandDispatcherImpl implements CommandDispatcher {
           return true;
         }
         return false;
+      case PlotweaverCommand.addCharacter:
+        return true;
+      case PlotweaverCommand.addPlot:
+        return true;
+      case PlotweaverCommand.addFragment:
+        return true;
+      case PlotweaverCommand.closeCurrentTab:
+        return openedTab != null;
+      case PlotweaverCommand.closeOtherTabs:
+        final opened = getIt<ViewCubit>().state.openedTabs;
+        return opened.length > 1;
+      case PlotweaverCommand.togglePinStateOfCurrentTab:
+        return openedTab != null;
     }
   }
 
@@ -103,29 +116,53 @@ class CommandDispatcherImpl implements CommandDispatcher {
           break;
         }
         if (openedTab.type == TabType.character) {
-          final character = getIt<CharactersCubit>().createNew();
-          getIt<ViewCubit>().openTab(
-            TabModel(
-              id: 'character_${character.id}',
-              title: character.name,
-              type: TabType.character,
-              associatedContentId: character.id,
-            ),
-          );
+          await sendIntent(PlotweaverCommand.addCharacter);
           break;
         }
         if (openedTab.type == TabType.plot) {
-          final plot = getIt<PlotsCubit>().createNew();
-          getIt<ViewCubit>().openTab(
-            TabModel(
-              id: 'character_${plot.id}',
-              title: plot.name,
-              type: TabType.plot,
-              associatedContentId: plot.id,
-            ),
-          );
+          await sendIntent(PlotweaverCommand.addPlot);
           break;
         }
+        if (openedTab.type == TabType.fragment) {
+          await sendIntent(PlotweaverCommand.addFragment);
+          break;
+        }
+        break;
+      case PlotweaverCommand.addCharacter:
+        final character = getIt<CharactersCubit>().createNew();
+        getIt<ViewCubit>().openTab(
+          TabModel(
+            id: 'character_${character.id}',
+            title: character.name,
+            type: TabType.character,
+            associatedContentId: character.id,
+          ),
+        );
+        break;
+      case PlotweaverCommand.addPlot:
+        final plot = getIt<PlotsCubit>().createNew();
+        getIt<ViewCubit>().openTab(
+          TabModel(
+            id: 'character_${plot.id}',
+            title: plot.name,
+            type: TabType.plot,
+            associatedContentId: plot.id,
+          ),
+        );
+        break;
+      case PlotweaverCommand.addFragment:
+        // TODO: handle this case
+        break;
+      case PlotweaverCommand.closeCurrentTab:
+        if (openedTab != null) {
+          getIt<ViewCubit>().closeTab(openedTab.id);
+        }
+        break;
+      case PlotweaverCommand.closeOtherTabs:
+        getIt<ViewCubit>().closeOtherTabs();
+        break;
+      case PlotweaverCommand.togglePinStateOfCurrentTab:
+        getIt<ViewCubit>().toggleCurrentTabPinState();
         break;
     }
   }
