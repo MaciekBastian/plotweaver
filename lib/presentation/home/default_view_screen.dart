@@ -16,6 +16,7 @@ import '../../infrastructure/global/models/tab_model.dart';
 import '../../infrastructure/global/models/tab_type.dart';
 import '../../infrastructure/project/cubit/project_cubit.dart';
 import '../characters/character_tab.dart';
+import '../fragments/fragment_tab.dart';
 import '../plots/plot_tab.dart';
 import '../project/edit_project_tab.dart';
 import 'widgets/app_logo_widget.dart';
@@ -159,7 +160,10 @@ class DefaultViewScreen extends StatelessWidget {
               plotId: currentTab.associatedContentId ?? '',
             );
           case TabType.fragment:
-            return Container();
+            return FragmentTab(
+              key: Key(currentTab.id),
+              fragmentId: currentTab.associatedContentId ?? '',
+            );
           case TabType.timeline:
             return Container();
         }
@@ -297,9 +301,9 @@ class DefaultViewScreen extends StatelessWidget {
           MacosPulldownMenuItem(
             title: Text(
               template == ProjectTemplate.book
-                  ? LocaleKeys.commands_add_chapter.tr()
+                  ? LocaleKeys.commands_add_part.tr()
                   : template == ProjectTemplate.movie
-                      ? LocaleKeys.commands_add_scene.tr()
+                      ? LocaleKeys.commands_add_act.tr()
                       : LocaleKeys.commands_add_episode.tr(),
             ),
             onTap: () {

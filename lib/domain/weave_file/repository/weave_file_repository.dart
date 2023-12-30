@@ -1,4 +1,5 @@
 import '../../characters/models/character_model.dart';
+import '../../fragments/models/fragment_model.dart';
 import '../../global/models/file_snippet_model.dart';
 import '../../plots/models/plot_model.dart';
 import '../../project/models/project_info_model.dart';
@@ -19,5 +20,10 @@ abstract class WeaveFileRepository {
   Future<bool> savePlotsChanges(
     List<PlotModel> modifiedPlots,
     List<String> removedPlotsIds,
+  );
+
+  Future<bool> saveFragmentsChanges(
+    List<FragmentModel> modifiedFragments,
+    List<String> removedFragmentsIds,
   );
 }

@@ -10,6 +10,7 @@ import '../../../domain/project/models/project_template.dart';
 import '../../../domain/project/repository/project_repository.dart';
 import '../../../domain/weave_file/repository/weave_file_repository.dart';
 import '../../characters/cubit/characters_cubit.dart';
+import '../../fragments/cubit/fragments_cubit.dart';
 import '../../global/cubit/view_cubit.dart';
 import '../../plots/cubit/plots_cubit.dart';
 
@@ -39,10 +40,6 @@ class ProjectCubit extends Cubit<ProjectState> {
     final projectInfo = await _weaveFileRepository.openFile(file);
     await _projectRepository.addToRecent(file);
     final recent = await _projectRepository.getRecent();
-    getIt<ViewCubit>().openProjectTab();
-    getIt<CharactersCubit>().init();
-    getIt<PlotsCubit>().init();
-
     emit(
       state.copyWith(
         openedProject: file,
@@ -50,6 +47,11 @@ class ProjectCubit extends Cubit<ProjectState> {
         projectInfo: projectInfo.projectInfo,
       ),
     );
+
+    getIt<ViewCubit>().openProjectTab();
+    getIt<CharactersCubit>().init();
+    getIt<PlotsCubit>().init();
+    getIt<FragmentsCubit>().init();
     return true;
   }
 
@@ -109,7 +111,7 @@ class ProjectCubit extends Cubit<ProjectState> {
     update(newModel);
   }
 
-  void editTemplate(ProjectTemplate newTemplate) {
+  Future<void> editTemplate(ProjectTemplate newTemplate) async {
     if (state.projectInfo == null) {
       return;
     }
@@ -120,6 +122,8 @@ class ProjectCubit extends Cubit<ProjectState> {
     );
 
     update(newModel);
+    await getIt<FragmentsCubit>().clearAll();
+    await save();
   }
 
   Future<void> save() async {

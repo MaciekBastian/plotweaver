@@ -7,6 +7,7 @@ import 'core/constants/colors.dart';
 import 'core/get_it/get_it.dart';
 import 'core/window/window_config.dart';
 import 'infrastructure/characters/cubit/characters_cubit.dart';
+import 'infrastructure/fragments/cubit/fragments_cubit.dart';
 import 'infrastructure/global/cubit/view_cubit.dart';
 import 'infrastructure/plots/cubit/plots_cubit.dart';
 import 'infrastructure/project/cubit/project_cubit.dart';
@@ -30,6 +31,7 @@ Future<void> main() async {
           BlocProvider(create: (context) => getIt<ViewCubit>()),
           BlocProvider(create: (context) => getIt<CharactersCubit>()),
           BlocProvider(create: (context) => getIt<PlotsCubit>()),
+          BlocProvider(create: (context) => getIt<FragmentsCubit>()),
         ],
         child: const Plotweaver(),
       ),

@@ -4,6 +4,7 @@ import '../../../core/get_it/get_it.dart';
 import '../../../domain/global/models/command.dart';
 import '../../../domain/global/services/command_dispatcher.dart';
 import '../../characters/cubit/characters_cubit.dart';
+import '../../fragments/cubit/fragments_cubit.dart';
 import '../../plots/cubit/plots_cubit.dart';
 import '../../project/cubit/project_cubit.dart';
 import '../cubit/view_cubit.dart';
@@ -32,6 +33,10 @@ class CommandDispatcherImpl implements CommandDispatcher {
           final hasUnsaved = getIt<PlotsCubit>().state.hasUnsavedChanges;
           return hasUnsaved;
         }
+        if (openedTab.type == TabType.fragment) {
+          final hasUnsaved = getIt<FragmentsCubit>().state.hasUnsavedChanges;
+          return hasUnsaved;
+        }
         return true;
       case PlotweaverCommand.delete:
         if (openedTab == null) {
@@ -45,6 +50,11 @@ class CommandDispatcherImpl implements CommandDispatcher {
             openedTab.associatedContentId != null) {
           return true;
         }
+        if (openedTab.type == TabType.fragment &&
+            openedTab.associatedContentId != null) {
+          final fragments = getIt<FragmentsCubit>().state.fragments.length;
+          return fragments > 1;
+        }
         return false;
       case PlotweaverCommand.add:
         if (openedTab == null) {
@@ -54,6 +64,9 @@ class CommandDispatcherImpl implements CommandDispatcher {
           return true;
         }
         if (openedTab.type == TabType.plot) {
+          return true;
+        }
+        if (openedTab.type == TabType.fragment) {
           return true;
         }
         return false;
@@ -93,6 +106,10 @@ class CommandDispatcherImpl implements CommandDispatcher {
           await getIt<PlotsCubit>().save();
           break;
         }
+        if (openedTab.type == TabType.fragment) {
+          await getIt<FragmentsCubit>().save();
+          break;
+        }
         break;
       case PlotweaverCommand.delete:
         if (openedTab == null) {
@@ -108,6 +125,13 @@ class CommandDispatcherImpl implements CommandDispatcher {
             openedTab.associatedContentId != null) {
           getIt<ViewCubit>().closeTab(openedTab.id);
           getIt<PlotsCubit>().delete(openedTab.associatedContentId!);
+          break;
+        }
+
+        if (openedTab.type == TabType.fragment &&
+            openedTab.associatedContentId != null) {
+          getIt<ViewCubit>().closeTab(openedTab.id);
+          getIt<FragmentsCubit>().delete(openedTab.associatedContentId!);
           break;
         }
         break;
@@ -143,7 +167,7 @@ class CommandDispatcherImpl implements CommandDispatcher {
         final plot = getIt<PlotsCubit>().createNew();
         getIt<ViewCubit>().openTab(
           TabModel(
-            id: 'character_${plot.id}',
+            id: 'plot_${plot.id}',
             title: plot.name,
             type: TabType.plot,
             associatedContentId: plot.id,
@@ -151,7 +175,15 @@ class CommandDispatcherImpl implements CommandDispatcher {
         );
         break;
       case PlotweaverCommand.addFragment:
-        // TODO: handle this case
+        final fragment = getIt<FragmentsCubit>().createNew();
+        getIt<ViewCubit>().openTab(
+          TabModel(
+            id: 'fragment_${fragment.id}',
+            title: fragment.name,
+            type: TabType.fragment,
+            associatedContentId: fragment.id,
+          ),
+        );
         break;
       case PlotweaverCommand.closeCurrentTab:
         if (openedTab != null) {

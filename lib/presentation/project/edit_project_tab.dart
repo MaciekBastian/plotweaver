@@ -11,6 +11,7 @@ import '../../domain/project/models/project_template.dart';
 import '../../generated/locale_keys.g.dart';
 import '../../infrastructure/global/cubit/view_cubit.dart';
 import '../../infrastructure/project/cubit/project_cubit.dart';
+import '../home/widgets/app_logo_widget.dart';
 
 class EditProjectTab extends StatefulWidget {
   const EditProjectTab({super.key});
@@ -131,12 +132,44 @@ class _EditProjectTabState extends State<EditProjectTab> {
               if (value == null) {
                 return;
               }
-              BlocProvider.of<ProjectCubit>(context).editTemplate(value);
-              setState(() {
-                _template = value;
-              });
-              _save();
               BlocProvider.of<ViewCubit>(context).leavePreviewState();
+
+              showMacosAlertDialog(
+                context: context,
+                builder: (context) {
+                  return MacosAlertDialog(
+                    appIcon: const AppLogoWidget(
+                      width: 64,
+                      height: 64,
+                    ),
+                    title: Text(LocaleKeys.alerts_changing_template_alert.tr()),
+                    message: Text(
+                      LocaleKeys.alerts_changing_template_data_loss.tr(),
+                      style: PlotweaverTextStyles.body,
+                    ),
+                    primaryButton: PushButton(
+                      controlSize: ControlSize.large,
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        BlocProvider.of<ProjectCubit>(context)
+                            .editTemplate(value);
+                        setState(() {
+                          _template = value;
+                        });
+                      },
+                      child: Text(LocaleKeys.alerts_change_template.tr()),
+                    ),
+                    secondaryButton: PushButton(
+                      controlSize: ControlSize.large,
+                      secondary: true,
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(LocaleKeys.alerts_cancel.tr()),
+                    ),
+                  );
+                },
+              );
             },
             items: [
               MacosPopupMenuItem(
