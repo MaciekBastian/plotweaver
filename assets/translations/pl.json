@@ -57,7 +57,11 @@
     "cancel": "Anuluj",
     "changing_template_alert": "Uwaga, zmiana szablonu usuwa dane!",
     "changing_template_data_loss": "Wszystkie istniejące części/akty/odcinki zostaną usunięte, tak samo jak wydarzenia na osi czasu, wszystkie trzeba będzie dodać na nowo. Ta czynność jest nieodwracalna!",
-    "change_template": "Zmień szablon"
+    "change_template": "Zmień szablon",
+    "chapter_delete": "Usunąć rozdział?",
+    "chapter_delete_data_loss": "Usunięcie rozdziału sprawi, że znikną dodane na karcie „Oś czasu” wydarzenia. Kontynuować?",
+    "scene_delete": "Usunąć scenę?",
+    "scene_delete_data_loss": "Usunięcie sceny sprawi, że znikną dodane na karcie „Oś czasu” wydarzenia. Kontynuować?"
   },
   "character_editor": {
     "character": "Bohater",
@@ -186,6 +190,7 @@
     "scenes": "Sceny",
     "chapters_info": "Podziel swoją książkę na rozdziały. Do każdego rozdziału będziesz mógł dodać wydarzenia na karcie „Oś czasu”.",
     "scenes_info": "Do każdej sceny będziesz mógł dodać wydarzenia na karcie „Oś czasu”.",
+    "unnamed_location": "Nienazwana lokalizacja",
     "chapter": "Rozdział",
     "title": "Tytuł",
     "time_of_action": "Czas akcji",

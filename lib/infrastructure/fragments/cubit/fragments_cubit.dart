@@ -8,10 +8,12 @@ import 'package:injectable/injectable.dart';
 import '../../../core/get_it/get_it.dart';
 import '../../../core/helpers/id_helper.dart';
 import '../../../domain/fragments/models/act_model.dart';
+import '../../../domain/fragments/models/chapter_model.dart';
 import '../../../domain/fragments/models/episode_model.dart';
 import '../../../domain/fragments/models/fragment_model.dart';
 import '../../../domain/fragments/models/fragment_snippet.dart';
 import '../../../domain/fragments/models/part_model.dart';
+import '../../../domain/fragments/models/scene_model.dart';
 import '../../../domain/project/models/project_template.dart';
 import '../../../domain/weave_file/repository/weave_file_repository.dart';
 import '../../../generated/locale_keys.g.dart';
@@ -206,5 +208,21 @@ class FragmentsCubit extends Cubit<FragmentsState> {
       editFragment(fragment.newNumber(index + 1));
     }
     emit(state.copyWith(hasUnsavedChanges: true));
+  }
+
+  ChapterModel getNewChapter(int number) {
+    return ChapterModel(
+      id: randomId(),
+      title: '${LocaleKeys.fragments_editor_chapter.tr()} $number',
+      number: number,
+    );
+  }
+
+  SceneModel getNewScene(int number) {
+    return SceneModel(
+      id: randomId(),
+      setting: LocaleKeys.fragments_editor_unnamed_location.tr(),
+      number: number,
+    );
   }
 }

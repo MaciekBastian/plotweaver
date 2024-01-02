@@ -46,4 +46,22 @@ class ChapterModel {
         name: title,
         number: number,
       );
+
+  ChapterModel copyWith({
+    String? id,
+    int? number,
+    String? title,
+    String? outline,
+    String? narrationCharacterId,
+    String? timeOfAction,
+  }) {
+    return ChapterModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      number: number ?? this.number,
+      narrationCharacterId: narrationCharacterId ?? this.narrationCharacterId,
+      outline: outline ?? this.outline,
+      timeOfAction: timeOfAction ?? this.timeOfAction,
+    );
+  }
 }

@@ -7,13 +7,17 @@ import '../../core/constants/colors.dart';
 import '../../core/get_it/get_it.dart';
 import '../../core/styles/text_styles.dart';
 import '../../domain/fragments/models/act_model.dart';
+import '../../domain/fragments/models/chapter_model.dart';
 import '../../domain/fragments/models/episode_model.dart';
 import '../../domain/fragments/models/fragment_model.dart';
 import '../../domain/fragments/models/fragment_type.dart';
 import '../../domain/fragments/models/part_model.dart';
+import '../../domain/fragments/models/scene_model.dart';
 import '../../generated/locale_keys.g.dart';
 import '../../infrastructure/fragments/cubit/fragments_cubit.dart';
 import '../../infrastructure/global/cubit/view_cubit.dart';
+import 'widgets/chapter_editor.dart';
+import 'widgets/scene_editor.dart';
 
 class FragmentTab extends StatefulWidget {
   const FragmentTab({
@@ -42,6 +46,8 @@ class _FragmentTabState extends State<FragmentTab> {
   late final TextEditingController _scriptWriterController;
   final _scriptWriterFocus = FocusNode();
   late int _number;
+  late final List<ChapterModel> _chapters;
+  late final List<SceneModel> _scenes;
 
   @override
   void initState() {
@@ -66,6 +72,12 @@ class _FragmentTabState extends State<FragmentTab> {
       text: fragment is EpisodeModel ? fragment.scriptWriter : null,
     );
     _number = fragment?.number ?? 1;
+    _chapters = fragment is PartModel ? [...fragment.chapters] : [];
+    _scenes = fragment is ActModel
+        ? [...fragment.scenes]
+        : fragment is EpisodeModel
+            ? [...fragment.scenes]
+            : [];
 
     _nameFocus.addListener(_save);
     _outlineFocus.addListener(_save);
@@ -88,7 +100,7 @@ class _FragmentTabState extends State<FragmentTab> {
           number: _number,
           author: _authorController.text,
           outline: _outlineController.text,
-          chapters: [],
+          chapters: _chapters,
         );
         break;
       case FragmentType.act:
@@ -149,6 +161,76 @@ class _FragmentTabState extends State<FragmentTab> {
             color: getIt<AppColors>().dividerColor,
             margin: const EdgeInsets.only(right: 15),
           ),
+          if (_type == FragmentType.part)
+            ChapterEditor(
+              onChapterDeleted: (chapterId) {
+                BlocProvider.of<ViewCubit>(context).leavePreviewState();
+                final newChapters = [..._chapters]
+                  ..removeWhere((element) => element.id == chapterId);
+                final indexed = newChapters.indexed.toList();
+                for (final element in indexed) {
+                  final removed = newChapters.removeAt(element.$1);
+                  final copy = removed.copyWith(number: element.$1 + 1);
+                  newChapters.insert(element.$1, copy);
+                }
+                setState(() {
+                  _chapters
+                    ..clear()
+                    ..addAll(newChapters);
+                });
+                _edit();
+              },
+              onChapterEdited: (model) {
+                _chapters
+                  ..removeWhere((element) => element.id == model.id)
+                  ..add(model);
+                _edit();
+              },
+              onNewChapterAdded: (model) {
+                BlocProvider.of<ViewCubit>(context).leavePreviewState();
+                setState(() {
+                  _chapters.add(model);
+                });
+                _edit();
+              },
+              partId: _id,
+              chapters: _chapters..sort((a, b) => a.number.compareTo(b.number)),
+            ),
+          if (_type == FragmentType.act || _type == FragmentType.episode)
+            SceneEditor(
+              onSceneDeleted: (sceneId) {
+                BlocProvider.of<ViewCubit>(context).leavePreviewState();
+                final newScenes = [..._scenes]
+                  ..removeWhere((element) => element.id == sceneId);
+                final indexed = newScenes.indexed.toList();
+                for (final element in indexed) {
+                  final removed = newScenes.removeAt(element.$1);
+                  final copy = removed.copyWith(number: element.$1 + 1);
+                  newScenes.insert(element.$1, copy);
+                }
+                setState(() {
+                  _scenes
+                    ..clear()
+                    ..addAll(newScenes);
+                });
+                _edit();
+              },
+              onSceneEdited: (model) {
+                _scenes
+                  ..removeWhere((element) => element.id == model.id)
+                  ..add(model);
+                _edit();
+              },
+              onNewSceneAdded: (model) {
+                BlocProvider.of<ViewCubit>(context).leavePreviewState();
+                setState(() {
+                  _scenes.add(model);
+                });
+                _edit();
+              },
+              partId: _id,
+              scenes: _scenes..sort((a, b) => a.number.compareTo(b.number)),
+            ),
           const SizedBox(height: 30),
         ],
       ),

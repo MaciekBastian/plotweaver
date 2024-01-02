@@ -123,6 +123,7 @@ class ProjectCubit extends Cubit<ProjectState> {
 
     update(newModel);
     await getIt<FragmentsCubit>().clearAll();
+    getIt<ViewCubit>().closeOtherTabs();
     await save();
   }
 

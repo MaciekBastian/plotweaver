@@ -50,4 +50,23 @@ class SceneModel {
         name: '${location.readable} $setting — $timeOfDay',
         number: number,
       );
+
+  SceneModel copyWith({
+    String? id,
+    int? number,
+    SceneLocation? location,
+    String? setting,
+    String? timeOfDay,
+    String? outline,
+    String? cameraNotes,
+  }) =>
+      SceneModel(
+        id: id ?? this.id,
+        number: number ?? this.number,
+        cameraNotes: cameraNotes ?? this.cameraNotes,
+        location: location ?? this.location,
+        outline: outline ?? this.outline,
+        setting: setting ?? this.setting,
+        timeOfDay: timeOfDay ?? this.timeOfDay,
+      );
 }
