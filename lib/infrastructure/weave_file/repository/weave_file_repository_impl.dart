@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/constants/weave_file.dart';
 import '../../../domain/characters/models/character_model.dart';
+import '../../../domain/fragments/models/fragment_model.dart';
 import '../../../domain/global/models/file_snippet_model.dart';
 import '../../../domain/plots/models/plot_model.dart';
 import '../../../domain/project/models/project_info_model.dart';
@@ -49,6 +50,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         projectInfo: projectInfoModel,
         characters: _openedFile!.characters,
         plots: _openedFile!.plots,
+        fragments: _openedFile!.fragments,
       );
       _openedFile = weave;
       final content = weave.toJson();
@@ -114,6 +116,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         projectInfo: _openedFile!.projectInfo,
         characters: characters,
         plots: _openedFile!.plots,
+        fragments: _openedFile!.fragments,
       );
       _openedFile = weave;
       final content = weave.toJson();
@@ -168,6 +171,62 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         projectInfo: _openedFile!.projectInfo,
         characters: _openedFile!.characters,
         plots: plots,
+        fragments: _openedFile!.fragments,
+      );
+      _openedFile = weave;
+      final content = weave.toJson();
+      final encoded = json.encode(content);
+      final file = File(_openedProjectPath!);
+      await file.writeAsString(encoded);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> saveFragmentsChanges(
+    List<FragmentModel> modifiedFragments,
+    List<String> removedFragmentsIds,
+  ) async {
+    if (_openedFile == null || _openedProjectPath == null) {
+      return false;
+    }
+    try {
+      final generalInfo = await _getGeneralInfo(
+        _openedFile!.generalInfo.createdAt,
+      );
+      final List<FragmentModel> fragments =
+          _openedFile!.fragments == null ? [] : [..._openedFile!.fragments!];
+
+      for (final fragment in modifiedFragments) {
+        final index = fragments.indexWhere(
+          (element) => element.id == fragment.id,
+        );
+        if (index == -1) {
+          fragments.add(fragment);
+        } else {
+          fragments
+            ..removeAt(index)
+            ..insert(index, fragment);
+        }
+      }
+
+      for (final fragmentId in removedFragmentsIds) {
+        final index = fragments.indexWhere(
+          (element) => element.id == fragmentId,
+        );
+        if (index >= 0) {
+          fragments.removeAt(index);
+        }
+      }
+
+      final weave = WeaveFileModel(
+        generalInfo: generalInfo,
+        projectInfo: _openedFile!.projectInfo,
+        characters: _openedFile!.characters,
+        plots: _openedFile!.plots,
+        fragments: fragments,
       );
       _openedFile = weave;
       final content = weave.toJson();
