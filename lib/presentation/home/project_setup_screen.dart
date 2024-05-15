@@ -61,7 +61,7 @@ class _ProjectSetupScreenState extends State<ProjectSetupScreen> {
                 CupertinoButton(
                   child: Text(LocaleKeys.home_cancel.tr()),
                   onPressed: () {
-                    AutoRouter.of(context).pop();
+                    AutoRouter.of(context).maybePop();
                   },
                 ),
                 const SizedBox(width: 20),

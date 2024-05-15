@@ -29,8 +29,6 @@ linter:
     - avoid_multiple_declarations_per_line
     - avoid_print
     - avoid_private_typedef_functions
-    - avoid_returning_null
-    - avoid_returning_null_for_future
     - avoid_returning_this
     - avoid_slow_async_io
     - avoid_type_to_string
