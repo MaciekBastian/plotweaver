@@ -1,5 +1,16 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    - build/**
+    - "**/generated/**"
+    - "**/*.config.dart"
+    - "**/*.g.dart"
+    - "**/*.gr.dart"
+    - "**/*.gl.dart"
+    - "**/*.freezed.dart"
+    - "**/*.graphql.dart"
+
 linter:
   rules:
     - always_declare_return_types
