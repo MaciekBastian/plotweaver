@@ -6,6 +6,7 @@ import 'core/addons/bloc_observer.dart';
 import 'core/config/sl_config.dart';
 import 'core/config/window_config.dart';
 import 'core/router/go_router.dart';
+import 'core/services/package_and_device_info_service.dart';
 import 'generated/l10n.dart';
 
 Future<void> main() async {
@@ -13,6 +14,7 @@ Future<void> main() async {
   Bloc.observer = MyBlocObserver();
   configureDependencies();
   await configureWindow();
+  await sl<PackageAndDeviceInfoService>().initialize();
 
   runApp(
     MaterialApp.router(

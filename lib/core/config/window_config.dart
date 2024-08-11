@@ -15,5 +15,6 @@ Future<void> configureWindow() async {
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
+    await windowManager.center();
   });
 }

@@ -1,5 +1,9 @@
 {
   "@@locale": "en",
   "@@author": "Maciej Bastian <maciekbastian2005@gmail.com>",
-  "plotweaver": "Plotweaver"
+  "plotweaver": "Plotweaver",
+  "weave_file_formatting_error": "This .weave file is incorrectly formatted",
+  "weave_file_unsupported": "This version of Plotweaver does not support this .weave file",
+  "file_does_not_exist": "File does not exist in this location",
+  "unknown_error": "Unknown error"
 }
