@@ -5,5 +5,13 @@
   "weave_file_formatting_error": "This .weave file is incorrectly formatted",
   "weave_file_unsupported": "This version of Plotweaver does not support this .weave file",
   "file_does_not_exist": "File does not exist in this location",
-  "unknown_error": "Unknown error"
+  "unknown_error": "Unknown error",
+  "search": "Search",
+  "recent": "Recent",
+  "quick_start": "Quick start",
+  "open_project": "Open project",
+  "create_project": "Create project",
+  "there_is_no_recent_projects": "There is no recent projects",
+  "open_project_or_create_new": "Open a project or create a new one to get started with Plotweaver",
+  "try_again": "Try again"
 }

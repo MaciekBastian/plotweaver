@@ -8,10 +8,12 @@ final class PlotweaverIONamesConstants {
 
 final class _PlotweaverFileNamesConstants {
   final general = 'general';
+  final recentProjects = 'recent_projects';
 }
 
 final class _PlotweaverDirectoryNamesConstants {
   final openedWeaveFiles = 'opened_weave_files';
+  final preferences = 'pref';
 }
 
 final class _PlotweaverFileExtensionNamesConstants {
