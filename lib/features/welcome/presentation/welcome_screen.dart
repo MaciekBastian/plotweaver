@@ -6,7 +6,8 @@ import '../../../core/extensions/theme_extension.dart';
 import '../../../generated/l10n.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/plotweaver_logo_widget.dart';
-import 'bloc/welcome_bloc.dart';
+import 'bloc/quick_start/quick_start_bloc.dart';
+import 'bloc/recent_projects/recent_projects_bloc.dart';
 import 'widgets/quick_start_widget.dart';
 import 'widgets/recent_projects_widget.dart';
 
@@ -15,9 +16,14 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          WelcomeBloc(sl())..add(const WelcomeEvent.loadRecent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => RecentProjectsBloc(sl())
+            ..add(const RecentProjectsEvent.loadRecent()),
+        ),
+        BlocProvider(create: (context) => QuickStartBloc(sl())),
+      ],
       child: AppScaffold(
         body: Row(
           children: [

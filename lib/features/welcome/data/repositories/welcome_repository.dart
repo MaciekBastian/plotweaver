@@ -17,6 +17,8 @@ abstract class WelcomeRepository {
   Future<Option<PlotweaverError>> addRecent(RecentProjectEntity entity);
 
   Future<Option<PlotweaverError>> modifyRecent(RecentProjectEntity entity);
+
+  Future<Option<PlotweaverError>> deleteRecent(RecentProjectEntity entity);
 }
 
 @Singleton(as: WelcomeRepository)
@@ -160,6 +162,58 @@ class WelcomeRepositoryImpl implements WelcomeRepository {
     final newRecent = [...recent.asRight()]
       ..removeAt(index)
       ..insert(index, entity);
+
+    final newFileContentEncoded = await Isolate.run(
+      () => handleCommonOperation(() => json.encode(newRecent)),
+    );
+
+    if (newFileContentEncoded.isLeft()) {
+      return Some(newFileContentEncoded.asLeft());
+    }
+
+    final resp = await handleVoidAsyncOperation(
+      () async => file.asRight().writeAsString(newFileContentEncoded.asRight()),
+    );
+
+    if (resp.isSome()) {
+      return Some(resp.asSome());
+    }
+
+    return const None();
+  }
+
+  @override
+  Future<Option<PlotweaverError>> deleteRecent(
+    RecentProjectEntity entity,
+  ) async {
+    final file = await _dataSource.getRecentProjectsFile();
+
+    if (file.isLeft()) {
+      return Some(file.asLeft());
+    }
+
+    if (!file.asRight().existsSync()) {
+      final resp = handleVoidOperation(file.asRight().createSync);
+      if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+    }
+
+    final recent = await getRecent();
+
+    if (recent.isLeft()) {
+      return Some(recent.asLeft());
+    }
+
+    final index = recent.asRight().indexWhere((el) => el.path == entity.path);
+
+    if (index == -1) {
+      return Some(
+        IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
+      );
+    }
+
+    final newRecent = [...recent.asRight()]..removeAt(index);
 
     final newFileContentEncoded = await Isolate.run(
       () => handleCommonOperation(() => json.encode(newRecent)),

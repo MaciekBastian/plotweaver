@@ -15,6 +15,7 @@ class GeneralEntity with _$GeneralEntity {
     required String projectIdentifier,
     required DateTime createdAt,
     required String weaveVersion,
+    required String origin,
     DateTime? lastAccessedAt,
     DateTime? lastModifiedAt,
     String? plotweaverVersion,
@@ -30,6 +31,7 @@ class GeneralEntity with _$GeneralEntity {
         : DateTime.tryParse(json[_GeneralEntityJsonKeys.createdAt]);
     final weaveVersionVal =
         json[_GeneralEntityJsonKeys.weaveVersion] as String?;
+    final originVal = json[_GeneralEntityJsonKeys.origin] as String?;
     final projectIdentifierVal =
         json[_GeneralEntityJsonKeys.projectIdentifier] as String?;
     final supportFromOutdatedVal =
@@ -39,7 +41,8 @@ class GeneralEntity with _$GeneralEntity {
 
     if (weaveVersionVal == null ||
         createdAtVal == null ||
-        projectIdentifierVal == null) {
+        projectIdentifierVal == null ||
+        originVal == null) {
       throw WeaveError.formattingError(
         message: S.current.weave_file_formatting_error,
       );
@@ -70,6 +73,7 @@ class GeneralEntity with _$GeneralEntity {
       projectIdentifier: projectIdentifierVal,
       createdAt: createdAtVal,
       weaveVersion: weaveVersionVal,
+      origin: originVal,
       lastAccessedAt: json[_GeneralEntityJsonKeys.lastAccessedAt] == null
           ? null
           : DateTime.tryParse(json[_GeneralEntityJsonKeys.lastAccessedAt]),
@@ -85,6 +89,7 @@ class GeneralEntity with _$GeneralEntity {
         _GeneralEntityJsonKeys.projectIdentifier: projectIdentifier,
         _GeneralEntityJsonKeys.createdAt: createdAt.toUtc().toIso8601String(),
         _GeneralEntityJsonKeys.weaveVersion: weaveVersion,
+        _GeneralEntityJsonKeys.origin: origin,
         _GeneralEntityJsonKeys.lastAccessedAt:
             lastAccessedAt?.toUtc().toIso8601String(),
         _GeneralEntityJsonKeys.lastModifiedAt:
@@ -102,6 +107,7 @@ final class _GeneralEntityJsonKeys {
   static const weaveVersion = 'weave_version';
   static const lastAccessedAt = 'last_accessed_at';
   static const lastModifiedAt = 'last_modified_at';
+  static const origin = 'origin';
   static const plotweaverVersion = 'plotweaver_version';
   static const allowChangesFromOutdatedClients =
       'allow_changes_from_outdated_clients';

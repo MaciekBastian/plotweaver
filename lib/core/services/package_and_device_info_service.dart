@@ -7,6 +7,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 abstract class PackageAndDeviceInfoService {
   Future<void> initialize();
 
+  String? get packageName;
+
   String? get packageVersion;
 
   String? get deviceName;
@@ -16,6 +18,7 @@ abstract class PackageAndDeviceInfoService {
 class PackageAndDeviceInfoServiceImpl implements PackageAndDeviceInfoService {
   String? _version;
   String? _deviceName;
+  String? _packageName;
 
   @override
   Future<void> initialize() async {
@@ -25,6 +28,7 @@ class PackageAndDeviceInfoServiceImpl implements PackageAndDeviceInfoService {
     final version = packageInfo.version;
 
     _version = '$version+$buildNumber';
+    _packageName = packageInfo.packageName;
 
     if (Platform.isMacOS) {
       final macosInfo = await DeviceInfoPlugin().macOsInfo;
@@ -42,4 +46,7 @@ class PackageAndDeviceInfoServiceImpl implements PackageAndDeviceInfoService {
 
   @override
   String? get deviceName => _deviceName;
+
+  @override
+  String? get packageName => _packageName;
 }

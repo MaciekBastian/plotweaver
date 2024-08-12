@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
+import '../bloc/quick_start/quick_start_bloc.dart';
 
 class QuickStartWidget extends StatelessWidget {
   const QuickStartWidget({super.key});
@@ -28,7 +30,11 @@ class QuickStartWidget extends StatelessWidget {
         Divider(color: context.colors.dividerColor),
         _QuickStartButton(
           icon: Icons.folder_outlined,
-          onTap: () {},
+          onTap: () {
+            context
+                .read<QuickStartBloc>()
+                .add(const QuickStartEvent.openProject());
+          },
           title: S.of(context).open_project,
         ),
         const SizedBox(height: 5),

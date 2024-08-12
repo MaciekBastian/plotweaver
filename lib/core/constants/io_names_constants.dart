@@ -8,6 +8,7 @@ final class PlotweaverIONamesConstants {
 
 final class _PlotweaverFileNamesConstants {
   final general = 'general';
+  final project = 'project';
   final recentProjects = 'recent_projects';
 }
 

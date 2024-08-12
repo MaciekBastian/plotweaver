@@ -9,7 +9,7 @@ import '../../../../generated/l10n.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../../../shared/widgets/fatal_error_widget.dart';
 import '../../domain/entities/recent_project_entity.dart';
-import '../bloc/welcome_bloc.dart';
+import '../bloc/recent_projects/recent_projects_bloc.dart';
 
 class RecentProjectsWidget extends StatelessWidget {
   const RecentProjectsWidget({super.key});
@@ -33,7 +33,7 @@ class RecentProjectsWidget extends StatelessWidget {
           ],
         ),
         Divider(color: context.colors.dividerColor),
-        BlocBuilder<WelcomeBloc, WelcomeState>(
+        BlocBuilder<RecentProjectsBloc, RecentProjectsState>(
           builder: (context, state) {
             return Expanded(
               child: Skeletonizer(
@@ -100,8 +100,8 @@ class RecentProjectsWidget extends StatelessWidget {
                           error: value.error,
                           onRetry: () {
                             context
-                                .read<WelcomeBloc>()
-                                .add(const WelcomeEvent.loadRecent());
+                                .read<RecentProjectsBloc>()
+                                .add(const RecentProjectsEvent.loadRecent());
                           },
                         ),
                       ],

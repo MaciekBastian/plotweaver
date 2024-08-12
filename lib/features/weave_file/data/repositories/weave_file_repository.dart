@@ -15,6 +15,7 @@ import '../../../../core/handlers/error_handler.dart';
 import '../../../../core/services/app_support_directories_service.dart';
 import '../../../../core/services/package_and_device_info_service.dart';
 import '../../../../generated/l10n.dart';
+import '../../../project/domain/entities/project_entity.dart';
 import '../../domain/entities/general_entity.dart';
 
 /// A repository responsible only for reading, writing, scattering and consolidating weave files.
@@ -98,8 +99,13 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
 
     final generalInfoMapEntry = (jsonContent.asRight()
         as Map<String, dynamic>)[PlotweaverIONamesConstants.fileNames.general];
+    final projectMapEntry = (jsonContent.asRight()
+        as Map<String, dynamic>)[PlotweaverIONamesConstants.fileNames.project];
 
-    if (generalInfoMapEntry == null || generalInfoMapEntry is! Map) {
+    if (generalInfoMapEntry == null ||
+        generalInfoMapEntry is! Map ||
+        projectMapEntry == null ||
+        projectMapEntry is! Map) {
       return Left(
         WeaveError.formattingError(
           message: S.current.weave_file_formatting_error,
@@ -113,8 +119,16 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
       ),
     );
 
+    final project = handleCommonOperation(
+      () => ProjectEntity.fromJson(projectMapEntry as Map<String, dynamic>),
+    );
+
     if (generalInfo.isLeft()) {
       return Left(generalInfo.asLeft());
+    }
+
+    if (project.isLeft()) {
+      return Left(project.asLeft());
     }
 
     final identifier = generalInfo.asRight().projectIdentifier;
@@ -162,6 +176,32 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
         () async => generalFile.writeAsString(
           generalJsonFileContent.asRight(),
         ),
+      );
+      if (resp.isSome()) {
+        return Left(resp.asSome());
+      }
+    }
+
+    // project.json
+
+    final projectFile = File(
+      p.join(
+        projectDirectory.path,
+        '${PlotweaverIONamesConstants.fileNames.project}.${PlotweaverIONamesConstants.fileExtensionNames.json}',
+      ),
+    );
+
+    if (!projectFile.existsSync()) {
+      final resp = handleVoidOperation(projectFile.createSync);
+      if (resp.isSome()) {
+        return Left(resp.asSome());
+      }
+    }
+
+    // Write ProjectEntity to project.json
+    if (project.isRight()) {
+      final resp = await handleVoidAsyncOperation(
+        () async => projectFile.writeAsString(json.encode(projectMapEntry)),
       );
       if (resp.isSome()) {
         return Left(resp.asSome());
@@ -252,6 +292,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
             lastModifiedAt: DateTime.now(),
             plotweaverVersion: sl<PackageAndDeviceInfoService>().packageVersion,
             weaveVersion: WeaveFileSupport.LATEST_VERSION,
+            origin: sl<PackageAndDeviceInfoService>().packageName ?? 'unknown',
           )
           .toJson(),
     );
@@ -260,8 +301,47 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
       return Some(generalModifiedJson.asLeft());
     }
 
+    // project.json
+
+    final projectFile = File(
+      p.join(
+        projectDirectory.path,
+        '${PlotweaverIONamesConstants.fileNames.project}.${PlotweaverIONamesConstants.fileExtensionNames.json}',
+      ),
+    );
+
+    if (!projectFile.existsSync()) {
+      return Some(
+        IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
+      );
+    }
+
+    final projectFileContent = await handleAsynchronousOperation(
+      projectFile.readAsString,
+    );
+
+    if (projectFileContent.isLeft()) {
+      return Some(
+        IOError.unknownError(message: S.current.unknown_error),
+      );
+    }
+
+    final projectJsonContent = await Isolate.run(
+      () => handleCommonOperation(
+        () => json.decode(projectFileContent.asRight()),
+      ),
+    );
+
+    if (projectJsonContent.isLeft()) {
+      return Some(
+        IOError.unknownError(message: S.current.unknown_error),
+      );
+    }
+
     outputJson[PlotweaverIONamesConstants.fileNames.general] =
         generalModifiedJson.asRight();
+    outputJson[PlotweaverIONamesConstants.fileNames.project] =
+        projectJsonContent.asRight();
 
     // TODO: consolidate other files
 
