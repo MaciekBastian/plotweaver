@@ -22,7 +22,7 @@ class WelcomeScreen extends StatelessWidget {
           create: (context) => RecentProjectsBloc(sl())
             ..add(const RecentProjectsEvent.loadRecent()),
         ),
-        BlocProvider(create: (context) => QuickStartBloc(sl())),
+        BlocProvider(create: (context) => QuickStartBloc(sl(), sl())),
       ],
       child: AppScaffold(
         body: Row(

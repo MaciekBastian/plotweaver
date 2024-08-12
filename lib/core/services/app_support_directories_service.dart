@@ -15,6 +15,10 @@ abstract class AppSupportDirectoriesService {
 
   /// Gets root directory for working files (for projects)
   Future<Either<PlotweaverError, Directory>> getWorkingDirectory();
+
+  Future<Either<PlotweaverError, Directory>> getProjectDirectory(
+    String identifier,
+  );
 }
 
 @Singleton(as: AppSupportDirectoriesService)
@@ -53,5 +57,32 @@ class AppSupportDirectoriesServiceImpl implements AppSupportDirectoriesService {
 
       return Right(weaveDir);
     }
+  }
+
+  @override
+  Future<Either<PlotweaverError, Directory>> getProjectDirectory(
+    String identifier,
+  ) async {
+    final rootDir = await getWorkingDirectory();
+
+    if (rootDir.isLeft()) {
+      return Left(rootDir.asLeft());
+    }
+
+    final projectDirectory = Directory(
+      p.join(
+        rootDir.asRight().path,
+        identifier,
+      ),
+    );
+
+    if (!projectDirectory.existsSync()) {
+      final resp = handleVoidOperation(projectDirectory.createSync);
+      if (resp.isSome()) {
+        return Left(resp.asSome());
+      }
+    }
+
+    return Right(projectDirectory);
   }
 }

@@ -17,6 +17,7 @@ import '../../../../core/services/package_and_device_info_service.dart';
 import '../../../../generated/l10n.dart';
 import '../../../project/domain/entities/project_entity.dart';
 import '../../domain/entities/general_entity.dart';
+import '../data_sources/weave_file_data_source.dart';
 
 /// A repository responsible only for reading, writing, scattering and consolidating weave files.
 abstract class WeaveFileRepository {
@@ -32,32 +33,9 @@ abstract class WeaveFileRepository {
 
 @Singleton(as: WeaveFileRepository)
 class WeaveFileRepositoryImpl implements WeaveFileRepository {
-  Future<Either<PlotweaverError, Directory>> _getProjectDirectory(
-    String identifier,
-  ) async {
-    final rootDir =
-        await sl<AppSupportDirectoriesService>().getWorkingDirectory();
+  WeaveFileRepositoryImpl() : _dataSource = WeaveFileDataSource();
 
-    if (rootDir.isLeft()) {
-      return Left(rootDir.asLeft());
-    }
-
-    final projectDirectory = Directory(
-      p.join(
-        rootDir.asRight().path,
-        identifier,
-      ),
-    );
-
-    if (!projectDirectory.existsSync()) {
-      final resp = handleVoidOperation(projectDirectory.createSync);
-      if (resp.isSome()) {
-        return Left(resp.asSome());
-      }
-    }
-
-    return Right(projectDirectory);
-  }
+  final WeaveFileDataSource _dataSource;
 
   @override
   Future<Either<PlotweaverError, String>> readFile(String path) async {
@@ -133,7 +111,8 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
 
     final identifier = generalInfo.asRight().projectIdentifier;
 
-    final projectDirectoryRes = await _getProjectDirectory(identifier);
+    final projectDirectoryRes = await sl<AppSupportDirectoriesService>()
+        .getProjectDirectory(identifier);
 
     if (projectDirectoryRes.isLeft()) {
       return Left(projectDirectoryRes.asLeft());
@@ -232,54 +211,14 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
       }
     }
 
-    final projectDirectoryRes = await _getProjectDirectory(projectIdentifier);
+    final projectDirectoryRes = await sl<AppSupportDirectoriesService>()
+        .getProjectDirectory(projectIdentifier);
 
     if (projectDirectoryRes.isLeft()) {
       return Some(projectDirectoryRes.asLeft());
     }
 
-    final projectDirectory = projectDirectoryRes.asRight();
-
-    final generalFile = File(
-      p.join(
-        projectDirectory.path,
-        '${PlotweaverIONamesConstants.fileNames.general}.${PlotweaverIONamesConstants.fileExtensionNames.json}',
-      ),
-    );
-
-    if (!generalFile.existsSync()) {
-      return Some(
-        IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
-      );
-    }
-
-    final generalFileContent = await handleAsynchronousOperation(
-      generalFile.readAsString,
-    );
-
-    if (generalFileContent.isLeft()) {
-      return Some(
-        IOError.unknownError(message: S.current.unknown_error),
-      );
-    }
-
-    final generalJsonContent = await Isolate.run(
-      () => handleCommonOperation(
-        () => json.decode(generalFileContent.asRight()),
-      ),
-    );
-
-    if (generalJsonContent.isLeft()) {
-      return Some(
-        IOError.unknownError(message: S.current.unknown_error),
-      );
-    }
-
-    final generalEntity = handleCommonOperation(
-      () => GeneralEntity.fromJson(
-        generalJsonContent.asRight() as Map<String, dynamic>,
-      ),
-    );
+    final generalEntity = await _dataSource.getGeneral(projectIdentifier);
 
     if (generalEntity.isLeft()) {
       return Some(generalEntity.asLeft());
@@ -303,34 +242,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
 
     // project.json
 
-    final projectFile = File(
-      p.join(
-        projectDirectory.path,
-        '${PlotweaverIONamesConstants.fileNames.project}.${PlotweaverIONamesConstants.fileExtensionNames.json}',
-      ),
-    );
-
-    if (!projectFile.existsSync()) {
-      return Some(
-        IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
-      );
-    }
-
-    final projectFileContent = await handleAsynchronousOperation(
-      projectFile.readAsString,
-    );
-
-    if (projectFileContent.isLeft()) {
-      return Some(
-        IOError.unknownError(message: S.current.unknown_error),
-      );
-    }
-
-    final projectJsonContent = await Isolate.run(
-      () => handleCommonOperation(
-        () => json.decode(projectFileContent.asRight()),
-      ),
-    );
+    final projectJsonContent = await _dataSource.getProject(projectIdentifier);
 
     if (projectJsonContent.isLeft()) {
       return Some(

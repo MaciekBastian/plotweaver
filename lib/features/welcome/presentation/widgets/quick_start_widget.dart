@@ -71,7 +71,9 @@ class QuickStartWidget extends StatelessWidget {
                   return null;
                 },
                 onSubmit: (name) {
-                  print('Project name: $name');
+                  context
+                      .read<QuickStartBloc>()
+                      .add(QuickStartEvent.createProject(name.trim()));
                 },
               ).show();
             },

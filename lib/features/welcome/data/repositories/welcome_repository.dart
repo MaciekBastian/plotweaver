@@ -23,7 +23,9 @@ abstract class WelcomeRepository {
 
 @Singleton(as: WelcomeRepository)
 class WelcomeRepositoryImpl implements WelcomeRepository {
-  final _dataSource = WelcomeDataSource();
+  WelcomeRepositoryImpl() : _dataSource = WelcomeDataSource();
+
+  final WelcomeDataSource _dataSource;
 
   @override
   Future<Option<PlotweaverError>> addRecent(RecentProjectEntity entity) async {
