@@ -19,4 +19,5 @@ final class _PlotweaverDirectoryNamesConstants {
 
 final class _PlotweaverFileExtensionNamesConstants {
   final json = 'json';
+  final weave = 'weave';
 }

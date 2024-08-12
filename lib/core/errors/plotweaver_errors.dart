@@ -16,6 +16,11 @@ class WeaveError extends PlotweaverError with _$WeaveError {
     required String message,
   }) = _WeaveFormattingError;
 
+  /// A file is not a weave file
+  const factory WeaveError.notAWeaveFile({
+    required String message,
+  }) = _NotAWeaveFile;
+
   /// Weave file has version lower than minimum supported bound
   const factory WeaveError.unsupportedDeprecatedVersion({
     required String message,

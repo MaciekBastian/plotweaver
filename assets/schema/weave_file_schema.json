@@ -1,0 +1,528 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$comment": "Schema describes a JSON-based .weave file",
+    "$id": "https://dev.plotweaver.com/documentation/weave_file/documentation",
+    "type": "object",
+    "properties": {
+        "general": {
+            "type": "object",
+            "description": "General information about the file",
+            "properties": {
+                "project_identifier": {
+                    "type": "string",
+                    "description": "Unique identifier of this project, used by the app to internally identify the project even when the path or name changes"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Contains a timestamp of when the file was created. Meant to not be changed during project's lifetime"
+                },
+                "last_accessed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Contains a timestamp of when the file was last access. Meant to be changed with every operation on the file. May be null for a shared file"
+                },
+                "last_update_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Contains a timestamp of when the file was last modified. Meant to be changed with every change to the file. May be null for a shared file or for a file with no changes compared to the default empty project"
+                },
+                "origin": {
+                    "type": "string",
+                    "default": "plotweaver",
+                    "description": "Id of the app that created this project. Should be unique for each app, but it is not enforced. Any name can be used expect for `plotweaver` which is reserved for the original Plotweaver app, but plotweaver can be provided if no changes to default file template/schema are made"
+                },
+                "plotweaver_version": {
+                    "type": "string",
+                    "description": "The version of plotweaver app that created this project. May be null for projects created by other apps. Other apps may also add their own property that specifies version"
+                },
+                "weave_version": {
+                    "type": "string",
+                    "const": "1.0.0",
+                    "description": "The version of Weave File, used to specify used schema. Should always be set to latest. This property informs the application that reads the file what properties, schema and structure to expect. Apps that support higher versions of weave file should allow backwards compatibility or fail gracefully with files that are below lower bound of weave file versions supported by the application."
+                },
+                "allow_changes_from_outdated_clients": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specifies if client that does not support this weave file version should be allowed to make changes into this file. Usually set to false"
+                }
+            },
+            "required": [
+                "project_identifier",
+                "created_at",
+                "origin",
+                "weave_version",
+                "allow_changes_from_outdated_clients"
+            ]
+        },
+        "project": {
+            "description": "Describes the project's metadata",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Title of this project"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "Author of this project"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of this project"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Current status of this project",
+                    "enum": [
+                        "idle",
+                        "on_track",
+                        "off_track",
+                        "completed",
+                        "rejected"
+                    ]
+                },
+                "template": {
+                    "type": "string",
+                    "description": "Template of this project. Must be consistent with other properties of this file. For backwards compatibility purposes, not supported templates should be not read by outdated clients and shall always fail at writing or reading",
+                    "enum": [
+                        "book",
+                        "movie",
+                        "series"
+                    ]
+                },
+                "changes": {
+                    "type": "array",
+                    "description": "Provides a list of changes to project's properties. Can be empty or null if origin does not support changes tracking or user explicitly turned this feature off. Changes should not exceed 25 length margin for optimization purposes. Changes history can be stored in separate file to support larger scope",
+                    "maxItems": 25,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "property": {
+                                "description": "Modified property. Either enum specifying other properties or a string for custom properties",
+                                "type": "string",
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string",
+                                        "enum": [
+                                            "template",
+                                            "status",
+                                            "description",
+                                            "author",
+                                            "title"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "old_value": {
+                                "description": "Old value that a new value replaced. Can be null if a value was created. "
+                            },
+                            "new_value": {
+                                "description": "New value that replaced an old value. Can be null if a value was removed."
+                            },
+                            "timestamp": {
+                                "type": "string",
+                                "format": "date-time",
+                                "description": "Timestamp of when the change was made"
+                            },
+                            "implementer": {
+                                "type": "string",
+                                "description": "Identifier, display name or other information about who made changes. Can be null if client does not support account / sharing feature"
+                            }
+                        },
+                        "required": [
+                            "property",
+                            "timestamp"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "title",
+                "template"
+            ]
+        },
+        "characters": {
+            "type": "array",
+            "description": "List of all characters for this project. Null for scattered structure of the project, as property is represented as characters.json which has the same schema as this property",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique id of this character. Must not repeat through entire project and never change"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Character's name. Must not be null"
+                    },
+                    "age": {
+                        "description": "Character's age. Can be a number or descriptive string",
+                        "anyOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "integer"
+                            }
+                        ]
+                    },
+                    "status": {
+                        "description": "Current status of this character. One of: `unspecified`, `unknown`, `alive`, `deceased`",
+                        "type": "string",
+                        "enum": [
+                            "unspecified",
+                            "unknown",
+                            "alive",
+                            "deceased"
+                        ],
+                        "default": "unspecified"
+                    },
+                    "gender": {
+                        "description": "Character's gender. May be a custom string or one of `unspecified`, `male`, `female`, `other`. ",
+                        "type": "string",
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "unspecified",
+                                    "male",
+                                    "female",
+                                    "other"
+                                ]
+                            }
+                        ],
+                        "default": "unspecified"
+                    },
+                    "portrayed_by": {
+                        "description": "Name of the actor that portrays the character in a movie. Value should not be used when project's template is `book`",
+                        "type": "string"
+                    },
+                    "domicile": {
+                        "description": "Name of the place where the character lives",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "General description of the character. May contain information about character's background or overall plot",
+                        "type": "string"
+                    },
+                    "goals": {
+                        "description": "Goals of this character",
+                        "type": "string"
+                    },
+                    "appearance": {
+                        "description": "Physical appearance of this character",
+                        "type": "string"
+                    },
+                    "lesson": {
+                        "description": "An outcome of this character's story",
+                        "type": "string"
+                    },
+                    "occupation": {
+                        "description": "Character's occupation",
+                        "type": "string"
+                    },
+                    "children": {
+                        "type": "array",
+                        "description": "Array of this character's children's IDs. An ID should correspond to another existing user, if user does not exist it should be automatically omitted",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "parents": {
+                        "type": "array",
+                        "description": "Array of this character's parents's IDs. An ID should correspond to another existing user, if user does not exist it should be automatically omitted",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "spouses": {
+                        "type": "array",
+                        "description": "Array of this character's spouses's IDs. An ID should correspond to another existing user, if user does not exist it should be automatically omitted",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "friends": {
+                        "type": "array",
+                        "description": "Array of this character's friends's IDs. An ID should correspond to another existing user, if user does not exist it should be automatically omitted",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "enemies": {
+                        "type": "array",
+                        "description": "Array of this character's enemies's IDs. An ID should correspond to another existing user, if user does not exist it should be automatically omitted",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "changes": {
+                        "type": "array",
+                        "description": "Provides a list of changes to project's properties. Can be empty or null if origin does not support changes tracking or user explicitly turned this feature off. Changes should not exceed 25 length margin for optimization purposes. Changes history can be stored in separate file to support larger scope",
+                        "maxItems": 25,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "property": {
+                                    "description": "Modified property. Either enum specifying other properties or a string for custom properties",
+                                    "type": "string",
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "enum": [
+                                                "name",
+                                                "age",
+                                                "status",
+                                                "gender",
+                                                "portrayed_by",
+                                                "domicile",
+                                                "description",
+                                                "goals",
+                                                "appearance",
+                                                "lesson",
+                                                "occupation",
+                                                "children",
+                                                "parents",
+                                                "spouses",
+                                                "friends",
+                                                "enemies"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "old_value": {
+                                    "description": "Old value that a new value replaced. Can be null if a value was created. "
+                                },
+                                "new_value": {
+                                    "description": "New value that replaced an old value. Can be null if a value was removed."
+                                },
+                                "timestamp": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "Timestamp of when the change was made"
+                                },
+                                "implementer": {
+                                    "type": "string",
+                                    "description": "Identifier, display name or other information about who made changes. Can be null if client does not support account / sharing feature"
+                                }
+                            },
+                            "required": [
+                                "property",
+                                "timestamp"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "status",
+                    "gender"
+                ]
+            }
+        },
+        "plots": {
+            "type": "array",
+            "description": "List of all plots for this project. Null for scattered structure of the project, as property is represented as plots.json which has the same schema as this property",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique id of this plot. Must not repeat through entire project and never change"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "A name of this plot"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A description of this plot, usually an outline"
+                    },
+                    "conflict": {
+                        "type": "string",
+                        "description": "A conflict introduced in this plot"
+                    },
+                    "result": {
+                        "type": "string",
+                        "description": "An outcome of this plot, usually describes if and how the conflict was resolved"
+                    },
+                    "importance": {
+                        "type": "string",
+                        "description": "Specifies importance of this plot, impact which it had on the entire story",
+                        "enum": [
+                            "episodic",
+                            "side",
+                            "secondary",
+                            "primary",
+                            "main"
+                        ]
+                    },
+                    "characters_involved": {
+                        "type": "array",
+                        "description": "List of IDs of the characters involved in this plot. Can be useful for character's story tracking",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "subplots": {
+                        "type": "array",
+                        "description": "List of IDs of other plots that are related to this plot in a hierarchical manner with this plot being primary one over the other. No plot provided should have this plot as it's subplot.",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "changes": {
+                        "type": "array",
+                        "description": "Provides a list of changes to project's properties. Can be empty or null if origin does not support changes tracking or user explicitly turned this feature off. Changes should not exceed 25 length margin for optimization purposes. Changes history can be stored in separate file to support larger scope",
+                        "maxItems": 25,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "property": {
+                                    "description": "Modified property. Either enum specifying other properties or a string for custom properties",
+                                    "type": "string",
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "enum": [
+                                                "name",
+                                                "description",
+                                                "conflict",
+                                                "result",
+                                                "importance",
+                                                "characters_involved",
+                                                "subplots"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "old_value": {
+                                    "description": "Old value that a new value replaced. Can be null if a value was created. "
+                                },
+                                "new_value": {
+                                    "description": "New value that replaced an old value. Can be null if a value was removed."
+                                },
+                                "timestamp": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "Timestamp of when the change was made"
+                                },
+                                "implementer": {
+                                    "type": "string",
+                                    "description": "Identifier, display name or other information about who made changes. Can be null if client does not support account / sharing feature"
+                                }
+                            },
+                            "required": [
+                                "property",
+                                "timestamp"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            }
+        },
+        "fragments": {
+            "type": "array",
+            "description": "List of all fragments for this project. Null for scattered structure of the project, as property is represented as fragments.json which has the same schema as this property",
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "description": "Schema for a `part` fragment (for books)",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "Unique id of this fragment. Must not repeat through entire project and never change"
+                            },
+                            "type": {
+                                "type": "string",
+                                "const": "part"
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "A name of this fragment"
+                            },
+                            "number": {
+                                "type": "integer",
+                                "description": "A chronological number of this fragment. Every item of this array should have its number set to whatever chronological order user desires. There must not be skipped values, or negative values. First item has number of 0. Numbers does not need to correspond to item's index in the array",
+                                "minimum": 0
+                            },
+                            "outline": {
+                                "type": "string",
+                                "description": "An outline of this part. For books not divided to parts it can be treated same as the project's description"
+                            },
+                            "author": {
+                                "type": "string",
+                                "description": "An author of this part"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name",
+                            "type",
+                            "number"
+                        ]
+                    },
+                    {
+                        "type": "object",
+                        "description": "Schema for an `act` fragment (for films)",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "Unique id of this fragment. Must not repeat through entire project and never change"
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "A name of this fragment"
+                            },
+                            "type": {
+                                "type": "string",
+                                "const": "act"
+                            },
+                            "number": {
+                                "type": "integer",
+                                "description": "A chronological number of this fragment. Every item of this array should have its number set to whatever chronological order user desires. There must not be skipped values, or negative values. First item has number of 0. Numbers does not need to correspond to item's index in the array",
+                                "minimum": 0
+                            },
+                            "outline": {
+                                "type": "string",
+                                "description": "An outline of this part. For films not divided to acts it can be treated same as the project's description"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name",
+                            "type",
+                            "number"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "required": [
+        "general",
+        "project"
+    ]
+}

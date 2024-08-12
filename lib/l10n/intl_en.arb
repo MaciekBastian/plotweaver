@@ -13,5 +13,6 @@
   "create_project": "Create project",
   "there_is_no_recent_projects": "There is no recent projects",
   "open_project_or_create_new": "Open a project or create a new one to get started with Plotweaver",
-  "try_again": "Try again"
+  "try_again": "Try again",
+  "not_a_weave_file": "Selected file is not a weave file. Select .weave file to continue"
 }

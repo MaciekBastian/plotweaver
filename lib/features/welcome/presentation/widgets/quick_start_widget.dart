@@ -11,39 +11,57 @@ class QuickStartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.rocket_launch_outlined,
-              size: 18,
-              color: context.colors.onScaffoldBackgroundColor,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              S.of(context).quick_start,
-              style: context.textStyle.h6,
-            ),
-          ],
-        ),
-        Divider(color: context.colors.dividerColor),
-        _QuickStartButton(
-          icon: Icons.folder_outlined,
-          onTap: () {
-            context
-                .read<QuickStartBloc>()
-                .add(const QuickStartEvent.openProject());
+    return BlocListener<QuickStartBloc, QuickStartState>(
+      listener: (context, state) {
+        state.maybeMap(
+          orElse: () {
+            Navigator.of(context).pop();
           },
-          title: S.of(context).open_project,
-        ),
-        const SizedBox(height: 5),
-        _QuickStartButton(
-          icon: Icons.create_outlined,
-          onTap: () {},
-          title: S.of(context).create_project,
-        ),
-      ],
+          locked: (_) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) {
+                return Container();
+              },
+            );
+          },
+        );
+      },
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.rocket_launch_outlined,
+                size: 18,
+                color: context.colors.onScaffoldBackgroundColor,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                S.of(context).quick_start,
+                style: context.textStyle.h6,
+              ),
+            ],
+          ),
+          Divider(color: context.colors.dividerColor),
+          _QuickStartButton(
+            icon: Icons.folder_outlined,
+            onTap: () {
+              context
+                  .read<QuickStartBloc>()
+                  .add(const QuickStartEvent.openProject());
+            },
+            title: S.of(context).open_project,
+          ),
+          const SizedBox(height: 5),
+          _QuickStartButton(
+            icon: Icons.create_outlined,
+            onTap: () {},
+            title: S.of(context).create_project,
+          ),
+        ],
+      ),
     );
   }
 }
