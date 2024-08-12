@@ -54,6 +54,14 @@ class _PlotweaverLightThemeColors implements PlotweaverColors {
 
   @override
   Color get shadedBackgroundColor => const Color(0xFFDFDFDF);
+
+  @override
+  BoxShadow get overlaysBoxShadow => const BoxShadow(
+        color: Colors.black38,
+        blurRadius: 5,
+        spreadRadius: 3,
+        offset: Offset(0, 4),
+      );
 }
 
 class _PlotweaverLightThemeTexts implements PlotweaverTexts {

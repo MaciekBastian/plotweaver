@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/regex_constants.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
+import '../../../../shared/overlays/prompt_overlay.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../bloc/quick_start/quick_start_bloc.dart';
 
@@ -57,7 +59,22 @@ class QuickStartWidget extends StatelessWidget {
           const SizedBox(height: 5),
           _QuickStartButton(
             icon: Icons.create_outlined,
-            onTap: () {},
+            onTap: () {
+              PromptOverlay(
+                context: context,
+                title: S.of(context).create_project,
+                message: S.of(context).project_name_hint,
+                validator: (content) {
+                  if (!RegexConstants.projectNameRegex.hasMatch(content)) {
+                    return S.of(context).project_name_format_error;
+                  }
+                  return null;
+                },
+                onSubmit: (name) {
+                  print('Project name: $name');
+                },
+              ).show();
+            },
             title: S.of(context).create_project,
           ),
         ],

@@ -23,6 +23,7 @@ abstract class PlotweaverColors {
   Color get disabled;
   Color get error;
   Color get shadedBackgroundColor;
+  BoxShadow get overlaysBoxShadow;
 }
 
 abstract class PlotweaverTexts {
