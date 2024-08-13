@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:dartz/dartz.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart' as fs;
 import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart' as pp;
 
@@ -26,7 +26,7 @@ import '../../domain/enums/project_enums.dart';
 
 abstract class ProjectRepository {
   /// Returns PlotweaverError on exception, and ProjectEntity if file was opened successfully. Null if cancelled by the user
-  Future<Either<PlotweaverError, ProjectEntity?>> openProject();
+  Future<Either<PlotweaverError, ProjectEntity?>> openProject([String? path]);
 
   Future<Either<PlotweaverError, ProjectEntity?>> createProject(
     String projectName,
@@ -45,35 +45,47 @@ class ProjectRepositoryImpl implements ProjectRepository {
   final AddRecentUsecase _addRecentUsecase;
   final ModifyRecentUsecase _modifyRecentUsecase;
   final WeaveFileDataSource _dataSource;
-  final _filePicker = FilePicker.platform;
 
   @override
-  Future<Either<PlotweaverError, ProjectEntity?>> openProject() async {
-    final res = await handleAsynchronousOperation(
-      () async => _filePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: [
-          PlotweaverIONamesConstants.fileExtensionNames.weave,
-        ],
-        allowCompression: false,
-        dialogTitle: S.current.open_project,
-        lockParentWindow: true,
-        withData: true,
-        initialDirectory: (await pp.getApplicationDocumentsDirectory()).path,
-      ),
-    );
+  Future<Either<PlotweaverError, ProjectEntity?>> openProject([
+    String? path,
+  ]) async {
+    late final File file;
+    if (path == null) {
+      final res = await handleAsynchronousOperation(
+        () async => fs.openFile(
+          acceptedTypeGroups: [
+            fs.XTypeGroup(
+              label: S.current.weave_file,
+              extensions: [
+                PlotweaverIONamesConstants.fileExtensionNames.weave,
+              ],
+            ),
+          ],
+          confirmButtonText: S.current.open_project,
+          initialDirectory: (await pp.getApplicationDocumentsDirectory()).path,
+        ),
+      );
 
-    if (res.isLeft()) {
-      return Left(res.asLeft());
+      if (res.isLeft()) {
+        return Left(res.asLeft());
+      }
+
+      if (res.asRight() == null) {
+        return const Right(null);
+      }
+      file = File(res.asRight()!.path);
+    } else {
+      file = File(path);
+      if (!file.existsSync()) {
+        return Left(
+          IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
+        );
+      }
     }
 
-    if (res.asRight() == null || res.asRight()!.files.isEmpty) {
-      return const Right(null);
-    }
-
-    final file = res.asRight()!.files.single;
-    final extension = file.extension?.toLowerCase() ??
-        file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
+    final extension =
+        file.path.substring(file.path.lastIndexOf('.') + 1).toLowerCase();
 
     if (extension != PlotweaverIONamesConstants.fileExtensionNames.weave) {
       return Left(
@@ -81,8 +93,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
       );
     }
 
-    final identifier =
-        await _readWeaveFileUsecase.call(file.path ?? file.xFile.path);
+    final identifier = await _readWeaveFileUsecase.call(file.path);
 
     if (identifier.isLeft()) {
       return Left(identifier.asLeft());
@@ -95,7 +106,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     final recentProjectEntity = RecentProjectEntity(
-      path: file.xFile.path,
+      path: file.path,
       projectName: project.asRight().title,
       lastAccess: DateTime.now(),
     );
@@ -110,15 +121,18 @@ class ProjectRepositoryImpl implements ProjectRepository {
     String projectName,
   ) async {
     final res = await handleAsynchronousOperation(
-      () async => _filePicker.saveFile(
-        dialogTitle: S.current.choose_location_of_your_project,
-        allowedExtensions: [
-          PlotweaverIONamesConstants.fileExtensionNames.weave,
+      () async => fs.getSaveLocation(
+        acceptedTypeGroups: [
+          fs.XTypeGroup(
+            label: S.current.weave_file,
+            extensions: [
+              PlotweaverIONamesConstants.fileExtensionNames.weave,
+            ],
+          ),
         ],
-        fileName: projectName,
-        lockParentWindow: true,
+        suggestedName: projectName,
+        confirmButtonText: S.current.create_project,
         initialDirectory: (await pp.getApplicationDocumentsDirectory()).path,
-        type: FileType.custom,
       ),
     );
 
@@ -129,9 +143,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
       return const Right(null);
     }
 
-    final file = File(
-      '${res.asRight()!}.${PlotweaverIONamesConstants.fileExtensionNames.weave}',
-    );
+    final file = File(res.asRight()!.path);
     if (!file.existsSync()) {
       final resp = handleVoidOperation(file.createSync);
       if (resp.isSome()) {
@@ -164,7 +176,11 @@ class ProjectRepositoryImpl implements ProjectRepository {
       lastAccess: DateTime.now(),
     );
 
-    await _addRecentUsecase.call(recentProjectEntity);
+    final recentResp = await _addRecentUsecase.call(recentProjectEntity);
+
+    if (recentResp.isSome()) {
+      return Left(recentResp.asSome());
+    }
 
     final jsonContent = {
       PlotweaverIONamesConstants.fileNames.general: generalEntity.toJson(),

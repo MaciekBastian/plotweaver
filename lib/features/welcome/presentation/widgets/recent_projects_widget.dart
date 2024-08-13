@@ -9,6 +9,7 @@ import '../../../../generated/l10n.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../../../shared/widgets/fatal_error_widget.dart';
 import '../../domain/entities/recent_project_entity.dart';
+import '../bloc/quick_start/quick_start_bloc.dart';
 import '../bloc/recent_projects/recent_projects_bloc.dart';
 
 class RecentProjectsWidget extends StatelessWidget {
@@ -37,7 +38,8 @@ class RecentProjectsWidget extends StatelessWidget {
           builder: (context, state) {
             return Expanded(
               child: Skeletonizer(
-                enableSwitchAnimation: true,
+                enableSwitchAnimation: false,
+                key: const Key('recent_projects_list_skeleton'),
                 switchAnimationConfig: const SwitchAnimationConfig(
                   duration: Durations.medium4,
                 ),
@@ -50,7 +52,8 @@ class RecentProjectsWidget extends StatelessWidget {
                   orElse: () => ListView(
                     children: List.generate(
                       10,
-                      (_) => _RecentProjectButton(
+                      (i) => _RecentProjectButton(
+                        key: Key('recent_project_$i'),
                         recentProjectEntity: RecentProjectEntity.placeholder(),
                       ),
                     ),
@@ -120,6 +123,7 @@ class RecentProjectsWidget extends StatelessWidget {
 class _RecentProjectButton extends StatelessWidget {
   const _RecentProjectButton({
     required this.recentProjectEntity,
+    super.key,
   });
 
   final RecentProjectEntity recentProjectEntity;
@@ -127,7 +131,11 @@ class _RecentProjectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClickableWidget(
-      onTap: () {},
+      onTap: () {
+        context
+            .read<QuickStartBloc>()
+            .add(QuickStartEvent.openProject(recentProjectEntity));
+      },
       borderRadius: BorderRadius.circular(6),
       child: Container(
         width: double.infinity,

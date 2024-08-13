@@ -40,6 +40,12 @@ class WelcomeRepositoryImpl implements WelcomeRepository {
       if (resp.isSome()) {
         return Some(resp.asSome());
       }
+      final emptyWriteResp = handleVoidOperation(
+        () => file.asRight().writeAsStringSync('[]'),
+      );
+      if (emptyWriteResp.isSome()) {
+        return Some(resp.asSome());
+      }
     }
 
     final entitySerialized = handleCommonOperation(() => entity.toJson());
@@ -145,6 +151,12 @@ class WelcomeRepositoryImpl implements WelcomeRepository {
       if (resp.isSome()) {
         return Some(resp.asSome());
       }
+      final emptyWriteResp = handleVoidOperation(
+        () => file.asRight().writeAsStringSync('[]'),
+      );
+      if (emptyWriteResp.isSome()) {
+        return Some(resp.asSome());
+      }
     }
 
     final recent = await getRecent();
@@ -156,9 +168,7 @@ class WelcomeRepositoryImpl implements WelcomeRepository {
     final index = recent.asRight().indexWhere((el) => el.path == entity.path);
 
     if (index == -1) {
-      return Some(
-        IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
-      );
+      return addRecent(entity);
     }
 
     final newRecent = [...recent.asRight()]
@@ -197,6 +207,12 @@ class WelcomeRepositoryImpl implements WelcomeRepository {
     if (!file.asRight().existsSync()) {
       final resp = handleVoidOperation(file.asRight().createSync);
       if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+      final emptyWriteResp = handleVoidOperation(
+        () => file.asRight().writeAsStringSync('[]'),
+      );
+      if (emptyWriteResp.isSome()) {
         return Some(resp.asSome());
       }
     }

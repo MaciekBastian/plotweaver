@@ -4,6 +4,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../../core/errors/plotweaver_errors.dart';
 import '../../../../project/domain/usecases/create_project_usecase.dart';
 import '../../../../project/domain/usecases/open_project_usecase.dart';
+import '../../../domain/entities/recent_project_entity.dart';
+import '../../../domain/usecases/delete_recent_usecase.dart';
 
 part 'quick_start_bloc.freezed.dart';
 part 'quick_start_event.dart';
@@ -13,6 +15,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
   QuickStartBloc(
     this._openProjectUsecase,
     this._createProjectUsecase,
+    this._deleteRecentUsecase,
   ) : super(const _Initial()) {
     on<_OpenProject>(_onOpenProject);
     on<_CreateProject>(_onCreateProject);
@@ -20,16 +23,25 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
 
   final OpenProjectUsecase _openProjectUsecase;
   final CreateProjectUsecase _createProjectUsecase;
+  final DeleteRecentUsecase _deleteRecentUsecase;
 
   Future<void> _onOpenProject(
     _OpenProject event,
     Emitter<QuickStartState> emit,
   ) async {
     emit(const _Locked());
-    final res = await _openProjectUsecase.call();
+    final res = await _openProjectUsecase.call(event.recent?.path);
 
     res.fold(
       (error) {
+        if (error is IOError && event.recent != null) {
+          error.maybeMap(
+            orElse: () {},
+            fileDoesNotExist: (value) async {
+              await _deleteRecentUsecase.call(event.recent!);
+            },
+          );
+        }
         emit(_Failure(error));
       },
       (value) {

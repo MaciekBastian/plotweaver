@@ -11,6 +11,6 @@ class OpenProjectUsecase {
 
   final ProjectRepository _projectRepository;
 
-  Future<Either<PlotweaverError, ProjectEntity?>> call() =>
-      _projectRepository.openProject();
+  Future<Either<PlotweaverError, ProjectEntity?>> call([String? path]) =>
+      _projectRepository.openProject(path);
 }

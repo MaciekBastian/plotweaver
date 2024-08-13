@@ -18,5 +18,8 @@
   "project_name": "Project name",
   "project_name_hint": "Please provide project's name",
   "project_name_format_error": "Project name can contain only letters and numbers",
-  "choose_location_of_your_project": "Choose location of your project"
+  "choose_location_of_your_project": "Choose location of your project",
+  "error_occurred": "Error occurred",
+  "weave_file": "Weave file",
+  "ok": "Ok"
 }
