@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/regex_constants.dart';
+import '../../../../core/constants/routes_constants.dart';
 import '../../../../core/errors/plotweaver_errors.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
@@ -26,8 +28,9 @@ class QuickStartWidget extends StatelessWidget {
             Navigator.of(context).pop();
           },
           success: (value) {
-            print('Navigating to project page');
+            // hiding the dialog
             Navigator.of(context).pop();
+            context.replace(PlotweaverRoutes.editor);
           },
           failure: (value) {
             Navigator.of(context).pop();
@@ -41,10 +44,12 @@ class QuickStartWidget extends StatelessWidget {
               );
             }
           },
-          locked: (_) {
+          locked: (value) {
             showDialog(
               context: context,
               barrierDismissible: false,
+              barrierColor:
+                  value.shouldShowBackdrop ? null : Colors.transparent,
               builder: (context) {
                 return Container();
               },

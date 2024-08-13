@@ -29,7 +29,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
     _OpenProject event,
     Emitter<QuickStartState> emit,
   ) async {
-    emit(const _Locked());
+    emit(_Locked(event.recent == null));
     final res = await _openProjectUsecase.call(event.recent?.path);
 
     res.fold(
@@ -58,7 +58,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
     _CreateProject event,
     Emitter<QuickStartState> emit,
   ) async {
-    emit(const _Locked());
+    emit(const _Locked(true));
     final res = await _createProjectUsecase.call(event.projectName);
 
     res.fold(
