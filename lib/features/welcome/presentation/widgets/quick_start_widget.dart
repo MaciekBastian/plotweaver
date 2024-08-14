@@ -11,7 +11,7 @@ import '../../../../shared/overlays/full_screen_alert.dart';
 import '../../../../shared/overlays/prompt_overlay.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../../project/domain/entities/current_project_entity.dart';
-import '../../../project/presentation/bloc/current_project_bloc.dart';
+import '../../../project/presentation/bloc/current_project/current_project_bloc.dart';
 import '../../../project/presentation/cubit/project_files_cubit.dart';
 import '../bloc/quick_start/quick_start_bloc.dart';
 import '../bloc/recent_projects/recent_projects_bloc.dart';

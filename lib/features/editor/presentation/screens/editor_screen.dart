@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../shared/widgets/app_scaffold.dart';
+import '../../../project/presentation/bloc/project_info_editor/project_info_editor_bloc.dart';
 import '../../../project/presentation/cubit/project_files_cubit.dart';
 import '../../../project/presentation/screens/project_editor_tab.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
@@ -16,7 +17,18 @@ class EditorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProjectFilesCubit, ProjectFilesState>(
+    return BlocConsumer<ProjectFilesCubit, ProjectFilesState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          orElse: () {},
+          active: (projectIdentifier, _) {
+            // set up all blocs
+            context
+                .read<ProjectInfoEditorBloc>()
+                .add(ProjectInfoEditorEvent.setup(projectIdentifier));
+          },
+        );
+      },
       builder: (context, state) {
         return Skeletonizer(
           enabled: state.map(active: (_) => false, loading: (_) => true),

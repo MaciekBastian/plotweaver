@@ -33,6 +33,10 @@ abstract class ProjectRepository {
   Future<Either<PlotweaverError, (ProjectEntity, String)?>> createProject(
     String projectName,
   );
+
+  Future<Either<PlotweaverError, ProjectEntity>> getOpenedProject(
+    String identifier,
+  );
 }
 
 @LazySingleton(as: ProjectRepository)
@@ -207,4 +211,10 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
     return Right((projectEntity, file.path));
   }
+
+  @override
+  Future<Either<PlotweaverError, ProjectEntity>> getOpenedProject(
+    String identifier,
+  ) =>
+      _dataSource.getProject(identifier);
 }
