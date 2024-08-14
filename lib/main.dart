@@ -8,6 +8,9 @@ import 'core/config/window_config.dart';
 import 'core/router/go_router.dart';
 import 'core/services/package_and_device_info_service.dart';
 import 'core/theme/plotweaver_theme.dart';
+import 'features/project/presentation/bloc/current_project_bloc.dart';
+import 'features/project/presentation/cubit/project_files_cubit.dart';
+import 'features/tabs/presentation/cubit/tabs_cubit.dart';
 import 'generated/l10n.dart';
 
 Future<void> main() async {
@@ -19,16 +22,25 @@ Future<void> main() async {
   await sl<PlotweaverThemeSelector>().initialize();
 
   runApp(
-    MaterialApp.router(
-      title: 'Plotweaver',
-      localizationsDelegates: const [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => CurrentProjectBloc()),
+        BlocProvider(create: (context) => ProjectFilesCubit()),
+        BlocProvider(
+          create: (context) => TabsCubit(),
+        ),
       ],
-      routerConfig: plotweaverRouter,
-      supportedLocales: S.delegate.supportedLocales,
+      child: MaterialApp.router(
+        title: 'Plotweaver',
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        routerConfig: plotweaverRouter,
+        supportedLocales: S.delegate.supportedLocales,
+      ),
     ),
   );
 }

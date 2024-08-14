@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/errors/plotweaver_errors.dart';
+import '../../../../project/domain/entities/project_entity.dart';
 import '../../../../project/domain/usecases/create_project_usecase.dart';
 import '../../../../project/domain/usecases/open_project_usecase.dart';
 import '../../../domain/entities/recent_project_entity.dart';
@@ -48,7 +49,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
         if (value == null) {
           emit(const _Initial());
         } else {
-          emit(const _Success());
+          emit(_Success(value.$1, value.$2));
         }
       },
     );
@@ -69,7 +70,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
         if (value == null) {
           emit(const _Initial());
         } else {
-          emit(const _Success());
+          emit(_Success(value.$1, value.$2));
         }
       },
     );

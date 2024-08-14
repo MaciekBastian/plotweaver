@@ -11,6 +11,8 @@ class CreateProjectUsecase {
 
   final ProjectRepository _projectRepository;
 
-  Future<Either<PlotweaverError, ProjectEntity?>> call(String projectName) =>
+  Future<Either<PlotweaverError, (ProjectEntity, String)?>> call(
+    String projectName,
+  ) =>
       _projectRepository.createProject(projectName);
 }

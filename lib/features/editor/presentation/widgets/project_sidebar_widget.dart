@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../shared/widgets/plotweaver_logo_widget.dart';
 import '../bloc/project_sidebar_bloc.dart';
+import 'project_sidebar_content.dart';
 
 class ProjectSidebarWidget extends StatefulWidget {
   const ProjectSidebarWidget({super.key});
@@ -26,7 +27,7 @@ class _ProjectSidebarWidgetState extends State<ProjectSidebarWidget> {
               children: [
                 Container(
                   width: width,
-                  padding: const EdgeInsets.only(left: 15),
+                  padding: const EdgeInsets.only(left: 20),
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: context.colors.shadedBackgroundColor,
@@ -42,6 +43,12 @@ class _ProjectSidebarWidgetState extends State<ProjectSidebarWidget> {
                       ),
                       const SizedBox(height: 10),
                       Divider(color: context.colors.dividerColor),
+                      const Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: ProjectSidebarContent(),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -59,7 +66,7 @@ class _ProjectSidebarWidgetState extends State<ProjectSidebarWidget> {
 }
 
 class _DragHandle extends StatefulWidget {
-  const _DragHandle({super.key});
+  const _DragHandle();
 
   @override
   State<_DragHandle> createState() => __DragHandleState();
@@ -69,6 +76,7 @@ class __DragHandleState extends State<_DragHandle> {
   final minWidth = 200.0;
   final maxWidth = 450.0;
   bool _isHovering = false;
+  bool _isDragging = false;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +121,20 @@ class __DragHandleState extends State<_DragHandle> {
                   .read<ProjectSidebarBloc>()
                   .add(const ProjectSidebarEvent.changeWidth(350));
             },
+            onHorizontalDragStart: (details) {
+              if (!_isDragging) {
+                setState(() {
+                  _isDragging = true;
+                });
+              }
+            },
+            onHorizontalDragEnd: (details) {
+              if (_isDragging) {
+                setState(() {
+                  _isDragging = false;
+                });
+              }
+            },
             onHorizontalDragUpdate: (details) {
               double newWidth = (state + details.delta.dx).floorToDouble();
               if (newWidth > maxWidth) {
@@ -126,9 +148,9 @@ class __DragHandleState extends State<_DragHandle> {
             },
             child: AnimatedContainer(
               duration: Durations.short4,
-              width: _isHovering ? 5 : 2,
+              width: (_isHovering || _isDragging) ? 5 : 2,
               height: double.infinity,
-              color: _isHovering
+              color: _isHovering || _isDragging
                   ? context.colors.link
                   : context.colors.shadedBackgroundColor,
             ),

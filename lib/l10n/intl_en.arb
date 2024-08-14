@@ -21,5 +21,7 @@
   "choose_location_of_your_project": "Choose location of your project",
   "error_occurred": "Error occurred",
   "weave_file": "Weave file",
-  "ok": "Ok"
+  "ok": "Ok",
+  "project": "Project",
+  "characters": "Characters"
 }

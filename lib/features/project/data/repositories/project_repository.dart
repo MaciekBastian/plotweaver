@@ -26,9 +26,11 @@ import '../../domain/enums/project_enums.dart';
 
 abstract class ProjectRepository {
   /// Returns PlotweaverError on exception, and ProjectEntity if file was opened successfully. Null if cancelled by the user
-  Future<Either<PlotweaverError, ProjectEntity?>> openProject([String? path]);
+  Future<Either<PlotweaverError, (ProjectEntity, String)?>> openProject([
+    String? path,
+  ]);
 
-  Future<Either<PlotweaverError, ProjectEntity?>> createProject(
+  Future<Either<PlotweaverError, (ProjectEntity, String)?>> createProject(
     String projectName,
   );
 }
@@ -47,7 +49,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   final WeaveFileDataSource _dataSource;
 
   @override
-  Future<Either<PlotweaverError, ProjectEntity?>> openProject([
+  Future<Either<PlotweaverError, (ProjectEntity, String)?>> openProject([
     String? path,
   ]) async {
     late final File file;
@@ -102,7 +104,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     final project = await _dataSource.getProject(identifier.asRight());
 
     if (project.isLeft()) {
-      return project;
+      return Right((project.asRight(), identifier.asRight()));
     }
 
     final recentProjectEntity = RecentProjectEntity(
@@ -113,11 +115,11 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
     await _modifyRecentUsecase.call(recentProjectEntity);
 
-    return project;
+    return Right((project.asRight(), identifier.asRight()));
   }
 
   @override
-  Future<Either<PlotweaverError, ProjectEntity?>> createProject(
+  Future<Either<PlotweaverError, (ProjectEntity, String)?>> createProject(
     String projectName,
   ) async {
     final res = await handleAsynchronousOperation(
@@ -203,6 +205,6 @@ class ProjectRepositoryImpl implements ProjectRepository {
       }
     }
 
-    return Right(projectEntity);
+    return Right((projectEntity, file.path));
   }
 }

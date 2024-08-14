@@ -10,6 +10,9 @@ import '../../../../generated/l10n.dart';
 import '../../../../shared/overlays/full_screen_alert.dart';
 import '../../../../shared/overlays/prompt_overlay.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
+import '../../../project/domain/entities/current_project_entity.dart';
+import '../../../project/presentation/bloc/current_project_bloc.dart';
+import '../../../project/presentation/cubit/project_files_cubit.dart';
 import '../bloc/quick_start/quick_start_bloc.dart';
 import '../bloc/recent_projects/recent_projects_bloc.dart';
 
@@ -30,6 +33,17 @@ class QuickStartWidget extends StatelessWidget {
           success: (value) {
             // hiding the dialog
             Navigator.of(context).pop();
+            context.read<CurrentProjectBloc>().add(
+                  CurrentProjectEvent.openProject(
+                    CurrentProjectEntity(
+                      projectName: value.project.title,
+                      identifier: value.identifier,
+                    ),
+                  ),
+                );
+            context
+                .read<ProjectFilesCubit>()
+                .checkAndLoadAllFiles(value.identifier);
             context.replace(PlotweaverRoutes.editor);
           },
           failure: (value) {

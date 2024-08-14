@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ProjectEditorScreen extends StatelessWidget {
-  const ProjectEditorScreen({super.key});
+class ProjectEditorTab extends StatelessWidget {
+  const ProjectEditorTab({super.key});
 
   @override
   Widget build(BuildContext context) {

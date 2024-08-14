@@ -2,8 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/editor/presentation/screens/editor_screen.dart';
 import '../constants/routes_constants.dart';
-import 'routes/editor_routes.dart';
+import 'page_transition.dart';
 import 'routes/other_routes.dart';
 
 final rootNavKey = GlobalKey<NavigatorState>(
@@ -15,7 +16,14 @@ final plotweaverRouter = GoRouter(
   initialLocation: PlotweaverRoutes.welcome,
   debugLogDiagnostics: kDebugMode,
   routes: [
-    shellRoute,
+    GoRoute(
+      path: PlotweaverRoutes.editor,
+      pageBuilder: (context, state) => buildPageWithFadeTransition(
+        context: context,
+        state: state,
+        child: const EditorScreen(),
+      ),
+    ),
     ...plotweaverOtherRoutes,
   ],
 );
