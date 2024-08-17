@@ -10,6 +10,7 @@ final class _PlotweaverFileNamesConstants {
   final general = 'general';
   final project = 'project';
   final recentProjects = 'recent_projects';
+  final rollback = '.rb_';
 }
 
 final class _PlotweaverDirectoryNamesConstants {

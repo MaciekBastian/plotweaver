@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:dartz/dartz.dart';
 import 'package:file_selector/file_selector.dart' as fs;
 import 'package:injectable/injectable.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as pp;
 
 import '../../../../core/config/sl_config.dart';
@@ -13,6 +14,7 @@ import '../../../../core/constants/weave_file_support.dart';
 import '../../../../core/errors/plotweaver_errors.dart';
 import '../../../../core/extensions/dartz_extension.dart';
 import '../../../../core/handlers/error_handler.dart';
+import '../../../../core/services/app_support_directories_service.dart';
 import '../../../../core/services/package_and_device_info_service.dart';
 import '../../../../generated/l10n.dart';
 import '../../../weave_file/data/data_sources/weave_file_data_source.dart';
@@ -26,17 +28,26 @@ import '../../domain/enums/project_enums.dart';
 
 abstract class ProjectRepository {
   /// Returns PlotweaverError on exception, and ProjectEntity if file was opened successfully. Null if cancelled by the user
-  Future<Either<PlotweaverError, (ProjectEntity, String)?>> openProject([
+  Future<Either<PlotweaverError, (ProjectEntity, String, String)?>>
+      openProject([
     String? path,
   ]);
 
-  Future<Either<PlotweaverError, (ProjectEntity, String)?>> createProject(
+  Future<Either<PlotweaverError, (ProjectEntity, String, String)?>>
+      createProject(
     String projectName,
   );
 
   Future<Either<PlotweaverError, ProjectEntity>> getOpenedProject(
     String identifier,
   );
+
+  Future<Option<PlotweaverError>> modifyProject(
+    String identifier,
+    ProjectEntity project,
+  );
+
+  Future<Option<PlotweaverError>> rollBackProject(String identifier);
 }
 
 @LazySingleton(as: ProjectRepository)
@@ -53,7 +64,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
   final WeaveFileDataSource _dataSource;
 
   @override
-  Future<Either<PlotweaverError, (ProjectEntity, String)?>> openProject([
+  Future<Either<PlotweaverError, (ProjectEntity, String, String)?>>
+      openProject([
     String? path,
   ]) async {
     late final File file;
@@ -108,7 +120,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     final project = await _dataSource.getProject(identifier.asRight());
 
     if (project.isLeft()) {
-      return Right((project.asRight(), identifier.asRight()));
+      return Right((project.asRight(), identifier.asRight(), file.path));
     }
 
     final recentProjectEntity = RecentProjectEntity(
@@ -119,11 +131,12 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
     await _modifyRecentUsecase.call(recentProjectEntity);
 
-    return Right((project.asRight(), identifier.asRight()));
+    return Right((project.asRight(), identifier.asRight(), file.path));
   }
 
   @override
-  Future<Either<PlotweaverError, (ProjectEntity, String)?>> createProject(
+  Future<Either<PlotweaverError, (ProjectEntity, String, String)?>>
+      createProject(
     String projectName,
   ) async {
     final res = await handleAsynchronousOperation(
@@ -209,12 +222,123 @@ class ProjectRepositoryImpl implements ProjectRepository {
       }
     }
 
-    return Right((projectEntity, file.path));
+    return Right((projectEntity, projectIdentifier, file.path));
   }
 
   @override
   Future<Either<PlotweaverError, ProjectEntity>> getOpenedProject(
     String identifier,
-  ) =>
-      _dataSource.getProject(identifier);
+  ) async {
+    final deleteRollbackResp =
+        await _dataSource.deleteProjectRollback(identifier);
+
+    if (deleteRollbackResp.isSome()) {
+      return Left(deleteRollbackResp.asSome());
+    }
+
+    final getResp = await _dataSource.getProject(identifier);
+
+    return getResp;
+  }
+
+  @override
+  Future<Option<PlotweaverError>> modifyProject(
+    String identifier,
+    ProjectEntity project,
+  ) async {
+    final projectDirectoryRes = await sl<AppSupportDirectoriesService>()
+        .getProjectDirectory(identifier);
+
+    if (projectDirectoryRes.isLeft()) {
+      return Some(projectDirectoryRes.asLeft());
+    }
+
+    final projectDirectory = projectDirectoryRes.asRight();
+
+    final projectFile = File(
+      p.join(
+        projectDirectory.path,
+        '${PlotweaverIONamesConstants.fileNames.project}.${PlotweaverIONamesConstants.fileExtensionNames.json}',
+      ),
+    );
+
+    if (!projectFile.existsSync()) {
+      final resp = handleVoidOperation(projectFile.createSync);
+      if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+    }
+
+    // create roll back version if necessary
+    await _dataSource.getProject(identifier, true);
+
+    final projectEncoded = await Isolate.run(
+      () => handleCommonOperation(() => json.encode(project.toJson())),
+    );
+
+    // Write ProjectEntity to project.json
+    if (projectEncoded.isRight()) {
+      final resp = await handleVoidAsyncOperation(
+        () async => projectFile.writeAsString(projectEncoded.asRight()),
+      );
+      if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+    } else {
+      return Some(projectEncoded.asLeft());
+    }
+
+    return const None();
+  }
+
+  @override
+  Future<Option<PlotweaverError>> rollBackProject(String identifier) async {
+    final project = await _dataSource.getProject(identifier, true);
+
+    if (project.isLeft()) {
+      return Some(project.asLeft());
+    }
+
+    final projectDirectoryRes = await sl<AppSupportDirectoriesService>()
+        .getProjectDirectory(identifier);
+
+    if (projectDirectoryRes.isLeft()) {
+      return Some(projectDirectoryRes.asLeft());
+    }
+
+    final projectDirectory = projectDirectoryRes.asRight();
+
+    final projectFile = File(
+      p.join(
+        projectDirectory.path,
+        '${PlotweaverIONamesConstants.fileNames.project}.${PlotweaverIONamesConstants.fileExtensionNames.json}',
+      ),
+    );
+
+    if (!projectFile.existsSync()) {
+      final resp = handleVoidOperation(projectFile.createSync);
+      if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+    }
+
+    final projectEncoded = await Isolate.run(
+      () =>
+          handleCommonOperation(() => json.encode(project.asRight().toJson())),
+    );
+
+    // Write ProjectEntity to project.json
+    if (projectEncoded.isRight()) {
+      final resp = await handleVoidAsyncOperation(
+        () async => projectFile.writeAsString(projectEncoded.asRight()),
+      );
+      if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+    } else {
+      return Some(projectEncoded.asLeft());
+    }
+
+    return const None();
+  }
 }

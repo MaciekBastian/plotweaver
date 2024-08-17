@@ -20,10 +20,12 @@ abstract class PlotweaverColors {
   Color get clickableFocusOverlayColor;
   Color get dividerColor;
   Color get link;
+  Color get onLink;
   Color get disabled;
   Color get error;
   Color get shadedBackgroundColor;
   BoxShadow get overlaysBoxShadow;
+  Color get propertyIconColor;
 }
 
 abstract class PlotweaverTexts {
@@ -36,6 +38,8 @@ abstract class PlotweaverTexts {
   TextStyle get body;
   TextStyle get caption;
   TextStyle get button;
+  TextStyle get propertyTitle;
+  TextStyle get propertyDescription;
 }
 
 abstract class PlotweaverThemeSelector {

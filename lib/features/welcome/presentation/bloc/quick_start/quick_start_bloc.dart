@@ -49,7 +49,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
         if (value == null) {
           emit(const _Initial());
         } else {
-          emit(_Success(value.$1, value.$2));
+          emit(_Success(value.$1, value.$2, value.$3));
         }
       },
     );
@@ -70,7 +70,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
         if (value == null) {
           emit(const _Initial());
         } else {
-          emit(_Success(value.$1, value.$2));
+          emit(_Success(value.$1, value.$2, value.$3));
         }
       },
     );

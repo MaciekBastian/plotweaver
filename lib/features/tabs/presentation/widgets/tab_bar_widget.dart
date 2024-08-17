@@ -22,6 +22,7 @@ class TabBarWidget extends StatelessWidget {
               return TabWidget(
                 tab: tab,
                 isSelected: state.openedTabId == tab.tabId,
+                isUnsaved: state.unsavedTabsIds.contains(tab.tabId),
               );
             }).toList(),
           );

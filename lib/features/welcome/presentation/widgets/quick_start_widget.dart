@@ -38,6 +38,7 @@ class QuickStartWidget extends StatelessWidget {
                     CurrentProjectEntity(
                       projectName: value.project.title,
                       identifier: value.identifier,
+                      path: value.path,
                     ),
                   ),
                 );

@@ -9,6 +9,8 @@ part 'current_project_entity.freezed.dart';
 class CurrentProjectEntity with _$CurrentProjectEntity {
   factory CurrentProjectEntity({
     required String projectName,
+    required String path,
     required String identifier,
+    @Default([]) List<String> unsavedTabsIds,
   }) = _CurrentProjectEntity;
 }

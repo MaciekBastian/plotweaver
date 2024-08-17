@@ -6,13 +6,14 @@ import '../../data/repositories/project_repository.dart';
 import '../entities/project_entity.dart';
 
 @lazySingleton
-class CreateProjectUsecase {
-  const CreateProjectUsecase(this._projectRepository);
+class ModifyProjectUsecase {
+  const ModifyProjectUsecase(this._projectRepository);
 
   final ProjectRepository _projectRepository;
 
-  Future<Either<PlotweaverError, (ProjectEntity, String, String)?>> call(
-    String projectName,
+  Future<Option<PlotweaverError>> call(
+    String identifier,
+    ProjectEntity project,
   ) =>
-      _projectRepository.createProject(projectName);
+      _projectRepository.modifyProject(identifier, project);
 }

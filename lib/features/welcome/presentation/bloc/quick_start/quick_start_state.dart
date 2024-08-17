@@ -6,6 +6,7 @@ class QuickStartState with _$QuickStartState {
   const factory QuickStartState.success(
     ProjectEntity project,
     String identifier,
+    String path,
   ) = _Success;
 
   /// App should be locked because picker is opened

@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../domain/entities/tab_entity.dart';
-import '../cubit/tabs_cubit.dart';
+import 'close_tab_button_widget.dart';
 import 'tab_icons_and_names.dart';
 
 class TabWidget extends StatelessWidget {
   const TabWidget({
     required this.tab,
     required this.isSelected,
+    required this.isUnsaved,
     super.key,
   });
 
   final TabEntity tab;
   final bool isSelected;
+  final bool isUnsaved;
 
   @override
   Widget build(BuildContext context) {
+    final tabName = getTabName(context, tab);
     return Container(
       width: 180,
       height: double.infinity,
@@ -34,7 +36,7 @@ class TabWidget extends StatelessWidget {
             const SizedBox(width: 5),
             Expanded(
               child: Text(
-                getTabName(context, tab),
+                tabName,
                 style: context.textStyle.button.copyWith(
                   color: isSelected
                       ? context.colors.onScaffoldBackgroundHeader
@@ -48,19 +50,10 @@ class TabWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            ClickableWidget(
-              onTap: () {
-                context.read<TabsCubit>().closeTab(tab);
-              },
-              child: SizedBox(
-                width: 25,
-                height: 25,
-                child: Icon(
-                  Icons.close,
-                  color: context.colors.disabled,
-                  size: 18,
-                ),
-              ),
+            CloseTabButton(
+              tab: tab,
+              isUnsaved: isUnsaved,
+              tabName: tabName,
             ),
             const SizedBox(width: 5),
           ],

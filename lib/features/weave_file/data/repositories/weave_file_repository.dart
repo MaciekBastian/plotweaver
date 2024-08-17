@@ -17,6 +17,7 @@ import '../../../../core/services/package_and_device_info_service.dart';
 import '../../../../generated/l10n.dart';
 import '../../../project/domain/entities/project_entity.dart';
 import '../../domain/entities/general_entity.dart';
+import '../../domain/entities/save_intent_entity.dart';
 import '../data_sources/weave_file_data_source.dart';
 
 /// A repository responsible only for reading, writing, scattering and consolidating weave files.
@@ -25,10 +26,9 @@ abstract class WeaveFileRepository {
   Future<Either<PlotweaverError, String>> readFile(String path);
 
   /// Consolidates files with project identifier into `path`
-  Future<Option<PlotweaverError>> consolidateAndSaveToPath(
-    String path,
-    String projectIdentifier,
-  );
+  Future<Option<PlotweaverError>> consolidateAndSaveToPath({
+    required SaveIntentEntity saveIntent,
+  });
 }
 
 @Singleton(as: WeaveFileRepository)
@@ -191,12 +191,11 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
   }
 
   @override
-  Future<Option<PlotweaverError>> consolidateAndSaveToPath(
-    String path,
-    String projectIdentifier,
-  ) async {
+  Future<Option<PlotweaverError>> consolidateAndSaveToPath({
+    required SaveIntentEntity saveIntent,
+  }) async {
     final Map<String, dynamic> outputJson = {};
-    final file = File(path);
+    final file = File(saveIntent.path);
 
     if (file.existsSync() &&
         file.statSync().type != FileSystemEntityType.file) {
@@ -212,13 +211,16 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
     }
 
     final projectDirectoryRes = await sl<AppSupportDirectoriesService>()
-        .getProjectDirectory(projectIdentifier);
+        .getProjectDirectory(saveIntent.projectIdentifier);
 
     if (projectDirectoryRes.isLeft()) {
       return Some(projectDirectoryRes.asLeft());
     }
 
-    final generalEntity = await _dataSource.getGeneral(projectIdentifier);
+    print(projectDirectoryRes.asRight().path);
+
+    final generalEntity =
+        await _dataSource.getGeneral(saveIntent.projectIdentifier);
 
     if (generalEntity.isLeft()) {
       return Some(generalEntity.asLeft());
@@ -240,20 +242,31 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
       return Some(generalModifiedJson.asLeft());
     }
 
-    // project.json
-
-    final projectJsonContent = await _dataSource.getProject(projectIdentifier);
-
-    if (projectJsonContent.isLeft()) {
-      return Some(
-        IOError.unknownError(message: S.current.unknown_error),
-      );
-    }
-
     outputJson[PlotweaverIONamesConstants.fileNames.general] =
         generalModifiedJson.asRight();
-    outputJson[PlotweaverIONamesConstants.fileNames.project] =
-        projectJsonContent.asRight();
+
+    // project.json
+
+    if (saveIntent.saveProject) {
+      final projectJsonContent = await handleAsynchronousOperation<
+          Either<PlotweaverError, Map<String, dynamic>>>(() async {
+        final proj = await _dataSource.getProject(saveIntent.projectIdentifier);
+        if (proj.isLeft()) {
+          return Left(proj.asLeft());
+        }
+        return Right(proj.asRight().toJson());
+      });
+
+      if (projectJsonContent.isLeft() ||
+          projectJsonContent.asRight().isLeft()) {
+        return Some(
+          IOError.unknownError(message: S.current.unknown_error),
+        );
+      }
+
+      outputJson[PlotweaverIONamesConstants.fileNames.project] =
+          projectJsonContent.asRight().asRight();
+    }
 
     // TODO: consolidate other files
 

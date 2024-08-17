@@ -23,5 +23,23 @@
   "weave_file": "Weave file",
   "ok": "Ok",
   "project": "Project",
-  "characters": "Characters"
+  "project_author": "Author",
+  "project_author_hint": "Name of the project's author or rights owner",
+  "project_description": "Opis",
+  "project_description_hint": "Describe your project's outline here",
+  "start_typing": "Start typing...",
+  "characters": "Characters",
+  "cancel": "Cancel",
+  "save": "Save",
+  "do_not_save": "Don’t save",
+  "do_you_want_to_save_changes_in_file": "Do you want to save changes for „{file}”?",
+  "@do_you_want_to_save_changes_in_file": {
+    "placeholders": {
+      "file": {
+        "example": "Project",
+        "type": "String"
+      }
+    }
+  },
+  "your_changes_will_be_lost_if_you_do_not_save": "Your changes will be lost if you don’t save them."
 }

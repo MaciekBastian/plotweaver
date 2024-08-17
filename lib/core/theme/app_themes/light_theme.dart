@@ -47,6 +47,9 @@ class _PlotweaverLightThemeColors implements PlotweaverColors {
   Color get link => const Color(0xFF3366CC);
 
   @override
+  Color get onLink => const Color(0xFFFFFFFF);
+
+  @override
   Color get disabled => const Color(0xFF606060);
 
   @override
@@ -62,6 +65,9 @@ class _PlotweaverLightThemeColors implements PlotweaverColors {
         spreadRadius: 3,
         offset: Offset(0, 4),
       );
+
+  @override
+  Color get propertyIconColor => const Color(0xFF3366CC);
 }
 
 class _PlotweaverLightThemeTexts implements PlotweaverTexts {
@@ -136,4 +142,10 @@ class _PlotweaverLightThemeTexts implements PlotweaverTexts {
         letterSpacing: 0.5,
         color: _PlotweaverLightThemeColors().onScaffoldBackgroundColor,
       );
+
+  @override
+  TextStyle get propertyDescription => caption;
+
+  @override
+  TextStyle get propertyTitle => body.copyWith(fontWeight: FontWeight.bold);
 }

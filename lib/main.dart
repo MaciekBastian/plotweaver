@@ -26,9 +26,7 @@ Future<void> main() async {
       providers: [
         BlocProvider(create: (context) => CurrentProjectBloc()),
         BlocProvider(create: (context) => ProjectFilesCubit()),
-        BlocProvider(
-          create: (context) => TabsCubit(),
-        ),
+        BlocProvider(create: (context) => sl<TabsCubit>()),
       ],
       child: MaterialApp.router(
         title: 'Plotweaver',

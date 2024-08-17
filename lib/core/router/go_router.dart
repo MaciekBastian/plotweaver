@@ -24,9 +24,13 @@ final plotweaverRouter = GoRouter(
       pageBuilder: (context, state) => buildPageWithFadeTransition(
         context: context,
         state: state,
-        // bloc provider with all editors
+        // bloc providers for all editors
         child: BlocProvider(
-          create: (context) => ProjectInfoEditorBloc(sl()),
+          create: (context) => ProjectInfoEditorBloc(
+            sl(),
+            sl(),
+            context.read(),
+          ),
           child: const EditorScreen(),
         ),
       ),
