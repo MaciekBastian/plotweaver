@@ -217,8 +217,6 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
       return Some(projectDirectoryRes.asLeft());
     }
 
-    print(projectDirectoryRes.asRight().path);
-
     final generalEntity =
         await _dataSource.getGeneral(saveIntent.projectIdentifier);
 
@@ -231,6 +229,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
           .asRight()
           .copyWith(
             lastModifiedAt: DateTime.now(),
+            lastAccessedAt: DateTime.now(),
             plotweaverVersion: sl<PackageAndDeviceInfoService>().packageVersion,
             weaveVersion: WeaveFileSupport.LATEST_VERSION,
             origin: sl<PackageAndDeviceInfoService>().packageName ?? 'unknown',

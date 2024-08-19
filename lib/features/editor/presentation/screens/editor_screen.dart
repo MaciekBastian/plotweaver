@@ -43,23 +43,7 @@ class EditorScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         const TabBarWidget(),
-                        Expanded(
-                          child: BlocBuilder<TabsCubit, TabsState>(
-                            builder: (context, state) {
-                              final tab = state.openedTabs
-                                  .where((el) => el.tabId == state.openedTabId)
-                                  .firstOrNull;
-                              if (tab == null) {
-                                return const BlankEditorTab();
-                              }
-
-                              return tab.map(
-                                projectTab: (_) => const ProjectEditorTab(),
-                                characterTab: (_) => Container(),
-                              );
-                            },
-                          ),
-                        ),
+                        _buildEditorView(),
                       ],
                     ),
                   ),
@@ -69,6 +53,26 @@ class EditorScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Expanded _buildEditorView() {
+    return Expanded(
+      child: BlocBuilder<TabsCubit, TabsState>(
+        builder: (context, state) {
+          final tab = state.openedTabs
+              .where((el) => el.tabId == state.openedTabId)
+              .firstOrNull;
+          if (tab == null) {
+            return const BlankEditorTab();
+          }
+
+          return tab.map(
+            projectTab: (_) => const ProjectEditorTab(),
+            characterTab: (_) => Container(),
+          );
+        },
+      ),
     );
   }
 }

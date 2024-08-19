@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/extensions/theme_extension.dart';
+import 'property_header_widget.dart';
 
 class TextPropertyWidget extends StatelessWidget {
   const TextPropertyWidget({
@@ -30,32 +31,10 @@ class TextPropertyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (icon is Icon)
-              Padding(
-                padding: const EdgeInsets.only(top: 2, left: 10, right: 5),
-                child: Icon(
-                  (icon as Icon).icon,
-                  size: 16,
-                  color: context.colors.propertyIconColor,
-                ),
-              ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: context.textStyle.propertyTitle,
-                ),
-                Text(
-                  description,
-                  style: context.textStyle.propertyDescription,
-                ),
-              ],
-            ),
-          ],
+        PropertyHeaderWidget(
+          description: description,
+          icon: icon,
+          title: title,
         ),
         const SizedBox(height: 10),
         TextField(

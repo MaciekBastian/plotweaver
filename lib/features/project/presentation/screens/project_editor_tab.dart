@@ -5,10 +5,16 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../shared/widgets/fatal_error_widget.dart';
+import '../../../../shared/widgets/property_header_widget.dart';
 import '../../../../shared/widgets/text_property_widget.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
+import '../../../weave_file/domain/entities/general_entity.dart';
 import '../../domain/entities/project_entity.dart';
+import '../../domain/enums/project_enums.dart';
 import '../bloc/project_info_editor/project_info_editor_bloc.dart';
+import '../widgets/general_file_info_widget.dart';
+import '../widgets/project_status_selector_widget.dart';
+import '../widgets/project_template_selector_widget.dart';
 
 class ProjectEditorTab extends StatefulWidget {
   const ProjectEditorTab({super.key});
@@ -19,6 +25,8 @@ class ProjectEditorTab extends StatefulWidget {
 
 class _ProjectEditorTabState extends State<ProjectEditorTab> {
   ProjectEntity? _project;
+  GeneralEntity? _general;
+
   final _projectNameController = TextEditingController();
   final _projectNameFocus = FocusNode();
 
@@ -27,6 +35,9 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
 
   final _descriptionNameController = TextEditingController();
   final _descriptionNameFocus = FocusNode();
+
+  ProjectTemplate _template = ProjectTemplate.book;
+  ProjectStatus _status = ProjectStatus.idle;
 
   @override
   void initState() {
@@ -37,19 +48,23 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
   void _fillEditor(ProjectInfoEditorState state) {
     state.maybeWhen(
       orElse: () {},
-      success: (projectInfo) {
+      success: (projectInfo, general) {
         _project = projectInfo;
-        _projectNameController.text = projectInfo.title;
-        _authorNameController.text = projectInfo.author ?? '';
-        _descriptionNameController.text = projectInfo.description ?? '';
+        _general = general;
       },
-      modified: (projectInfo) {
+      modified: (projectInfo, general) {
         _project = projectInfo;
-        _projectNameController.text = projectInfo.title;
-        _authorNameController.text = projectInfo.author ?? '';
-        _descriptionNameController.text = projectInfo.description ?? '';
+        _general = general;
       },
     );
+
+    if (_project != null) {
+      _projectNameController.text = _project!.title;
+      _authorNameController.text = _project!.author ?? '';
+      _descriptionNameController.text = _project!.description ?? '';
+      _template = _project!.template;
+      _status = _project!.status;
+    }
   }
 
   void _sendModifyEvent() {
@@ -61,6 +76,8 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
       author: _authorNameController.text.trim(),
       description: _descriptionNameController.text.trim(),
       title: _projectNameController.text.trim(),
+      template: _template,
+      status: _status,
     );
     _project = newProject;
     context.read<ProjectInfoEditorBloc>().add(
@@ -83,7 +100,7 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
             failure: (_) => true,
             loading: () => true,
           ) &&
-          current.maybeWhen(orElse: () => false, success: (_) => true),
+          current.maybeWhen(orElse: () => false, success: (_, __) => true),
       builder: (context, state) {
         return state.maybeWhen(
           orElse: () => Skeletonizer(
@@ -144,40 +161,12 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
                   children: [
                     Expanded(
                       flex: 2,
-                      child: Column(
-                        children: [
-                          TextPropertyWidget(
-                            icon: const Icon(Icons.person_rounded),
-                            controller: _authorNameController,
-                            focusNode: _authorNameFocus,
-                            title: S.of(context).project_author,
-                            description: S.of(context).project_author_hint,
-                            onChange: _sendModifyEvent,
-                            hint: S.of(context).start_typing,
-                            maxLines: 1,
-                          ),
-                          const SizedBox(height: 15),
-                          TextPropertyWidget(
-                            icon: const Icon(Icons.format_align_left),
-                            controller: _descriptionNameController,
-                            focusNode: _descriptionNameFocus,
-                            title: S.of(context).project_description,
-                            description: S.of(context).project_description_hint,
-                            onChange: _sendModifyEvent,
-                            hint: S.of(context).start_typing,
-                            maxLines: 20,
-                            minLines: 4,
-                          ),
-                        ],
-                      ),
+                      child: _buildLeftPane(),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
                       flex: 2,
-                      child: Container(
-                        color: Colors.black,
-                        height: 10,
-                      ),
+                      child: _buildRightPane(),
                     ),
                     // white space
                     Expanded(child: Container()),
@@ -200,6 +189,74 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
           },
         );
       },
+    );
+  }
+
+  Column _buildRightPane() {
+    return Column(
+      children: [
+        ProjectTemplateSelectorWidget(
+          selected: _template,
+          onSelected: (selected) {
+            if (_template == selected) {
+              return;
+            }
+            setState(() {
+              _template = selected;
+            });
+            _sendModifyEvent();
+          },
+        ),
+        const SizedBox(height: 30),
+        ProjectStatusSelectorWidget(
+          selected: _status,
+          onSelection: (selected) {
+            if (selected != _status) {
+              setState(() {
+                _status = selected;
+              });
+              _sendModifyEvent();
+            }
+          },
+        ),
+        const SizedBox(height: 30),
+        PropertyHeaderWidget(
+          icon: const Icon(Icons.info_outline),
+          title: S.of(context).weave_file_info,
+          description: S.of(context).weave_file_info_hint,
+        ),
+        const SizedBox(height: 10),
+        if (_general != null) GeneralFileInfoWidget(general: _general!),
+      ],
+    );
+  }
+
+  Column _buildLeftPane() {
+    return Column(
+      children: [
+        TextPropertyWidget(
+          icon: const Icon(Icons.person_rounded),
+          controller: _authorNameController,
+          focusNode: _authorNameFocus,
+          title: S.of(context).project_author,
+          description: S.of(context).project_author_hint,
+          onChange: _sendModifyEvent,
+          hint: S.of(context).start_typing,
+          maxLines: 1,
+        ),
+        const SizedBox(height: 30),
+        TextPropertyWidget(
+          icon: const Icon(Icons.format_align_left),
+          controller: _descriptionNameController,
+          focusNode: _descriptionNameFocus,
+          title: S.of(context).project_description,
+          description: S.of(context).project_description_hint,
+          onChange: _sendModifyEvent,
+          hint: S.of(context).start_typing,
+          maxLines: 20,
+          minLines: 4,
+        ),
+      ],
     );
   }
 }

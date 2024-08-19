@@ -11,7 +11,7 @@ class ProjectFilesCubit extends Cubit<ProjectFilesState> {
   ProjectFilesCubit() : super(const ProjectFilesState.loading());
 
   Future<void> checkAndLoadAllFiles(String identifier) async {
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 1));
     emit(
       _Active(
         projectIdentifier: identifier,
