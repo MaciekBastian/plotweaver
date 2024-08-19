@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/regex_constants.dart';
+import '../../../../core/constants/routes_constants.dart';
 import '../../../../core/errors/plotweaver_errors.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../shared/overlays/full_screen_alert.dart';
 import '../../../../shared/overlays/prompt_overlay.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
+import '../../../project/domain/entities/current_project_entity.dart';
+import '../../../project/presentation/bloc/current_project/current_project_bloc.dart';
+import '../../../project/presentation/cubit/project_files_cubit.dart';
 import '../bloc/quick_start/quick_start_bloc.dart';
 import '../bloc/recent_projects/recent_projects_bloc.dart';
 
@@ -26,8 +31,21 @@ class QuickStartWidget extends StatelessWidget {
             Navigator.of(context).pop();
           },
           success: (value) {
-            print('Navigating to project page');
+            // hiding the dialog
             Navigator.of(context).pop();
+            context.read<CurrentProjectBloc>().add(
+                  CurrentProjectEvent.openProject(
+                    CurrentProjectEntity(
+                      projectName: value.project.title,
+                      identifier: value.identifier,
+                      path: value.path,
+                    ),
+                  ),
+                );
+            context
+                .read<ProjectFilesCubit>()
+                .checkAndLoadAllFiles(value.identifier);
+            context.replace(PlotweaverRoutes.editor);
           },
           failure: (value) {
             Navigator.of(context).pop();
@@ -41,10 +59,12 @@ class QuickStartWidget extends StatelessWidget {
               );
             }
           },
-          locked: (_) {
+          locked: (value) {
             showDialog(
               context: context,
               barrierDismissible: false,
+              barrierColor:
+                  value.shouldShowBackdrop ? null : Colors.transparent,
               builder: (context) {
                 return Container();
               },

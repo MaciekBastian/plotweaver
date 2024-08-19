@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../features/project/domain/enums/project_enums.dart';
 import '../plotweaver_theme.dart';
 
 class PlotweaverLightTheme implements PlotweaverTheme {
@@ -47,6 +48,9 @@ class _PlotweaverLightThemeColors implements PlotweaverColors {
   Color get link => const Color(0xFF3366CC);
 
   @override
+  Color get onLink => const Color(0xFFFFFFFF);
+
+  @override
   Color get disabled => const Color(0xFF606060);
 
   @override
@@ -62,6 +66,18 @@ class _PlotweaverLightThemeColors implements PlotweaverColors {
         spreadRadius: 3,
         offset: Offset(0, 4),
       );
+
+  @override
+  Color get propertyIconColor => const Color(0xFF3366CC);
+
+  @override
+  Map<ProjectStatus, Color> get projectStatusColors => {
+        ProjectStatus.idle: const Color(0xFFA4ABB6),
+        ProjectStatus.onTrack: const Color(0xFF50C878),
+        ProjectStatus.offTrack: const Color(0xFFFFB302),
+        ProjectStatus.rejected: const Color(0xFFFF3838),
+        ProjectStatus.completed: const Color(0xFF4682B4),
+      };
 }
 
 class _PlotweaverLightThemeTexts implements PlotweaverTexts {
@@ -136,4 +152,10 @@ class _PlotweaverLightThemeTexts implements PlotweaverTexts {
         letterSpacing: 0.5,
         color: _PlotweaverLightThemeColors().onScaffoldBackgroundColor,
       );
+
+  @override
+  TextStyle get propertyDescription => caption;
+
+  @override
+  TextStyle get propertyTitle => body.copyWith(fontWeight: FontWeight.bold);
 }

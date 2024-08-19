@@ -16,7 +16,7 @@ import '../../../project/domain/entities/project_entity.dart';
 import '../../domain/entities/general_entity.dart';
 
 class WeaveFileDataSource {
-  Future<Either<PlotweaverError, Map<String, dynamic>>> _getFileJson(
+  Future<Either<PlotweaverError, File>> _getFile(
     String identifier,
     String fileNameBase,
   ) async {
@@ -36,10 +36,39 @@ class WeaveFileDataSource {
       ),
     );
 
+    return Right(outputFile);
+  }
+
+  Future<Either<PlotweaverError, Map<String, dynamic>>> _getFileJson(
+    String identifier,
+    String fileNameBase,
+    bool createEmptyFile,
+  ) async {
+    final fileResp = await _getFile(identifier, fileNameBase);
+    if (fileResp.isLeft()) {
+      return Left(fileResp.asLeft());
+    }
+
+    final outputFile = fileResp.asRight();
+
     if (!outputFile.existsSync()) {
-      return Left(
-        IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
-      );
+      if (createEmptyFile) {
+        final resp = handleVoidOperation(outputFile.createSync);
+        if (resp.isSome()) {
+          return Left(resp.asSome());
+        }
+        final emptyWriteResp = handleVoidOperation(
+          () => outputFile.writeAsStringSync('{}'),
+        );
+        if (emptyWriteResp.isSome()) {
+          return Left(resp.asSome());
+        }
+        return const Right({});
+      } else {
+        return Left(
+          IOError.fileDoesNotExist(message: S.current.file_does_not_exist),
+        );
+      }
     }
 
     final outputFileContent = await handleAsynchronousOperation(
@@ -77,6 +106,7 @@ class WeaveFileDataSource {
     final jsonContent = await _getFileJson(
       identifier,
       PlotweaverIONamesConstants.fileNames.general,
+      false,
     );
     if (jsonContent.isLeft()) {
       return Left(jsonContent.asLeft());
@@ -90,14 +120,51 @@ class WeaveFileDataSource {
   }
 
   Future<Either<PlotweaverError, ProjectEntity>> getProject(
-    String identifier,
-  ) async {
+    String identifier, [
+    bool rollback = false,
+  ]) async {
+    final fileNameBase =
+        '${rollback ? PlotweaverIONamesConstants.fileNames.rollback : ''}${PlotweaverIONamesConstants.fileNames.project}';
+
     final jsonContent = await _getFileJson(
       identifier,
-      PlotweaverIONamesConstants.fileNames.project,
+      fileNameBase,
+      rollback,
     );
     if (jsonContent.isLeft()) {
       return Left(jsonContent.asLeft());
+    }
+
+    if (jsonContent.asRight().isEmpty && rollback) {
+      final projectResp = await getProject(identifier);
+      if (projectResp.isLeft()) {
+        return Left(projectResp.asLeft());
+      }
+
+      final fileResp = await _getFile(
+        identifier,
+        PlotweaverIONamesConstants.fileNames.project,
+      );
+
+      if (fileResp.isLeft()) {
+        return Left(fileResp.asLeft());
+      }
+
+      final rollbackFileResp = await _getFile(identifier, fileNameBase);
+
+      if (rollbackFileResp.isLeft()) {
+        return Left(rollbackFileResp.asLeft());
+      }
+
+      final copyResp = await handleAsynchronousOperation(
+        () => fileResp.asRight().copy(rollbackFileResp.asRight().path),
+      );
+
+      if (copyResp.isLeft()) {
+        return Left(copyResp.asLeft());
+      }
+
+      return Right(projectResp.asRight());
     }
 
     final projectEntity = handleCommonOperation(
@@ -105,5 +172,35 @@ class WeaveFileDataSource {
     );
 
     return projectEntity;
+  }
+
+  Future<Option<PlotweaverError>> _deleteRollback(
+    String identifier,
+    String fileNameBase,
+  ) async {
+    final fileResp = await _getFile(identifier, fileNameBase);
+
+    if (fileResp.isLeft()) {
+      return Some(fileResp.asLeft());
+    }
+    if (fileResp.asRight().existsSync()) {
+      final deleteResp =
+          await handleAsynchronousOperation(() => fileResp.asRight().delete());
+
+      if (deleteResp.isLeft()) {
+        return Some(deleteResp.asLeft());
+      }
+    }
+
+    return const None();
+  }
+
+  Future<Option<PlotweaverError>> deleteProjectRollback(
+    String identifier,
+  ) {
+    final fileNameBase =
+        '${PlotweaverIONamesConstants.fileNames.rollback}${PlotweaverIONamesConstants.fileNames.project}';
+
+    return _deleteRollback(identifier, fileNameBase);
   }
 }

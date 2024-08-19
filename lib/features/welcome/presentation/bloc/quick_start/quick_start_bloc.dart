@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/errors/plotweaver_errors.dart';
+import '../../../../project/domain/entities/project_entity.dart';
 import '../../../../project/domain/usecases/create_project_usecase.dart';
 import '../../../../project/domain/usecases/open_project_usecase.dart';
 import '../../../domain/entities/recent_project_entity.dart';
@@ -29,7 +30,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
     _OpenProject event,
     Emitter<QuickStartState> emit,
   ) async {
-    emit(const _Locked());
+    emit(_Locked(event.recent == null));
     final res = await _openProjectUsecase.call(event.recent?.path);
 
     res.fold(
@@ -48,7 +49,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
         if (value == null) {
           emit(const _Initial());
         } else {
-          emit(const _Success());
+          emit(_Success(value.$1, value.$2, value.$3));
         }
       },
     );
@@ -58,7 +59,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
     _CreateProject event,
     Emitter<QuickStartState> emit,
   ) async {
-    emit(const _Locked());
+    emit(const _Locked(true));
     final res = await _createProjectUsecase.call(event.projectName);
 
     res.fold(
@@ -69,7 +70,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
         if (value == null) {
           emit(const _Initial());
         } else {
-          emit(const _Success());
+          emit(_Success(value.$1, value.$2, value.$3));
         }
       },
     );

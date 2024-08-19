@@ -21,5 +21,52 @@
   "choose_location_of_your_project": "Choose location of your project",
   "error_occurred": "Error occurred",
   "weave_file": "Weave file",
-  "ok": "Ok"
+  "ok": "Ok",
+  "project": "Project",
+  "project_author": "Author",
+  "project_author_hint": "Name of the project's author or rights owner",
+  "project_description": "Opis",
+  "project_description_hint": "Describe your project's outline here",
+  "start_typing": "Start typing...",
+  "characters": "Characters",
+  "cancel": "Cancel",
+  "save": "Save",
+  "do_not_save": "Don’t save",
+  "do_you_want_to_save_changes_in_file": "Do you want to save changes for „{file}”?",
+  "@do_you_want_to_save_changes_in_file": {
+    "placeholders": {
+      "file": {
+        "example": "Project",
+        "type": "String"
+      }
+    }
+  },
+  "your_changes_will_be_lost_if_you_do_not_save": "Your changes will be lost if you don’t save them.",
+  "project_template": "Template",
+  "project_template_hint": "Project’s template modifies parameters and outlook of your project.",
+  "project_template_book": "Book",
+  "project_template_book_hint": "Consists of parts and chapters",
+  "project_template_movie": "Movie",
+  "project_template_movie_hint": "Consists of acts and scenes",
+  "project_template_series": "Series",
+  "project_template_series_hint": "Consists of episodes and scenes",
+  "project_status": "Status",
+  "project_status_hint": "Track this project’s status",
+  "project_status_idle": "Idle",
+  "project_status_idle_hint": "The work on this project has not been started yet",
+  "project_status_on_track": "On track",
+  "project_status_on_track_hint": "The work on this project is going as planned",
+  "project_status_off_track": "Off track",
+  "project_status_off_track_hint": "The work on this project is not going as planned and project’s completion may be in danger",
+  "project_status_completed": "Completed",
+  "project_status_completed_hint": "The work on this project was completed",
+  "project_status_rejected": "Rejected",
+  "project_status_rejected_hint": "This project was rejected and no work is planned on it",
+  "weave_file_info": "Weave file info",
+  "weave_file_info_hint": "Unmodifiable metadata about this file",
+  "created_at": "Created at",
+  "last_modified_at": "Last modified at",
+  "weave_file_version": "Weave file version",
+  "plotweaver_version": "Plotweaver version",
+  "origin": "Origin"
 }

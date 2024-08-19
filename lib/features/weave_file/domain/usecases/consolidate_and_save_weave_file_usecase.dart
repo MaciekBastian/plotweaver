@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/plotweaver_errors.dart';
 import '../../data/repositories/weave_file_repository.dart';
+import '../entities/save_intent_entity.dart';
 
 @lazySingleton
 class ConsolidateAndSaveWeaveFileUsecase {
@@ -11,8 +12,7 @@ class ConsolidateAndSaveWeaveFileUsecase {
   final WeaveFileRepository _weaveFileRepository;
 
   Future<Option<PlotweaverError>> call({
-    required String path,
-    required String identifier,
+    required SaveIntentEntity saveIntent,
   }) =>
-      _weaveFileRepository.consolidateAndSaveToPath(path, identifier);
+      _weaveFileRepository.consolidateAndSaveToPath(saveIntent: saveIntent);
 }
