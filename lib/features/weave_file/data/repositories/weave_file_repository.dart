@@ -15,10 +15,10 @@ import '../../../../core/handlers/error_handler.dart';
 import '../../../../core/services/app_support_directories_service.dart';
 import '../../../../core/services/package_and_device_info_service.dart';
 import '../../../../generated/l10n.dart';
+import '../../../project/data/data_sources/project_data_source.dart';
 import '../../../project/domain/entities/project_entity.dart';
 import '../../domain/entities/general_entity.dart';
 import '../../domain/entities/save_intent_entity.dart';
-import '../data_sources/weave_file_data_source.dart';
 
 /// A repository responsible only for reading, writing, scattering and consolidating weave files.
 abstract class WeaveFileRepository {
@@ -33,9 +33,9 @@ abstract class WeaveFileRepository {
 
 @Singleton(as: WeaveFileRepository)
 class WeaveFileRepositoryImpl implements WeaveFileRepository {
-  WeaveFileRepositoryImpl() : _dataSource = WeaveFileDataSource();
+  WeaveFileRepositoryImpl() : _projectDataSource = ProjectDataSource();
 
-  final WeaveFileDataSource _dataSource;
+  final ProjectDataSource _projectDataSource;
 
   @override
   Future<Either<PlotweaverError, String>> readFile(String path) async {
@@ -218,7 +218,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
     }
 
     final generalEntity =
-        await _dataSource.getGeneral(saveIntent.projectIdentifier);
+        await _projectDataSource.getGeneral(saveIntent.projectIdentifier);
 
     if (generalEntity.isLeft()) {
       return Some(generalEntity.asLeft());
@@ -249,7 +249,8 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
     if (saveIntent.saveProject) {
       final projectJsonContent = await handleAsynchronousOperation<
           Either<PlotweaverError, Map<String, dynamic>>>(() async {
-        final proj = await _dataSource.getProject(saveIntent.projectIdentifier);
+        final proj =
+            await _projectDataSource.getProject(saveIntent.projectIdentifier);
         if (proj.isLeft()) {
           return Left(proj.asLeft());
         }

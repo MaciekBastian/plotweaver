@@ -12,16 +12,15 @@ import '../../../../core/extensions/dartz_extension.dart';
 import '../../../../core/handlers/error_handler.dart';
 import '../../../../core/services/app_support_directories_service.dart';
 import '../../../../generated/l10n.dart';
-import '../../../project/domain/entities/project_entity.dart';
-import '../../domain/entities/general_entity.dart';
 
 class WeaveFileDataSource {
-  Future<Either<PlotweaverError, File>> _getFile(
+  Future<Either<PlotweaverError, File>> getFile(
     String identifier,
-    String fileNameBase,
-  ) async {
+    String fileNameBase, [
+    String? subdirectory,
+  ]) async {
     final projectDirectoryRes = await sl<AppSupportDirectoriesService>()
-        .getProjectDirectory(identifier);
+        .getProjectDirectory(identifier, subdirectory: subdirectory);
 
     if (projectDirectoryRes.isLeft()) {
       return Left(projectDirectoryRes.asLeft());
@@ -39,12 +38,13 @@ class WeaveFileDataSource {
     return Right(outputFile);
   }
 
-  Future<Either<PlotweaverError, Map<String, dynamic>>> _getFileJson(
+  Future<Either<PlotweaverError, Map<String, dynamic>>> getFileJson(
     String identifier,
     String fileNameBase,
-    bool createEmptyFile,
-  ) async {
-    final fileResp = await _getFile(identifier, fileNameBase);
+    bool createEmptyFile, [
+    String? subdirectory,
+  ]) async {
+    final fileResp = await getFile(identifier, fileNameBase, subdirectory);
     if (fileResp.isLeft()) {
       return Left(fileResp.asLeft());
     }
@@ -100,85 +100,12 @@ class WeaveFileDataSource {
     );
   }
 
-  Future<Either<PlotweaverError, GeneralEntity>> getGeneral(
+  Future<Option<PlotweaverError>> deleteRollback(
     String identifier,
-  ) async {
-    final jsonContent = await _getFileJson(
-      identifier,
-      PlotweaverIONamesConstants.fileNames.general,
-      false,
-    );
-    if (jsonContent.isLeft()) {
-      return Left(jsonContent.asLeft());
-    }
-
-    final generalEntity = handleCommonOperation(
-      () => GeneralEntity.fromJson(jsonContent.asRight()),
-    );
-
-    return generalEntity;
-  }
-
-  Future<Either<PlotweaverError, ProjectEntity>> getProject(
-    String identifier, [
-    bool rollback = false,
+    String fileNameBase, [
+    String? subdirectory,
   ]) async {
-    final fileNameBase =
-        '${rollback ? PlotweaverIONamesConstants.fileNames.rollback : ''}${PlotweaverIONamesConstants.fileNames.project}';
-
-    final jsonContent = await _getFileJson(
-      identifier,
-      fileNameBase,
-      rollback,
-    );
-    if (jsonContent.isLeft()) {
-      return Left(jsonContent.asLeft());
-    }
-
-    if (jsonContent.asRight().isEmpty && rollback) {
-      final projectResp = await getProject(identifier);
-      if (projectResp.isLeft()) {
-        return Left(projectResp.asLeft());
-      }
-
-      final fileResp = await _getFile(
-        identifier,
-        PlotweaverIONamesConstants.fileNames.project,
-      );
-
-      if (fileResp.isLeft()) {
-        return Left(fileResp.asLeft());
-      }
-
-      final rollbackFileResp = await _getFile(identifier, fileNameBase);
-
-      if (rollbackFileResp.isLeft()) {
-        return Left(rollbackFileResp.asLeft());
-      }
-
-      final copyResp = await handleAsynchronousOperation(
-        () => fileResp.asRight().copy(rollbackFileResp.asRight().path),
-      );
-
-      if (copyResp.isLeft()) {
-        return Left(copyResp.asLeft());
-      }
-
-      return Right(projectResp.asRight());
-    }
-
-    final projectEntity = handleCommonOperation(
-      () => ProjectEntity.fromJson(jsonContent.asRight()),
-    );
-
-    return projectEntity;
-  }
-
-  Future<Option<PlotweaverError>> _deleteRollback(
-    String identifier,
-    String fileNameBase,
-  ) async {
-    final fileResp = await _getFile(identifier, fileNameBase);
+    final fileResp = await getFile(identifier, fileNameBase, subdirectory);
 
     if (fileResp.isLeft()) {
       return Some(fileResp.asLeft());
@@ -193,14 +120,5 @@ class WeaveFileDataSource {
     }
 
     return const None();
-  }
-
-  Future<Option<PlotweaverError>> deleteProjectRollback(
-    String identifier,
-  ) {
-    final fileNameBase =
-        '${PlotweaverIONamesConstants.fileNames.rollback}${PlotweaverIONamesConstants.fileNames.project}';
-
-    return _deleteRollback(identifier, fileNameBase);
   }
 }
