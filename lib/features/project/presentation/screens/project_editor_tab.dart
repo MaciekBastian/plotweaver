@@ -7,6 +7,7 @@ import '../../../../generated/l10n.dart';
 import '../../../../shared/widgets/fatal_error_widget.dart';
 import '../../../../shared/widgets/property_header_widget.dart';
 import '../../../../shared/widgets/text_property_widget.dart';
+import '../../../editor/presentation/screens/editor_screen.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
 import '../../../weave_file/domain/entities/general_entity.dart';
 import '../../domain/entities/project_entity.dart';
@@ -43,6 +44,17 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
   void initState() {
     _fillEditor(context.read<ProjectInfoEditorBloc>().state);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _authorNameController.dispose();
+    _projectNameController.dispose();
+    _descriptionNameController.dispose();
+    _authorNameFocus.dispose();
+    _projectNameFocus.dispose();
+    _descriptionNameFocus.dispose();
+    super.dispose();
   }
 
   void _fillEditor(ProjectInfoEditorState state) {
@@ -121,6 +133,9 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
                   style: context.textStyle.h1,
                   onChanged: (value) {
                     _sendModifyEvent();
+                  },
+                  onTapOutside: (event) {
+                    editorFocusNode.requestFocus();
                   },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(

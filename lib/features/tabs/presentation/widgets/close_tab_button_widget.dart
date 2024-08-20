@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/config/sl_config.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../shared/overlays/full_screen_alert.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
-import '../../../project/presentation/bloc/current_project/current_project_bloc.dart';
-import '../../../project/presentation/bloc/project_info_editor/project_info_editor_bloc.dart';
+import '../../../commands/data/repositories/commands_repository.dart';
+import '../../../commands/domain/enums/command_status.dart';
+import '../../domain/commands/tab_intent.dart';
 import '../../domain/entities/tab_entity.dart';
 import '../cubit/tabs_cubit.dart';
 
@@ -59,39 +61,41 @@ class _CloseTabButtonState extends State<CloseTabButton> {
               showCancelButton: true,
               options: [
                 AlertOption(
-                  callback: () {
+                  callback: () async {
                     Navigator.of(context).pop();
-                    context.read<CurrentProjectBloc>().add(
-                          CurrentProjectEvent.save(
-                            tabs: [widget.tab.tabId],
-                            then: (wasSaveSuccessful, error) {
-                              if (wasSaveSuccessful) {
-                                _closeTab();
-                              } else {
-                                showFullscreenError(error);
-                              }
-                            },
-                          ),
-                        );
+                    final resultId = Actions.invoke(
+                      context,
+                      TabIntent.saveTab(widget.tab),
+                    );
+                    if (resultId is String) {
+                      final result = await sl<CommandsRepository>()
+                          .waitForResult(resultId);
+                      if (result.status == CommandStatus.error) {
+                        showFullscreenError(result.error);
+                      } else if (result.status == CommandStatus.success) {
+                        _closeTab();
+                      }
+                    }
                   },
                   title: S.of(context).save,
                   isDefault: true,
                 ),
                 AlertOption(
-                  callback: () {
+                  callback: () async {
                     Navigator.of(context).pop();
-                    context.read<CurrentProjectBloc>().add(
-                          CurrentProjectEvent.rollBack(
-                            tabs: [widget.tab.tabId],
-                            then: (wasSaveSuccessful, error) {
-                              if (wasSaveSuccessful) {
-                                _closeTab();
-                              } else {
-                                showFullscreenError(error);
-                              }
-                            },
-                          ),
-                        );
+                    final resultId = Actions.invoke(
+                      context,
+                      TabIntent.rollback(widget.tab),
+                    );
+                    if (resultId is String) {
+                      final result = await sl<CommandsRepository>()
+                          .waitForResult(resultId);
+                      if (result.status == CommandStatus.error) {
+                        showFullscreenError(result.error);
+                      } else if (result.status == CommandStatus.success) {
+                        _closeTab();
+                      }
+                    }
                   },
                   title: S.of(context).do_not_save,
                   isDestructive: true,
@@ -120,14 +124,6 @@ class _CloseTabButtonState extends State<CloseTabButton> {
   }
 
   void _closeTab() {
-    widget.tab.map(
-      projectTab: (value) {
-        context
-            .read<ProjectInfoEditorBloc>()
-            .add(const ProjectInfoEditorEvent.setup(null, true));
-      },
-      characterTab: (value) {},
-    );
     context.read<TabsCubit>().closeTab(widget.tab);
   }
 }
