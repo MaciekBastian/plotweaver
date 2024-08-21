@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
+import '../../../characters/presentation/bloc/characters_editors_bloc.dart';
 import '../../../project/domain/enums/file_bundle_type.dart';
 import '../../domain/entities/tab_entity.dart';
 
@@ -34,7 +36,13 @@ Widget getFileBundleIcon(BuildContext context, FileBundleType type) {
 String getTabName(BuildContext context, TabEntity tab) {
   return tab.map(
     projectTab: (value) => S.of(context).project,
-    characterTab: (value) => 'placeholder',
+    characterTab: (value) {
+      return context
+              .watch<CharactersEditorsBloc>()
+              .getCharacter(value.characterId)
+              ?.name ??
+          S.of(context).character;
+    },
   );
 }
 

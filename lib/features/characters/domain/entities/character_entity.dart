@@ -84,8 +84,8 @@ class CharacterEntity with _$CharacterEntity {
         _CharacterEntityJsonKeys.id: id,
         _CharacterEntityJsonKeys.name: name,
         if (age.isNotEmpty) _CharacterEntityJsonKeys.age: age,
-        _CharacterEntityJsonKeys.status: status,
-        _CharacterEntityJsonKeys.gender: gender,
+        _CharacterEntityJsonKeys.status: status.code,
+        _CharacterEntityJsonKeys.gender: gender.code,
         if (occupation.isNotEmpty)
           _CharacterEntityJsonKeys.occupation: occupation,
         if (domicile.isNotEmpty) _CharacterEntityJsonKeys.domicile: domicile,

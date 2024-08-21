@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../domain/entities/tab_entity.dart';
+import '../cubit/tabs_cubit.dart';
 import 'close_tab_button_widget.dart';
 import 'tab_icons_and_names.dart';
 
@@ -28,7 +30,9 @@ class TabWidget extends StatelessWidget {
           ? context.colors.scaffoldBackgroundColor
           : context.colors.shadedBackgroundColor,
       child: ClickableWidget(
-        onTap: () {},
+        onTap: () {
+          context.read<TabsCubit>().openTab(tab);
+        },
         child: Row(
           children: [
             const SizedBox(width: 10),

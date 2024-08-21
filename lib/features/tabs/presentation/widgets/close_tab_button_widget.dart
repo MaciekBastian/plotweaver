@@ -5,6 +5,7 @@ import '../../../../core/extensions/theme_extension.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../shared/overlays/full_screen_alert.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
+import '../../../characters/presentation/bloc/characters_editors_bloc.dart';
 import '../../../project/presentation/bloc/current_project/current_project_bloc.dart';
 import '../../../project/presentation/bloc/project_info_editor/project_info_editor_bloc.dart';
 import '../../domain/entities/tab_entity.dart';
@@ -126,7 +127,11 @@ class _CloseTabButtonState extends State<CloseTabButton> {
             .read<ProjectInfoEditorBloc>()
             .add(const ProjectInfoEditorEvent.setup(null, true));
       },
-      characterTab: (value) {},
+      characterTab: (value) {
+        context
+            .read<CharactersEditorsBloc>()
+            .add(CharactersEditorsEvent.setup(null, [value.characterId]));
+      },
     );
     context.read<TabsCubit>().closeTab(widget.tab);
   }

@@ -11,7 +11,10 @@ mixin TabEntityMixin {
 class TabEntity with TabEntityMixin, _$TabEntity {
   factory TabEntity.projectTab({required String tabId}) = _ProjectTab;
 
-  factory TabEntity.characterTab({required String tabId}) = _CharacterTab;
+  factory TabEntity.characterTab({
+    required String tabId,
+    required String characterId,
+  }) = _CharacterTab;
 
   const TabEntity._();
 

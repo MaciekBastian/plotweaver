@@ -19,6 +19,9 @@ class TabsCubit extends Cubit<TabsState> {
   final ConsolidateAndSaveWeaveFileUsecase _saveWeaveFileUsecase;
 
   void openTab(TabEntity tab) {
+    if (state.openedTabId == tab.tabId) {
+      return;
+    }
     if (state.openedTabs.any((el) => el.tabId == tab.tabId)) {
       emit(state.copyWith(openedTabId: tab.tabId));
     } else {
@@ -39,8 +42,10 @@ class TabsCubit extends Cubit<TabsState> {
       if (newTabs.isEmpty) {
         emit(const TabsState());
       } else {
-        late String newId;
-        if (newTabs.length >= tabIndex) {
+        String? newId;
+        if (tabIndex == 0) {
+          newId = newTabs[0].tabId;
+        } else if (newTabs.length >= tabIndex) {
           newId = newTabs[tabIndex - 1].tabId;
         } else {
           newId = newTabs[tabIndex].tabId;

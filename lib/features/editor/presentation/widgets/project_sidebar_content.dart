@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../../../core/constants/io_names_constants.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../../project/domain/entities/project_file_entity.dart';
@@ -82,9 +83,12 @@ class ProjectSidebarContent extends StatelessWidget {
           title: 'long placeholder text',
         );
       },
-      characterFile: () {
-        // TODO: adjust for characters feature
-        final tab = TabEntity.characterTab(tabId: 'character');
+      characterFile: (characterId) {
+        final tab = TabEntity.characterTab(
+          tabId:
+              '${PlotweaverIONamesConstants.directoryNames.characters}$characterId',
+          characterId: characterId,
+        );
         return _ProjectSidebarFile(
           tab: tab,
           key: Key('sidebar_file_${tab.tabId}'),

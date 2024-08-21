@@ -222,6 +222,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
       }
     }
 
+    await _readWeaveFileUsecase.call(file.path);
+
     return Right((projectEntity, projectIdentifier, file.path));
   }
 

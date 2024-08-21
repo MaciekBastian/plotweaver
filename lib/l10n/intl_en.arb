@@ -25,7 +25,7 @@
   "project": "Project",
   "project_author": "Author",
   "project_author_hint": "Name of the project's author or rights owner",
-  "project_description": "Opis",
+  "project_description": "Description",
   "project_description_hint": "Describe your project's outline here",
   "start_typing": "Start typing...",
   "characters": "Characters",
@@ -68,5 +68,7 @@
   "last_modified_at": "Last modified at",
   "weave_file_version": "Weave file version",
   "plotweaver_version": "Plotweaver version",
-  "origin": "Origin"
+  "origin": "Origin",
+  "unnamed_character": "Unnamed character",
+  "character": "Character"
 }

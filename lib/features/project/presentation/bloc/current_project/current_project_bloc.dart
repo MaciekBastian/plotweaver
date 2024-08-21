@@ -7,6 +7,7 @@ import '../../../../../core/errors/plotweaver_errors.dart';
 import '../../../../../core/extensions/dartz_extension.dart';
 import '../../../../../core/handlers/error_handler.dart';
 import '../../../../../shared/overlays/full_screen_alert.dart';
+import '../../../../characters/domain/usecases/rollback_character_usecase.dart';
 import '../../../../tabs/presentation/cubit/tabs_cubit.dart';
 import '../../../../weave_file/domain/entities/save_intent_entity.dart';
 import '../../../domain/entities/current_project_entity.dart';
@@ -56,6 +57,7 @@ class CurrentProjectBloc
                   characterTab: (value) => SaveIntentEntity(
                     path: project.path,
                     projectIdentifier: project.identifier,
+                    saveCharactersIds: [value.characterId],
                   ),
                 );
               },
@@ -126,7 +128,11 @@ class CurrentProjectBloc
               projectTab: (value) => sl<RollBackProjectUsecase>().call(
                 (state as _Project).project.identifier,
               ),
-              characterTab: (value) async => const None(),
+              characterTab: (value) async =>
+                  sl<RollbackCharacterUsecase>().call(
+                projectIdentifier: (state as _Project).project.identifier,
+                characterId: value.characterId,
+              ),
             );
             if (rollbackResp.isSome()) {
               throw rollbackResp.asSome();

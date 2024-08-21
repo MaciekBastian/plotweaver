@@ -152,9 +152,195 @@ class CharactersDataSource {
     return const None();
   }
 
-  // TODO:
-  // Future<Either<PlotweaverError, List<Map<String, dynamic>>>>
-  //     consolidateCharacters(
-  //   String projectIdentifier,
-  // ) async {}
+  Future<Either<PlotweaverError, List<CharacterEntity>>> getAllCharacters(
+    String projectIdentifier, [
+    List<String> savingIds = const [],
+  ]) async {
+    final projectDirectoryRes =
+        await sl<AppSupportDirectoriesService>().getProjectDirectory(
+      projectIdentifier,
+      subdirectory: PlotweaverIONamesConstants.directoryNames.characters,
+    );
+
+    if (projectDirectoryRes.isLeft()) {
+      return Left(projectDirectoryRes.asLeft());
+    }
+
+    final files = projectDirectoryRes.asRight().listSync().where(
+          (el) =>
+              el.statSync().type == FileSystemEntityType.file &&
+              !el.path.startsWith('.') &&
+              el.path
+                  .endsWith(PlotweaverIONamesConstants.fileExtensionNames.json),
+        );
+
+    if (files.isEmpty) {
+      return const Right([]);
+    }
+
+    final List<CharacterEntity> output = [];
+
+    await Future.forEach(files, (characterFile) async {
+      if (characterFile is File) {
+        final characterFileContent = await handleAsynchronousOperation(
+          characterFile.readAsString,
+        );
+
+        if (characterFileContent.isLeft()) {
+          return Left(IOError.unknownError(message: S.current.unknown_error));
+        }
+
+        final characterJsonContent = await Isolate.run(
+          () => handleCommonOperation(
+            () => json.decode(characterFileContent.asRight()),
+          ),
+        );
+
+        if (characterJsonContent.isLeft()) {
+          return Left(IOError.unknownError(message: S.current.unknown_error));
+        }
+
+        final characterEntity = handleCommonOperation(
+          () => CharacterEntity.fromJson(characterJsonContent.asRight()),
+        );
+
+        if (characterEntity.isLeft()) {
+          return Left(characterEntity.asLeft());
+        }
+
+        if (savingIds.isEmpty ||
+            savingIds.contains(characterEntity.asRight().id)) {
+          output.add(characterEntity.asRight());
+        } else {
+          final rollbackResp = await getCharacter(
+            projectIdentifier: projectIdentifier,
+            characterId: characterEntity.asRight().id,
+            rollback: true,
+          );
+          if (rollbackResp.isLeft()) {
+            output.add(characterEntity.asRight());
+          } else {
+            output.add(rollbackResp.asRight());
+          }
+        }
+      }
+    });
+
+    return Right(output);
+  }
+
+  Future<Either<PlotweaverError, List<Map<String, dynamic>>>>
+      consolidateCharacters(
+    String projectIdentifier,
+    List<String> saveCharactersIds,
+  ) async {
+    final projectDirectoryRes =
+        await sl<AppSupportDirectoriesService>().getProjectDirectory(
+      projectIdentifier,
+      subdirectory: PlotweaverIONamesConstants.directoryNames.characters,
+    );
+
+    if (projectDirectoryRes.isLeft()) {
+      return Left(projectDirectoryRes.asLeft());
+    }
+
+    if (!projectDirectoryRes.asRight().existsSync()) {
+      final resp = handleVoidOperation(
+        projectDirectoryRes.asRight().createSync,
+      );
+      if (resp.isSome()) {
+        return Left(resp.asSome());
+      }
+    }
+
+    final characters = await getAllCharacters(
+      projectIdentifier,
+      saveCharactersIds,
+    );
+
+    if (characters.isLeft()) {
+      return Left(projectDirectoryRes.asLeft());
+    }
+
+    return Right(characters.asRight().map((el) => el.toJson()).toList());
+  }
+
+  Future<Option<PlotweaverError>> writeToCharacter(
+    String projectIdentifier,
+    CharacterEntity character,
+  ) async {
+    final projectDirectoryRes =
+        await sl<AppSupportDirectoriesService>().getProjectDirectory(
+      projectIdentifier,
+      subdirectory: PlotweaverIONamesConstants.directoryNames.characters,
+    );
+
+    if (projectDirectoryRes.isLeft()) {
+      return Some(projectDirectoryRes.asLeft());
+    }
+
+    if (!projectDirectoryRes.asRight().existsSync()) {
+      final resp = handleVoidOperation(
+        projectDirectoryRes.asRight().createSync,
+      );
+      if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+    }
+
+    final characterFile = File(
+      p.join(
+        projectDirectoryRes.asRight().path,
+        '${character.id}.${PlotweaverIONamesConstants.fileExtensionNames.json}',
+      ),
+    );
+
+    if (!characterFile.existsSync()) {
+      final resp = handleVoidOperation(characterFile.createSync);
+      if (resp.isSome()) {
+        return Some(resp.asSome());
+      }
+    }
+
+    final characterJsonContent = await Isolate.run(
+      () => handleCommonOperation(() => json.encode(character.toJson())),
+    );
+
+    if (characterJsonContent.isLeft()) {
+      return Some(characterJsonContent.asLeft());
+    } else {
+      final resp = await handleAsynchronousOperation(
+        () => characterFile.writeAsString(characterJsonContent.asRight()),
+      );
+
+      if (resp.isLeft()) {
+        return Some(resp.asLeft());
+      }
+    }
+
+    return const None();
+  }
+
+  Future<Option<PlotweaverError>> deleteCharacter(
+    String projectIdentifier,
+    String characterId,
+  ) async {
+    final file = await _weaveDataSource.getFile(
+      projectIdentifier,
+      characterId,
+      PlotweaverIONamesConstants.directoryNames.characters,
+    );
+
+    if (file.isLeft()) {
+      return Some(file.asLeft());
+    }
+
+    final deleteRes = await handleVoidAsyncOperation(
+      () => file.asRight().delete(),
+    );
+
+    await deleteCharacterRollback(projectIdentifier, characterId);
+
+    return deleteRes;
+  }
 }

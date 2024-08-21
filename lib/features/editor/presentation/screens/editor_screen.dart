@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../shared/widgets/app_scaffold.dart';
+import '../../../characters/presentation/bloc/characters_editors_bloc.dart';
+import '../../../characters/presentation/screens/character_editor_tab.dart';
 import '../../../project/presentation/bloc/project_info_editor/project_info_editor_bloc.dart';
 import '../../../project/presentation/cubit/project_files_cubit.dart';
 import '../../../project/presentation/screens/project_editor_tab.dart';
@@ -26,9 +28,21 @@ class EditorScreen extends StatelessWidget {
             context
                 .read<ProjectInfoEditorBloc>()
                 .add(ProjectInfoEditorEvent.setup(projectIdentifier));
+            context
+                .read<CharactersEditorsBloc>()
+                .add(CharactersEditorsEvent.setup(projectIdentifier));
           },
         );
       },
+      listenWhen: (previous, current) =>
+          previous.maybeWhen(
+            orElse: () => false,
+            loading: () => true,
+          ) &&
+          current.maybeMap(
+            orElse: () => false,
+            active: (_) => true,
+          ),
       builder: (context, state) {
         return Skeletonizer(
           enabled: state.map(active: (_) => false, loading: (_) => true),
@@ -69,7 +83,9 @@ class EditorScreen extends StatelessWidget {
 
           return tab.map(
             projectTab: (_) => const ProjectEditorTab(),
-            characterTab: (_) => Container(),
+            characterTab: (tab) => CharacterEditorTab(
+              characterId: tab.characterId,
+            ),
           );
         },
       ),

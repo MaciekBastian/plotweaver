@@ -11,7 +11,9 @@ part 'project_file_entity.freezed.dart';
 class ProjectFileEntity with _$ProjectFileEntity {
   factory ProjectFileEntity.projectFile() = _ProjectFile;
 
-  factory ProjectFileEntity.characterFile() = _CharacterFile;
+  factory ProjectFileEntity.characterFile({
+    required String characterId,
+  }) = _CharacterFile;
 
   factory ProjectFileEntity.placeholder() = _Placeholder;
 

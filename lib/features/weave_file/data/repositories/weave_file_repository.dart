@@ -15,6 +15,7 @@ import '../../../../core/handlers/error_handler.dart';
 import '../../../../core/services/app_support_directories_service.dart';
 import '../../../../core/services/package_and_device_info_service.dart';
 import '../../../../generated/l10n.dart';
+import '../../../characters/data/data_sources/characters_data_source.dart';
 import '../../../project/data/data_sources/project_data_source.dart';
 import '../../../project/domain/entities/project_entity.dart';
 import '../../domain/entities/general_entity.dart';
@@ -33,12 +34,16 @@ abstract class WeaveFileRepository {
 
 @Singleton(as: WeaveFileRepository)
 class WeaveFileRepositoryImpl implements WeaveFileRepository {
-  WeaveFileRepositoryImpl() : _projectDataSource = ProjectDataSource();
+  WeaveFileRepositoryImpl()
+      : _projectDataSource = ProjectDataSource(),
+        _charactersDataSource = CharactersDataSource();
 
   final ProjectDataSource _projectDataSource;
+  final CharactersDataSource _charactersDataSource;
 
-  @override
-  Future<Either<PlotweaverError, String>> readFile(String path) async {
+  Future<Either<PlotweaverError, Map<String, dynamic>>> _getWeaveJsonContent(
+    String path,
+  ) async {
     final file = File(path);
 
     if (!file.existsSync() ||
@@ -75,10 +80,24 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
       }
     }
 
-    final generalInfoMapEntry = (jsonContent.asRight()
-        as Map<String, dynamic>)[PlotweaverIONamesConstants.fileNames.general];
-    final projectMapEntry = (jsonContent.asRight()
-        as Map<String, dynamic>)[PlotweaverIONamesConstants.fileNames.project];
+    return Right(jsonContent.asRight());
+  }
+
+  @override
+  Future<Either<PlotweaverError, String>> readFile(String path) async {
+    final jsonContent = await _getWeaveJsonContent(path);
+
+    if (jsonContent.isLeft()) {
+      return Left(jsonContent.asLeft());
+    }
+
+    final generalInfoMapEntry =
+        jsonContent.asRight()[PlotweaverIONamesConstants.fileNames.general];
+    final projectMapEntry =
+        jsonContent.asRight()[PlotweaverIONamesConstants.fileNames.project];
+    final characters = jsonContent
+            .asRight()[PlotweaverIONamesConstants.directoryNames.characters]
+        as List?;
 
     if (generalInfoMapEntry == null ||
         generalInfoMapEntry is! Map ||
@@ -187,6 +206,22 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
       }
     }
 
+    if (characters != null) {
+      final resp = await _charactersDataSource.openProjectCharacters(
+        identifier,
+        characters
+            .map(
+              (el) => (el as Map).map(
+                (key, val) => MapEntry(key.toString(), val),
+              ),
+            )
+            .toList(),
+      );
+      if (resp.isSome()) {
+        return Left(resp.asSome());
+      }
+    }
+
     return Right(identifier);
   }
 
@@ -196,6 +231,12 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
   }) async {
     final Map<String, dynamic> outputJson = {};
     final file = File(saveIntent.path);
+
+    final currentJsonContent = await _getWeaveJsonContent(saveIntent.path);
+
+    if (currentJsonContent.isLeft()) {
+      return Some(currentJsonContent.asLeft());
+    }
 
     if (file.existsSync() &&
         file.statSync().type != FileSystemEntityType.file) {
@@ -266,9 +307,48 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
 
       outputJson[PlotweaverIONamesConstants.fileNames.project] =
           projectJsonContent.asRight().asRight();
+    } else {
+      outputJson[PlotweaverIONamesConstants.fileNames.project] =
+          currentJsonContent
+              .asRight()[PlotweaverIONamesConstants.fileNames.project];
     }
 
     // TODO: consolidate other files
+
+    if (saveIntent.saveCharactersIds.isNotEmpty) {
+      final consolidateCharactersResp =
+          await _charactersDataSource.consolidateCharacters(
+        saveIntent.projectIdentifier,
+        saveIntent.saveCharactersIds,
+      );
+
+      if (consolidateCharactersResp.isRight()) {
+        if (consolidateCharactersResp.asRight().isNotEmpty) {
+          outputJson[PlotweaverIONamesConstants.directoryNames.characters] =
+              consolidateCharactersResp.asRight();
+        } else {
+          outputJson[PlotweaverIONamesConstants.directoryNames.characters] =
+              currentJsonContent.asRight()[
+                  PlotweaverIONamesConstants.directoryNames.characters];
+        }
+      } else {
+        outputJson[PlotweaverIONamesConstants.directoryNames.characters] =
+            currentJsonContent.asRight()[
+                PlotweaverIONamesConstants.directoryNames.characters];
+      }
+    } else if (saveIntent.deleteCharactersIds.isNotEmpty) {
+      outputJson[PlotweaverIONamesConstants.directoryNames.characters] = [
+        ...(currentJsonContent.asRight()[
+                PlotweaverIONamesConstants.directoryNames.characters] ??
+            []),
+      ]..removeWhere(
+          (el) => saveIntent.deleteCharactersIds.contains(el['id']),
+        );
+    } else {
+      outputJson[PlotweaverIONamesConstants.directoryNames.characters] =
+          currentJsonContent
+              .asRight()[PlotweaverIONamesConstants.directoryNames.characters];
+    }
 
     final outputSerialized = await Isolate.run(
       () => handleCommonOperation(() => json.encode(outputJson)),
