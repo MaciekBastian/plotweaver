@@ -1,10 +1,15 @@
-import 'package:bloc/bloc.dart';
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/plotweaver_errors.dart';
 import '../../../../core/extensions/dartz_extension.dart';
+import '../../../characters/presentation/bloc/characters_editors_bloc.dart';
+import '../../../editor/presentation/screens/editor_screen.dart';
+import '../../../project/presentation/bloc/project_info_editor/project_info_editor_bloc.dart';
 import '../../../weave_file/domain/entities/save_intent_entity.dart';
 import '../../../weave_file/domain/usecases/consolidate_and_save_weave_file_usecase.dart';
 import '../../domain/entities/tab_entity.dart';
@@ -35,6 +40,22 @@ class TabsCubit extends Cubit<TabsState> {
   }
 
   void closeTab(TabEntity tab) {
+    final context = globalEditorKey.currentContext;
+    if (context != null) {
+      // setting up all blocs before closing
+      tab.map(
+        projectTab: (value) {
+          context
+              .read<ProjectInfoEditorBloc>()
+              .add(const ProjectInfoEditorEvent.setup(null, true));
+        },
+        characterTab: (value) {
+          context
+              .read<CharactersEditorsBloc>()
+              .add(CharactersEditorsEvent.setup(null, [value.characterId]));
+        },
+      );
+    }
     if (state.openedTabs.any((el) => el.tabId == tab.tabId)) {
       final tabIndex =
           state.openedTabs.indexWhere((el) => el.tabId == tab.tabId);

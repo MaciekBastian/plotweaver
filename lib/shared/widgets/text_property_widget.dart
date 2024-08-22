@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/extensions/theme_extension.dart';
+import '../../features/editor/presentation/screens/editor_screen.dart';
 import 'property_header_widget.dart';
 
 class TextPropertyWidget extends StatelessWidget {
@@ -46,6 +47,9 @@ class TextPropertyWidget extends StatelessWidget {
           maxLines: maxLines,
           onChanged: (_) {
             onChange();
+          },
+          onTapOutside: (event) {
+            editorFocusNode.requestFocus();
           },
           decoration: InputDecoration(
             border: OutlineInputBorder(

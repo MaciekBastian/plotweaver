@@ -9,14 +9,17 @@ import 'clickable_widget.dart';
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
     required this.body,
+    this.scaffoldKey,
     super.key,
   });
 
   final Widget body;
+  final GlobalKey? scaffoldKey;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: context.colors.scaffoldBackgroundColor,
       body: Column(
         children: [
