@@ -7,10 +7,10 @@ class TextPropertyWidget extends StatelessWidget {
   const TextPropertyWidget({
     required this.icon,
     required this.controller,
-    required this.description,
     required this.focusNode,
     required this.onChange,
     required this.title,
+    this.description,
     this.hint,
     this.maxLines,
     this.minLines = 1,
@@ -22,7 +22,7 @@ class TextPropertyWidget extends StatelessWidget {
   final FocusNode focusNode;
   final VoidCallback onChange;
   final String title;
-  final String description;
+  final String? description;
   final String? hint;
   final int minLines;
   final int? maxLines;

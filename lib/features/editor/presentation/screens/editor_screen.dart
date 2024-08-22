@@ -82,9 +82,12 @@ class EditorScreen extends StatelessWidget {
           }
 
           return tab.map(
-            projectTab: (_) => const ProjectEditorTab(),
+            projectTab: (_) => const ProjectEditorTab(
+              key: Key('project_editor_tab_view'),
+            ),
             characterTab: (tab) => CharacterEditorTab(
               characterId: tab.characterId,
+              key: Key('character_editor_tab_${tab.characterId}'),
             ),
           );
         },

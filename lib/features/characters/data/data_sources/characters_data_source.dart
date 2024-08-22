@@ -48,14 +48,18 @@ class CharactersDataSource {
       final fileResp = await _weaveDataSource.getFile(
         projectIdentifier,
         characterId,
+        PlotweaverIONamesConstants.directoryNames.characters,
       );
 
       if (fileResp.isLeft()) {
         return Left(fileResp.asLeft());
       }
 
-      final rollbackFileResp =
-          await _weaveDataSource.getFile(projectIdentifier, fileNameBase);
+      final rollbackFileResp = await _weaveDataSource.getFile(
+        projectIdentifier,
+        fileNameBase,
+        PlotweaverIONamesConstants.directoryNames.characters,
+      );
 
       if (rollbackFileResp.isLeft()) {
         return Left(rollbackFileResp.asLeft());
@@ -169,9 +173,10 @@ class CharactersDataSource {
     final files = projectDirectoryRes.asRight().listSync().where(
           (el) =>
               el.statSync().type == FileSystemEntityType.file &&
-              !el.path.startsWith('.') &&
-              el.path
-                  .endsWith(PlotweaverIONamesConstants.fileExtensionNames.json),
+              !p.basename(el.path).startsWith('.') &&
+              p.basename(el.path).endsWith(
+                    PlotweaverIONamesConstants.fileExtensionNames.json,
+                  ),
         );
 
     if (files.isEmpty) {
@@ -210,6 +215,10 @@ class CharactersDataSource {
 
         if (savingIds.isEmpty ||
             savingIds.contains(characterEntity.asRight().id)) {
+          await deleteCharacterRollback(
+            projectIdentifier,
+            characterEntity.asRight().id,
+          );
           output.add(characterEntity.asRight());
         } else {
           final rollbackResp = await getCharacter(

@@ -26,7 +26,7 @@ Widget getFileBundleIcon(BuildContext context, FileBundleType type) {
   switch (type) {
     case FileBundleType.characters:
       return Icon(
-        Icons.person_rounded,
+        Icons.groups_3_outlined,
         size: 18,
         color: context.colors.onScaffoldBackgroundHeader,
       );

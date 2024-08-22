@@ -86,11 +86,23 @@ class CharacterEntity with _$CharacterEntity {
         if (age.isNotEmpty) _CharacterEntityJsonKeys.age: age,
         _CharacterEntityJsonKeys.status: status.code,
         _CharacterEntityJsonKeys.gender: gender.code,
+        if (domicile.isNotEmpty) _CharacterEntityJsonKeys.domicile: domicile,
         if (occupation.isNotEmpty)
           _CharacterEntityJsonKeys.occupation: occupation,
-        if (domicile.isNotEmpty) _CharacterEntityJsonKeys.domicile: domicile,
         if (portrayedBy.isNotEmpty)
           _CharacterEntityJsonKeys.portrayedBy: portrayedBy,
+        if (description.isNotEmpty)
+          _CharacterEntityJsonKeys.description: description,
+        if (appearance.isNotEmpty)
+          _CharacterEntityJsonKeys.appearance: appearance,
+        if (goals.isNotEmpty) _CharacterEntityJsonKeys.goals: goals,
+        if (lesson.isNotEmpty) _CharacterEntityJsonKeys.lesson: lesson,
+        if (children.isNotEmpty) _CharacterEntityJsonKeys.children: children,
+        if (parents.isNotEmpty) _CharacterEntityJsonKeys.parents: parents,
+        if (siblings.isNotEmpty) _CharacterEntityJsonKeys.siblings: siblings,
+        if (spouses.isNotEmpty) _CharacterEntityJsonKeys.spouses: spouses,
+        if (friends.isNotEmpty) _CharacterEntityJsonKeys.friends: friends,
+        if (enemies.isNotEmpty) _CharacterEntityJsonKeys.enemies: enemies,
         if (other != null) ...other!,
       };
 }
