@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+
+import '../../core/constants/images_constants.dart';
 
 class PlotweaverLogoWidget extends StatelessWidget {
   const PlotweaverLogoWidget({
@@ -13,8 +16,11 @@ class PlotweaverLogoWidget extends StatelessWidget {
     return SizedBox(
       width: radius * 2,
       height: radius * 2,
-      // TODO: change to plotweaver logo when design is ready
-      child: const Placeholder(),
+      child: SvgPicture.asset(
+        ImagesConstants.plotweaverLogo,
+        width: radius * 2 - 30,
+        height: radius * 2 - 30,
+      ),
     );
   }
 }

@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "plotweaver" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "plotweaver" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 Maciej Bastian. All rights reserved." "\0"
             VALUE "OriginalFilename", "plotweaver.exe" "\0"
             VALUE "ProductName", "plotweaver" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
