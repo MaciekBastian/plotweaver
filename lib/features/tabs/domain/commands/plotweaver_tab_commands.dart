@@ -6,5 +6,7 @@ class PlotweaverTabCommands extends PlotweaverCommands {
   List<TabCommand> get commands => [
         TabCommand.save(),
         TabCommand.rollback(),
+        TabCommand.close(),
+        TabCommand.open(),
       ];
 }

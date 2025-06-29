@@ -36,44 +36,44 @@ class _EditorScreenState extends State<EditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FocusableActionDetector(
-      focusNode: editorFocusNode,
-      actions: {
-        ...PlotweaverTabCommands().defaultActions,
-      },
-      autofocus: true,
-      child: AppScaffold(
-        scaffoldKey: globalEditorKey,
-        body: BlocConsumer<ProjectFilesCubit, ProjectFilesState>(
-          listener: (context, state) {
-            state.maybeWhen(
-              orElse: () {},
-              active: (projectIdentifier, _) {
-                // set up all blocs
-                context
-                    .read<ProjectInfoEditorBloc>()
-                    .add(ProjectInfoEditorEvent.setup(projectIdentifier));
-                context
-                    .read<CharactersEditorsBloc>()
-                    .add(CharactersEditorsEvent.setup(projectIdentifier));
-              },
-            );
-          },
-          listenWhen: (previous, current) =>
-              previous.maybeWhen(
-                orElse: () => false,
-                loading: () => true,
-              ) &&
-              current.maybeMap(
-                orElse: () => false,
-                active: (_) => true,
-              ),
-          builder: (context, state) {
-            return Skeletonizer(
-              enabled: state.map(active: (_) => false, loading: (_) => true),
-              enableSwitchAnimation: true,
-              child: BlocProvider(
-                create: (context) => ProjectSidebarBloc(),
+    return BlocProvider(
+      create: (context) => ProjectSidebarBloc(),
+      child: FocusableActionDetector(
+        focusNode: editorFocusNode,
+        actions: {
+          ...PlotweaverTabCommands().defaultActions,
+        },
+        autofocus: true,
+        child: AppScaffold(
+          scaffoldKey: globalEditorKey,
+          body: BlocConsumer<ProjectFilesCubit, ProjectFilesState>(
+            listener: (context, state) {
+              state.maybeWhen(
+                orElse: () {},
+                active: (projectIdentifier, _) {
+                  // set up all blocs
+                  context
+                      .read<ProjectInfoEditorBloc>()
+                      .add(ProjectInfoEditorEvent.setup(projectIdentifier));
+                  context
+                      .read<CharactersEditorsBloc>()
+                      .add(CharactersEditorsEvent.setup(projectIdentifier));
+                },
+              );
+            },
+            listenWhen: (previous, current) =>
+                previous.maybeWhen(
+                  orElse: () => false,
+                  loading: () => true,
+                ) &&
+                current.maybeMap(
+                  orElse: () => false,
+                  active: (_) => true,
+                ),
+            builder: (context, state) {
+              return Skeletonizer(
+                enabled: state.map(active: (_) => false, loading: (_) => true),
+                enableSwitchAnimation: true,
                 child: Row(
                   children: [
                     const ProjectSidebarWidget(),
@@ -87,9 +87,9 @@ class _EditorScreenState extends State<EditorScreen> {
                     ),
                   ],
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

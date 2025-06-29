@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/config/sl_config.dart';
+import '../../../tabs/domain/commands/actions/close_tab_action.dart';
+import '../../../tabs/domain/commands/actions/open_tab_action.dart';
 import '../../../tabs/domain/commands/actions/rollback_tab_action.dart';
 import '../../../tabs/domain/commands/actions/save_tab_action.dart';
 import '../../../tabs/domain/commands/tab_intent.dart';
@@ -30,7 +32,7 @@ class PlotweaverCommandDispatcher extends ActionDispatcher {
   Action<Intent> _getAction(Intent intent, Action defaultAction) {
     if (intent is TabIntent) {
       return intent.map(
-        saveTab: (value) {
+        save: (value) {
           final tabsCubit = sl<TabsCubit>();
           final currentTabId = tabsCubit.state.openedTabId;
           final currentTab =
@@ -45,6 +47,17 @@ class PlotweaverCommandDispatcher extends ActionDispatcher {
               currentTabId == null ? null : tabsCubit.getTab(currentTabId);
 
           return RollbackTabAction(value.tab ?? currentTab);
+        },
+        close: (value) {
+          final tabsCubit = sl<TabsCubit>();
+          final currentTabId = tabsCubit.state.openedTabId;
+          final currentTab =
+              currentTabId == null ? null : tabsCubit.getTab(currentTabId);
+
+          return CloseTabAction(value.tab ?? currentTab);
+        },
+        open: (value) {
+          return OpenTabAction(value.tab);
         },
       );
     }

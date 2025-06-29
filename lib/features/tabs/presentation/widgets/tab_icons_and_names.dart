@@ -33,15 +33,23 @@ Widget getFileBundleIcon(BuildContext context, FileBundleType type) {
   }
 }
 
-String getTabName(BuildContext context, TabEntity tab) {
+String getTabName(BuildContext context, TabEntity tab, [bool watch = true]) {
   return tab.map(
     projectTab: (value) => S.of(context).project,
     characterTab: (value) {
-      return context
-              .watch<CharactersEditorsBloc>()
-              .getCharacter(value.characterId)
-              ?.name ??
-          S.of(context).character;
+      if (watch) {
+        return context
+                .watch<CharactersEditorsBloc>()
+                .getCharacter(value.characterId)
+                ?.name ??
+            S.of(context).character;
+      } else {
+        return context
+                .read<CharactersEditorsBloc>()
+                .getCharacter(value.characterId)
+                ?.name ??
+            S.of(context).character;
+      }
     },
   );
 }

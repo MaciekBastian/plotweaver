@@ -8,6 +8,7 @@ import '../../../../shared/widgets/clickable_widget.dart';
 import '../../../project/domain/entities/project_file_entity.dart';
 import '../../../project/domain/enums/file_bundle_type.dart';
 import '../../../project/presentation/cubit/project_files_cubit.dart';
+import '../../../tabs/domain/commands/tab_intent.dart';
 import '../../../tabs/domain/entities/tab_entity.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
 import '../../../tabs/presentation/widgets/tab_icons_and_names.dart';
@@ -158,7 +159,7 @@ class _ProjectSidebarFile extends StatelessWidget {
             child: ClickableWidget(
               onTap: () {
                 if (tab != null) {
-                  context.read<TabsCubit>().openTab(tab!);
+                  Actions.invoke(context, TabIntent.open(tab));
                 }
               },
               borderRadius: BorderRadius.circular(8),

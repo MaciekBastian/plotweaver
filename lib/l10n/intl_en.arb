@@ -107,5 +107,7 @@
     }
   },
   "this_action_is_irreversible": "This action is irreversible",
-  "delete_character": "Delete character"
+  "delete_character": "Delete character",
+  "search_for_command_or_file": "Search for command or file",
+  "no_matching_commands": "No matching commands"
 }

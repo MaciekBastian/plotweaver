@@ -342,7 +342,7 @@ class WeaveFileRepositoryImpl implements WeaveFileRepository {
                 PlotweaverIONamesConstants.directoryNames.characters] ??
             []),
       ]..removeWhere(
-          (el) => saveIntent.deleteCharactersIds.contains(el['id']),
+          (el) => saveIntent.deleteCharactersIds.contains((el as Map)['id']),
         );
     } else {
       outputJson[PlotweaverIONamesConstants.directoryNames.characters] =

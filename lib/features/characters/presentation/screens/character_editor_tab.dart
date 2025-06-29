@@ -111,6 +111,21 @@ class _CharacterEditorTabState extends State<CharacterEditorTab> {
   }
 
   @override
+  void dispose() {
+    _appearanceController.dispose();
+    _goalsController.dispose();
+    _lessonController.dispose();
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _ageController.dispose();
+    _portrayedByController.dispose();
+    _domicileController.dispose();
+    _occupationController.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocConsumer<CharactersEditorsBloc, CharactersEditorsState>(
       listener: (context, state) {
