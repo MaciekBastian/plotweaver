@@ -23,7 +23,7 @@ class ProjectFilesCubit extends Cubit<ProjectFilesState> {
       return;
     }
 
-    if (state is _Loading) {
+    if (state is ProjectFilesStateLoading) {
       await Future.delayed(const Duration(seconds: 1));
     }
 
@@ -32,7 +32,7 @@ class ProjectFilesCubit extends Cubit<ProjectFilesState> {
     );
 
     emit(
-      _Active(
+      ProjectFilesStateActive(
         projectIdentifier: _projectIdentifier!,
         projectFiles: [
           ProjectFileEntity.projectFile(),

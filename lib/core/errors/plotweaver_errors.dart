@@ -10,58 +10,60 @@ abstract class PlotweaverError implements Exception {
 
 /// Class for errors related to weave files
 @freezed
-class WeaveError extends PlotweaverError with _$WeaveError {
+sealed class WeaveError extends PlotweaverError with _$WeaveError {
   /// Weave file has wrong format or is not a weave file
   const factory WeaveError.formattingError({
     required String message,
-  }) = _WeaveFormattingError;
+  }) = WeaveFormattingError;
 
   /// A file is not a weave file
   const factory WeaveError.notAWeaveFile({
     required String message,
-  }) = _NotAWeaveFile;
+  }) = NotAWeaveFileError;
 
   /// Weave file has version lower than minimum supported bound
   const factory WeaveError.unsupportedDeprecatedVersion({
     required String message,
-  }) = _WeaveUnsupportedDeprecatedVersion;
+  }) = WeaveUnsupportedDeprecatedVersionError;
 
   /// Weave file has newer version than latest supported and is not allowing writes from outdated clients
   const factory WeaveError.unsupportedNewVersion({
     required String message,
-  }) = _WeaveUnsupportedNewVersion;
+  }) = WeaveUnsupportedNewVersionError;
 
   const WeaveError._();
 }
 
 /// Class for errors related to i/o
 @freezed
-class IOError extends PlotweaverError with _$IOError {
+sealed class IOError extends PlotweaverError with _$IOError {
   /// Parse error
-  const factory IOError.parseError() = _IOParseError;
+  const factory IOError.parseError() = IOParseError;
 
   /// file does not exist error
   const factory IOError.fileDoesNotExist({
     required String message,
-  }) = _IOFileDoesNotExist;
+  }) = IOFileDoesNotExist;
 
   /// Unknown IO error
   const factory IOError.unknownError({
     required String message,
-  }) = _IOUnknownError;
+  }) = IOUnknownError;
 
   const IOError._();
 
   @override
-  String? get message => maybeWhen(
-        orElse: () => null,
-        fileDoesNotExist: (message) => message,
-        unknownError: (message) => message,
-      );
+  String? get message => switch (this) {
+        IOParseError(:final message) => message,
+        IOFileDoesNotExist(:final message) => message,
+        IOUnknownError(:final message) => message,
+      };
 }
 
 /// Class for any unknown, uncaught errors
 @freezed
-class UnknownError extends PlotweaverError with _$UnknownError {
+sealed class UnknownError extends PlotweaverError with _$UnknownError {
   const factory UnknownError({String? message}) = _UnknownError;
+
+  const UnknownError._();
 }

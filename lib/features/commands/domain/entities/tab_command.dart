@@ -15,13 +15,14 @@ import 'command_entity.dart';
 part 'tab_command.freezed.dart';
 
 @Freezed(toJson: false, fromJson: false)
-class TabCommand with _$TabCommand implements CommandEntity {
+sealed class TabCommand with _$TabCommand implements CommandEntity {
   factory TabCommand({
     required PlotweaverCommand command,
     required Intent intent,
     required Action action,
     @Default(true) bool discoverable,
     ShortcutActivator? shortcut,
+    @Default([]) List<String> commandNamesTranslateKeys,
   }) = _TabCommand;
 
   factory TabCommand.save() => _TabCommand(

@@ -27,7 +27,7 @@ class CharactersEditorsBloc
     this._createCharacterUsecase,
     this._deleteCharacterUsecase,
     this._currentProjectBloc,
-  ) : super(const _Loading()) {
+  ) : super(const CharactersEditorsStateLoading()) {
     on<_Modify>(_onModify);
     on<_Setup>(_onSetup);
     on<_Create>(_onCreate);
@@ -54,11 +54,12 @@ class CharactersEditorsBloc
       CurrentProjectEvent.toggleUnsavedChangesForTab(event.tabId),
     );
 
-    final List<CharacterEntity> currentCharacters = state.maybeMap(
-      orElse: () => [],
-      modified: (value) => value.characters,
-      success: (value) => value.characters,
-    );
+    final List<CharacterEntity> currentCharacters = switch (state) {
+      CharactersEditorsStateLoading() => [],
+      CharactersEditorsStateSuccess(:final _characters) => _characters,
+      CharactersEditorsStateFailure() => [],
+      CharactersEditorsStateModified(:final _characters) => _characters,
+    };
 
     final newCharacters = [...currentCharacters];
     final index = newCharacters.indexWhere((el) => el.id == event.character.id);
@@ -72,7 +73,7 @@ class CharactersEditorsBloc
         event.character,
       );
 
-    emit(_Modified(newCharacters));
+    emit(CharactersEditorsStateModified(newCharacters));
   }
 
   Future<void> _onSetup(
@@ -83,8 +84,8 @@ class CharactersEditorsBloc
     if (_projectIdentifier == null) {
       return;
     }
-    if (state is _Loading ||
-        state is _Failure ||
+    if (state is CharactersEditorsStateLoading ||
+        state is CharactersEditorsStateFailure ||
         event.forceForIds.isNotEmpty) {
       final resp = await _getAllCharactersUsecase.call(
         projectIdentifier: _projectIdentifier!,
@@ -92,11 +93,13 @@ class CharactersEditorsBloc
 
       resp.fold(
         (error) {
-          emit(_Failure(error));
+          emit(CharactersEditorsStateFailure(error));
         },
         (characters) {
-          if (state is _Modified) {
-            final newCharacters = [...(state as _Modified).characters];
+          if (state is CharactersEditorsStateModified) {
+            final newCharacters = [
+              ...(state as CharactersEditorsStateModified).characters,
+            ];
             for (final element in event.forceForIds) {
               final character =
                   characters.where((el) => el.id == element).firstOrNull;
@@ -108,9 +111,9 @@ class CharactersEditorsBloc
                   ..insert(index, character);
               }
             }
-            emit(_Modified(newCharacters));
+            emit(CharactersEditorsStateModified(newCharacters));
           } else {
-            emit(_Success(characters));
+            emit(CharactersEditorsStateSuccess(characters));
           }
         },
       );
@@ -140,13 +143,14 @@ class CharactersEditorsBloc
       event.then(null, resp.asSome());
       return;
     }
-    final List<CharacterEntity> currentCharacters = state.maybeWhen(
-      orElse: () => [],
-      modified: (characters) => characters,
-      success: (characters) => characters,
-    );
+    final List<CharacterEntity> currentCharacters = switch (state) {
+      CharactersEditorsStateLoading() => [],
+      CharactersEditorsStateSuccess(:final _characters) => _characters,
+      CharactersEditorsStateFailure() => [],
+      CharactersEditorsStateModified(:final _characters) => _characters,
+    };
 
-    emit(_Modified([...currentCharacters, character]));
+    emit(CharactersEditorsStateModified([...currentCharacters, character]));
 
     final tabId =
         '${PlotweaverIONamesConstants.directoryNames.characters}${character.id}';
@@ -161,13 +165,14 @@ class CharactersEditorsBloc
     event.then(character, null);
   }
 
-  CharacterEntity? getCharacter(String characterId) => state.maybeMap(
-        orElse: () => null,
-        success: (value) =>
-            value.characters.where((el) => el.id == characterId).firstOrNull,
-        modified: (value) =>
-            value.characters.where((el) => el.id == characterId).firstOrNull,
-      );
+  CharacterEntity? getCharacter(String characterId) => switch (state) {
+        CharactersEditorsStateLoading() => null,
+        CharactersEditorsStateSuccess(:final _characters) =>
+          _characters.where((el) => el.id == characterId).firstOrNull,
+        CharactersEditorsStateFailure() => null,
+        CharactersEditorsStateModified(:final _characters) =>
+          _characters.where((el) => el.id == characterId).firstOrNull,
+      };
 
   Future<void> _onDelete(
     _Delete event,
@@ -189,14 +194,15 @@ class CharactersEditorsBloc
       return;
     }
     final List<CharacterEntity> currentCharacters = [
-      ...state.maybeWhen(
-        orElse: () => [],
-        modified: (characters) => characters,
-        success: (characters) => characters,
-      ),
+      ...switch (state) {
+        CharactersEditorsStateLoading() => [],
+        CharactersEditorsStateSuccess(:final _characters) => _characters,
+        CharactersEditorsStateFailure() => [],
+        CharactersEditorsStateModified(:final _characters) => _characters,
+      },
     ]..removeWhere((el) => el.id == event.characterId);
 
-    emit(_Modified([...currentCharacters]));
+    emit(CharactersEditorsStateModified([...currentCharacters]));
 
     final tabId =
         '${PlotweaverIONamesConstants.directoryNames.characters}${event.characterId}';

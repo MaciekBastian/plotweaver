@@ -43,55 +43,13 @@ class RecentProjectsWidget extends StatelessWidget {
                 switchAnimationConfig: const SwitchAnimationConfig(
                   duration: Durations.medium4,
                 ),
-                enabled: state.maybeWhen(
-                  orElse: () => false,
-                  loading: () => true,
-                  initial: () => true,
-                ),
-                child: state.maybeMap(
-                  orElse: () => ListView(
-                    children: List.generate(
-                      10,
-                      (i) => _RecentProjectButton(
-                        key: Key('recent_project_$i'),
-                        recentProjectEntity: RecentProjectEntity.placeholder(),
-                      ),
-                    ),
-                  ),
-                  empty: (_) => ListView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      const SizedBox(height: 30),
-                      SvgPicture.asset(
-                        ImagesConstants.lighthouse,
-                        height: 80,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        S.of(context).there_is_no_recent_projects,
-                        style: context.textStyle.h3,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        S.of(context).open_project_or_create_new,
-                        style: context.textStyle.caption,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                  success: (value) {
-                    return ListView.builder(
-                      itemCount: value.projects.length,
-                      itemBuilder: (context, index) {
-                        return _RecentProjectButton(
-                          recentProjectEntity: value.projects[index],
-                        );
-                      },
-                    );
-                  },
-                  failure: (value) {
-                    return Column(
+                enabled: switch (state) {
+                  RecentProjectsStateInitial() => true,
+                  RecentProjectsStateLoading() => true,
+                  _ => false,
+                },
+                child: switch (state) {
+                  RecentProjectsStateFailure(:final error) => Column(
                       children: [
                         const SizedBox(height: 30),
                         SvgPicture.asset(
@@ -100,7 +58,7 @@ class RecentProjectsWidget extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         FatalErrorWidget(
-                          error: value.error,
+                          error: error,
                           onRetry: () {
                             context
                                 .read<RecentProjectsBloc>()
@@ -108,9 +66,49 @@ class RecentProjectsWidget extends StatelessWidget {
                           },
                         ),
                       ],
-                    );
-                  },
-                ),
+                    ),
+                  RecentProjectsStateSuccess(:final projects) =>
+                    ListView.builder(
+                      itemCount: projects.length,
+                      itemBuilder: (context, index) {
+                        return _RecentProjectButton(
+                          recentProjectEntity: projects[index],
+                        );
+                      },
+                    ),
+                  RecentProjectsStateEmpty() => ListView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 30),
+                        SvgPicture.asset(
+                          ImagesConstants.lighthouse,
+                          height: 80,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          S.of(context).there_is_no_recent_projects,
+                          style: context.textStyle.h3,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          S.of(context).open_project_or_create_new,
+                          style: context.textStyle.caption,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  _ => ListView(
+                      children: List.generate(
+                        10,
+                        (i) => _RecentProjectButton(
+                          key: Key('recent_project_$i'),
+                          recentProjectEntity:
+                              RecentProjectEntity.placeholder(),
+                        ),
+                      ),
+                    ),
+                },
               ),
             );
           },

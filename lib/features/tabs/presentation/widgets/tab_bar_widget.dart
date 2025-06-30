@@ -94,13 +94,12 @@ class _TabBarToolbar extends StatelessWidget {
             ),
           ),
         ),
-        if (currentTab != null)
-          currentTab!.maybeMap(
-            orElse: SizedBox.shrink,
-            characterTab: (tab) {
+        if (currentTab != null && currentTab is CharacterTab)
+          Builder(
+            builder: (context) {
               final character = context
                   .read<CharactersEditorsBloc>()
-                  .getCharacter(tab.characterId);
+                  .getCharacter((currentTab! as CharacterTab).characterId);
               if (character == null) {
                 return const SizedBox.shrink();
               }
@@ -113,13 +112,12 @@ class _TabBarToolbar extends StatelessWidget {
                           AlertOption(
                             callback: () {
                               Navigator.of(context).pop();
-                              final path = context
-                                  .read<CurrentProjectBloc>()
-                                  .state
-                                  .maybeMap(
-                                    orElse: () => null,
-                                    project: (value) => value.project.path,
-                                  );
+                              final currentProjectState =
+                                  context.read<CurrentProjectBloc>().state;
+                              final path = currentProjectState
+                                      is CurrentProjectStateProject
+                                  ? currentProjectState.project.path
+                                  : null;
                               if (path == null) {
                                 return;
                               }

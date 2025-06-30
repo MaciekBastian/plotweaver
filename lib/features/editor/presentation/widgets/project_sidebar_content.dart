@@ -22,14 +22,11 @@ class ProjectSidebarContent extends StatelessWidget {
     return BlocBuilder<ProjectFilesCubit, ProjectFilesState>(
       builder: (context, state) {
         return ListView(
-          children: state.map(
-            active: (value) {
-              return value.projectFiles
-                  .map((file) => mapProjectFileToSidebarFile(context, file))
-                  .toList();
-            },
-            loading: (_) {
-              final placeholders = [
+          children: switch (state) {
+            ProjectFilesStateActive(:final projectFiles) => projectFiles
+                .map((file) => mapProjectFileToSidebarFile(context, file))
+                .toList(),
+            ProjectFilesStateLoading() => [
                 ProjectFileEntity.placeholder(),
                 ProjectFileEntity.fileBundle(
                   type: FileBundleType.characters,
@@ -52,13 +49,10 @@ class ProjectSidebarContent extends StatelessWidget {
                     (_) => ProjectFileEntity.placeholder(),
                   ),
                 ),
-              ];
-
-              return placeholders
+              ]
                   .map((file) => mapProjectFileToSidebarFile(context, file))
-                  .toList();
-            },
-          ),
+                  .toList(),
+          },
         );
       },
     );
@@ -68,8 +62,8 @@ class ProjectSidebarContent extends StatelessWidget {
     BuildContext context,
     ProjectFileEntity file,
   ) {
-    return file.when(
-      projectFile: () {
+    switch (file) {
+      case ProjectFileEntityProjectFile():
         final tab = TabEntity.projectTab(tabId: 'project');
         return _ProjectSidebarFile(
           tab: tab,
@@ -77,14 +71,7 @@ class ProjectSidebarContent extends StatelessWidget {
           icon: getTabIcon(context, tab),
           title: getTabName(context, tab),
         );
-      },
-      placeholder: () {
-        return _ProjectSidebarFile(
-          icon: Container(),
-          title: 'long placeholder text',
-        );
-      },
-      characterFile: (characterId) {
+      case ProjectFileEntityCharacterFile(:final characterId):
         final tab = TabEntity.characterTab(
           tabId:
               '${PlotweaverIONamesConstants.directoryNames.characters}$characterId',
@@ -96,8 +83,12 @@ class ProjectSidebarContent extends StatelessWidget {
           icon: getTabIcon(context, tab),
           title: getTabName(context, tab),
         );
-      },
-      fileBundle: (List<ProjectFileEntity> files, FileBundleType type) {
+      case ProjectFileEntityPlaceholder():
+        return _ProjectSidebarFile(
+          icon: Container(),
+          title: 'long placeholder text',
+        );
+      case ProjectFileEntityFileBundle(:final files, :final type):
         return Column(
           children: [
             _ProjectSidebarFile(
@@ -120,8 +111,7 @@ class ProjectSidebarContent extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
+    }
   }
 }
 

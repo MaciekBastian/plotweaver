@@ -12,13 +12,14 @@ import 'command_entity.dart';
 part 'general_command.freezed.dart';
 
 @Freezed(toJson: false, fromJson: false)
-class GeneralCommand with _$GeneralCommand implements CommandEntity {
+sealed class GeneralCommand with _$GeneralCommand implements CommandEntity {
   factory GeneralCommand({
     required PlotweaverCommand command,
     required Intent intent,
     required Action action,
     @Default(true) bool discoverable,
     ShortcutActivator? shortcut,
+    @Default([]) List<String> commandNamesTranslateKeys,
   }) = _GeneralCommand;
 
   factory GeneralCommand.showCommandSearchBar() => _GeneralCommand(

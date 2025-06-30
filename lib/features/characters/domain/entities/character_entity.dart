@@ -10,7 +10,7 @@ part 'character_entity.freezed.dart';
   fromJson: false,
   toJson: false,
 )
-class CharacterEntity with _$CharacterEntity {
+sealed class CharacterEntity with _$CharacterEntity {
   factory CharacterEntity({
     required String id,
     required String name,

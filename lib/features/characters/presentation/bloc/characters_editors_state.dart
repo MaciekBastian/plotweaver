@@ -1,14 +1,15 @@
 part of 'characters_editors_bloc.dart';
 
 @freezed
-class CharactersEditorsState with _$CharactersEditorsState {
-  const factory CharactersEditorsState.loading() = _Loading;
+sealed class CharactersEditorsState with _$CharactersEditorsState {
+  const factory CharactersEditorsState.loading() =
+      CharactersEditorsStateLoading;
   const factory CharactersEditorsState.success(
     List<CharacterEntity> characters,
-  ) = _Success;
+  ) = CharactersEditorsStateSuccess;
   const factory CharactersEditorsState.failure(PlotweaverError error) =
-      _Failure;
+      CharactersEditorsStateFailure;
   const factory CharactersEditorsState.modified(
     List<CharacterEntity> characters,
-  ) = _Modified;
+  ) = CharactersEditorsStateModified;
 }

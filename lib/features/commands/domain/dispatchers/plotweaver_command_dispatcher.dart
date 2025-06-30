@@ -31,35 +31,31 @@ class PlotweaverCommandDispatcher extends ActionDispatcher {
 
   Action<Intent> _getAction(Intent intent, Action defaultAction) {
     if (intent is TabIntent) {
-      return intent.map(
-        save: (value) {
+      switch (intent) {
+        case SaveTabIntent(:final tab):
           final tabsCubit = sl<TabsCubit>();
           final currentTabId = tabsCubit.state.openedTabId;
           final currentTab =
               currentTabId == null ? null : tabsCubit.getTab(currentTabId);
 
-          return SaveTabAction(value.tab ?? currentTab);
-        },
-        rollback: (value) {
+          return SaveTabAction(tab ?? currentTab);
+        case RollbackTabIntent(:final tab):
           final tabsCubit = sl<TabsCubit>();
           final currentTabId = tabsCubit.state.openedTabId;
           final currentTab =
               currentTabId == null ? null : tabsCubit.getTab(currentTabId);
 
-          return RollbackTabAction(value.tab ?? currentTab);
-        },
-        close: (value) {
+          return RollbackTabAction(tab ?? currentTab);
+        case CloseTabIntent(:final tab):
           final tabsCubit = sl<TabsCubit>();
           final currentTabId = tabsCubit.state.openedTabId;
           final currentTab =
               currentTabId == null ? null : tabsCubit.getTab(currentTabId);
 
-          return CloseTabAction(value.tab ?? currentTab);
-        },
-        open: (value) {
-          return OpenTabAction(value.tab);
-        },
-      );
+          return CloseTabAction(tab ?? currentTab);
+        case OpenTabIntent(:final tab):
+          return OpenTabAction(tab);
+      }
     }
 
     return defaultAction;

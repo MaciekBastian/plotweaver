@@ -58,17 +58,24 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
   }
 
   void _fillEditor(ProjectInfoEditorState state) {
-    state.maybeWhen(
-      orElse: () {},
-      success: (projectInfo, general) {
+    switch (state) {
+      case ProjectInfoEditorStateSuccess(
+          :final generalInfo,
+          :final projectInfo,
+        ):
         _project = projectInfo;
-        _general = general;
-      },
-      modified: (projectInfo, general) {
+        _general = generalInfo;
+        break;
+      case ProjectInfoEditorStateModified(
+          :final generalInfo,
+          :final projectInfo,
+        ):
         _project = projectInfo;
-        _general = general;
-      },
-    );
+        _general = generalInfo;
+        break;
+      default:
+        break;
+    }
 
     if (_project != null) {
       _projectNameController.text = _project!.title;
@@ -106,92 +113,21 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
       listener: (context, state) {
         _fillEditor(state);
       },
-      listenWhen: (previous, current) =>
-          previous.maybeWhen(
-            orElse: () => false,
-            failure: (_) => true,
-            loading: () => true,
-          ) &&
-          current.maybeWhen(orElse: () => false, success: (_, __) => true),
+      listenWhen: (previous, current) {
+        final previousCheck = switch (previous) {
+          ProjectInfoEditorStateLoading() => true,
+          ProjectInfoEditorStateFailure() => true,
+          _ => false,
+        };
+        final currentCheck = switch (previous) {
+          ProjectInfoEditorStateSuccess() => true,
+          _ => false,
+        };
+        return previousCheck && currentCheck;
+      },
       builder: (context, state) {
-        return state.maybeWhen(
-          orElse: () => Skeletonizer(
-            enableSwitchAnimation: true,
-            enabled: state.maybeWhen(
-              orElse: () => false,
-              loading: () => true,
-            ),
-            child: ListView(
-              padding: const EdgeInsets.symmetric(
-                vertical: 10,
-                horizontal: 15,
-              ),
-              children: [
-                TextField(
-                  focusNode: _projectNameFocus,
-                  controller: _projectNameController,
-                  style: context.textStyle.h1,
-                  onChanged: (value) {
-                    _sendModifyEvent();
-                  },
-                  onTapOutside: (event) {
-                    editorFocusNode.requestFocus();
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        width: 3,
-                        color: Colors.transparent,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        width: 3,
-                        color: Colors.transparent,
-                      ),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        width: 3,
-                        color: Colors.transparent,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        width: 3,
-                        color: context.colors.link,
-                      ),
-                    ),
-                    hintText: S.of(context).start_typing,
-                  ),
-                ),
-                Divider(color: context.colors.dividerColor),
-                const SizedBox(height: 20),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: _buildLeftPane(),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      flex: 2,
-                      child: _buildRightPane(),
-                    ),
-                    // white space
-                    Expanded(child: Container()),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          failure: (error) {
-            return Center(
+        return switch (state) {
+          ProjectInfoEditorStateFailure(:final error) => Center(
               child: FatalErrorWidget(
                 error: error,
                 onRetry: () async {
@@ -200,9 +136,83 @@ class _ProjectEditorTabState extends State<ProjectEditorTab> {
                       );
                 },
               ),
-            );
-          },
-        );
+            ),
+          _ => Skeletonizer(
+              enableSwitchAnimation: true,
+              enabled: switch (state) {
+                ProjectInfoEditorStateLoading() => true,
+                _ => false,
+              },
+              child: ListView(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 15,
+                ),
+                children: [
+                  TextField(
+                    focusNode: _projectNameFocus,
+                    controller: _projectNameController,
+                    style: context.textStyle.h1,
+                    onChanged: (value) {
+                      _sendModifyEvent();
+                    },
+                    onTapOutside: (event) {
+                      editorFocusNode.requestFocus();
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                          width: 3,
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                          width: 3,
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                          width: 3,
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          width: 3,
+                          color: context.colors.link,
+                        ),
+                      ),
+                      hintText: S.of(context).start_typing,
+                    ),
+                  ),
+                  Divider(color: context.colors.dividerColor),
+                  const SizedBox(height: 20),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _buildLeftPane(),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        flex: 2,
+                        child: _buildRightPane(),
+                      ),
+                      // white space
+                      Expanded(child: Container()),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+        };
       },
     );
   }

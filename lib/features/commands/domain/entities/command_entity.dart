@@ -9,6 +9,7 @@ abstract class CommandEntity {
     required this.intent,
     this.discoverable = true,
     this.shortcut,
+    this.commandNamesTranslateKeys = const [],
   });
 
   final PlotweaverCommand command;
@@ -16,4 +17,5 @@ abstract class CommandEntity {
   final bool discoverable;
   final Action action;
   final Intent intent;
+  final List<String> commandNamesTranslateKeys;
 }

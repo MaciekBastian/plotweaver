@@ -8,18 +8,18 @@ import '../../../project/domain/enums/file_bundle_type.dart';
 import '../../domain/entities/tab_entity.dart';
 
 Widget getTabIcon(BuildContext context, TabEntity tab) {
-  return tab.map(
-    projectTab: (value) => Icon(
-      Icons.settings,
-      size: 18,
-      color: context.colors.onScaffoldBackgroundHeader,
-    ),
-    characterTab: (value) => Icon(
-      Icons.person_rounded,
-      size: 18,
-      color: context.colors.onScaffoldBackgroundHeader,
-    ),
-  );
+  return switch (tab) {
+    ProjectTab() => Icon(
+        Icons.settings,
+        size: 18,
+        color: context.colors.onScaffoldBackgroundHeader,
+      ),
+    CharacterTab() => Icon(
+        Icons.person_rounded,
+        size: 18,
+        color: context.colors.onScaffoldBackgroundHeader,
+      ),
+  };
 }
 
 Widget getFileBundleIcon(BuildContext context, FileBundleType type) {
@@ -34,24 +34,20 @@ Widget getFileBundleIcon(BuildContext context, FileBundleType type) {
 }
 
 String getTabName(BuildContext context, TabEntity tab, [bool watch = true]) {
-  return tab.map(
-    projectTab: (value) => S.of(context).project,
-    characterTab: (value) {
-      if (watch) {
-        return context
+  return switch (tab) {
+    ProjectTab() => S.of(context).project,
+    CharacterTab(:final characterId) => watch
+        ? context
                 .watch<CharactersEditorsBloc>()
-                .getCharacter(value.characterId)
+                .getCharacter(characterId)
                 ?.name ??
-            S.of(context).character;
-      } else {
-        return context
+            S.of(context).character
+        : context
                 .read<CharactersEditorsBloc>()
-                .getCharacter(value.characterId)
+                .getCharacter(characterId)
                 ?.name ??
-            S.of(context).character;
-      }
-    },
-  );
+            S.of(context).character,
+  };
 }
 
 String getFileBundleName(BuildContext context, FileBundleType type) {

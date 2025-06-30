@@ -15,9 +15,9 @@ class PlotweaverCommands {
   Map<Type, Action> get defaultActions => commands.asMap().map(
         (key, value) => MapEntry(value.intent.runtimeType, value.action),
       );
-}
 
-List<CommandEntity> get allPlotweaverCommands => [
-      ...PlotweaverTabCommands().commands,
-      ...PlotweaverGeneralCommands().commands,
-    ];
+  List<CommandEntity> get allPlotweaverCommands => [
+        ...PlotweaverTabCommands().commands,
+        ...PlotweaverGeneralCommands().commands,
+      ];
+}

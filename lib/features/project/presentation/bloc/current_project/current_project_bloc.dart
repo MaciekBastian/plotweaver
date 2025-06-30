@@ -8,6 +8,7 @@ import '../../../../../core/extensions/dartz_extension.dart';
 import '../../../../../core/handlers/error_handler.dart';
 import '../../../../../shared/overlays/full_screen_alert.dart';
 import '../../../../characters/domain/usecases/rollback_character_usecase.dart';
+import '../../../../tabs/domain/entities/tab_entity.dart';
 import '../../../../tabs/presentation/cubit/tabs_cubit.dart';
 import '../../../../weave_file/domain/entities/save_intent_entity.dart';
 import '../../../domain/entities/current_project_entity.dart';
@@ -19,7 +20,7 @@ part 'current_project_state.dart';
 
 class CurrentProjectBloc
     extends Bloc<CurrentProjectEvent, CurrentProjectState> {
-  CurrentProjectBloc() : super(const _NoProject()) {
+  CurrentProjectBloc() : super(const CurrentProjectStateNoProject()) {
     on<_OpenProject>(_onOpenProject);
     on<_ToggleUnsavedChanges>(_onToggleUnsavedChanges);
     on<_Save>(_onSave);
@@ -30,36 +31,37 @@ class CurrentProjectBloc
     _OpenProject event,
     Emitter<CurrentProjectState> emit,
   ) async {
-    emit(_Project(event.project));
+    emit(CurrentProjectStateProject(event.project));
   }
 
   Future<void> _onSave(
     _Save event,
     Emitter<CurrentProjectState> emit,
   ) async {
-    if (state is _Project) {
-      final changes = event.tabs ?? (state as _Project).project.unsavedTabsIds;
+    if (state is CurrentProjectStateProject) {
+      final changes = event.tabs ??
+          (state as CurrentProjectStateProject).project.unsavedTabsIds;
 
       final response = await handleVoidAsyncOperation(
         () async => Future.forEach(
           changes,
           (element) async {
-            final project = (state as _Project).project;
+            final project = (state as CurrentProjectStateProject).project;
             final resp = await sl<TabsCubit>().saveTab(
               element,
               (tab) {
-                return tab.map(
-                  projectTab: (value) => SaveIntentEntity(
-                    path: project.path,
-                    projectIdentifier: project.identifier,
-                    saveProject: true,
-                  ),
-                  characterTab: (value) => SaveIntentEntity(
-                    path: project.path,
-                    projectIdentifier: project.identifier,
-                    saveCharactersIds: [value.characterId],
-                  ),
-                );
+                return switch (tab) {
+                  ProjectTab() => SaveIntentEntity(
+                      path: project.path,
+                      projectIdentifier: project.identifier,
+                      saveProject: true,
+                    ),
+                  CharacterTab(:final characterId) => SaveIntentEntity(
+                      path: project.path,
+                      projectIdentifier: project.identifier,
+                      saveCharactersIds: [characterId],
+                    ),
+                };
               },
             );
 
@@ -77,7 +79,11 @@ class CurrentProjectBloc
               final newUnsaved = [...project.unsavedTabsIds]
                 ..removeWhere((el) => el == element);
 
-              emit(_Project(project.copyWith(unsavedTabsIds: newUnsaved)));
+              emit(
+                CurrentProjectStateProject(
+                  project.copyWith(unsavedTabsIds: newUnsaved),
+                ),
+              );
             }
           },
         ),
@@ -93,8 +99,8 @@ class CurrentProjectBloc
     _ToggleUnsavedChanges event,
     Emitter<CurrentProjectState> emit,
   ) async {
-    if (state is _Project) {
-      final project = (state as _Project).project;
+    if (state is CurrentProjectStateProject) {
+      final project = (state as CurrentProjectStateProject).project;
 
       final newUnsaved = [...project.unsavedTabsIds];
 
@@ -105,7 +111,11 @@ class CurrentProjectBloc
         sl<TabsCubit>().markTabAsUnsaved(event.tabId);
       }
 
-      emit(_Project(project.copyWith(unsavedTabsIds: newUnsaved)));
+      emit(
+        CurrentProjectStateProject(
+          project.copyWith(unsavedTabsIds: newUnsaved),
+        ),
+      );
     }
   }
 
@@ -113,8 +123,9 @@ class CurrentProjectBloc
     _RollBack event,
     Emitter<CurrentProjectState> emit,
   ) async {
-    if (state is _Project) {
-      final changes = event.tabs ?? (state as _Project).project.unsavedTabsIds;
+    if (state is CurrentProjectStateProject) {
+      final changes = event.tabs ??
+          (state as CurrentProjectStateProject).project.unsavedTabsIds;
 
       final response = await handleVoidAsyncOperation(
         () async => Future.forEach(
@@ -124,16 +135,17 @@ class CurrentProjectBloc
             if (tab == null) {
               throw const UnknownError();
             }
-            final Option<PlotweaverError> rollbackResp = await tab.map(
-              projectTab: (value) => sl<RollBackProjectUsecase>().call(
-                (state as _Project).project.identifier,
-              ),
-              characterTab: (value) async =>
-                  sl<RollbackCharacterUsecase>().call(
-                projectIdentifier: (state as _Project).project.identifier,
-                characterId: value.characterId,
-              ),
-            );
+            final Option<PlotweaverError> rollbackResp = await switch (tab) {
+              ProjectTab() => sl<RollBackProjectUsecase>().call(
+                  (state as CurrentProjectStateProject).project.identifier,
+                ),
+              CharacterTab(:final characterId) =>
+                sl<RollbackCharacterUsecase>().call(
+                  projectIdentifier:
+                      (state as CurrentProjectStateProject).project.identifier,
+                  characterId: characterId,
+                ),
+            };
             if (rollbackResp.isSome()) {
               throw rollbackResp.asSome();
             }

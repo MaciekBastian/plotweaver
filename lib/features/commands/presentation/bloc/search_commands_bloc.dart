@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../domain/entities/command_entity.dart';
 import '../../domain/entities/search_command_suggestion.dart';
 
 part 'search_commands_bloc.freezed.dart';

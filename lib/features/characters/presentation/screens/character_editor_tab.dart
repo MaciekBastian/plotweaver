@@ -135,17 +135,33 @@ class _CharacterEditorTabState extends State<CharacterEditorTab> {
               .getCharacter(widget.characterId),
         );
       },
-      listenWhen: (previous, current) =>
-          previous.maybeWhen(
-            orElse: () => false,
-            failure: (_) => true,
-            loading: () => true,
-          ) &&
-          current.maybeMap(orElse: () => false, success: (_) => true),
+      listenWhen: (previous, current) {
+        final previousCheck = switch (previous) {
+          CharactersEditorsStateLoading() => true,
+          CharactersEditorsStateFailure() => true,
+          _ => false,
+        };
+        final currentCheck = switch (previous) {
+          CharactersEditorsStateSuccess() => true,
+          _ => false,
+        };
+        return previousCheck && currentCheck;
+      },
       builder: (context, state) {
-        return state.maybeWhen(
-          orElse: () {
-            return ListView(
+        return switch (state) {
+          CharactersEditorsStateFailure(:final error) => Center(
+              child: FatalErrorWidget(
+                error: error,
+                onRetry: () async {
+                  context.read<CharactersEditorsBloc>().add(
+                        CharactersEditorsEvent.setup(null, [
+                          _characterEntity!.id,
+                        ]),
+                      );
+                },
+              ),
+            ),
+          _ => ListView(
               padding: const EdgeInsets.symmetric(
                 vertical: 10,
                 horizontal: 15,
@@ -168,21 +184,8 @@ class _CharacterEditorTabState extends State<CharacterEditorTab> {
                   ],
                 ),
               ],
-            );
-          },
-          failure: (error) => Center(
-            child: FatalErrorWidget(
-              error: error,
-              onRetry: () async {
-                context.read<CharactersEditorsBloc>().add(
-                      CharactersEditorsEvent.setup(null, [
-                        _characterEntity!.id,
-                      ]),
-                    );
-              },
             ),
-          ),
-        );
+        };
       },
     );
   }

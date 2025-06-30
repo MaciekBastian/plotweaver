@@ -21,7 +21,7 @@ class ProjectInfoEditorBloc
     this._modifyProjectUsecase,
     this._currentProjectBloc,
   )   : _projectDataSource = ProjectDataSource(),
-        super(const _Loading()) {
+        super(const ProjectInfoEditorStateLoading()) {
     on<_Modify>(_onModify);
     on<_Setup>(_onSetup);
   }
@@ -41,11 +41,16 @@ class ProjectInfoEditorBloc
     _currentProjectBloc.add(
       CurrentProjectEvent.toggleUnsavedChangesForTab(event.tabId),
     );
-    if (state is _Success) {
-      emit(_Modified(event.project, (state as _Success).generalInfo));
-    } else if (state is _Modified) {
+    if (state is ProjectInfoEditorStateSuccess) {
       emit(
-        (state as _Modified).copyWith(
+        ProjectInfoEditorStateModified(
+          event.project,
+          (state as ProjectInfoEditorStateSuccess).generalInfo,
+        ),
+      );
+    } else if (state is ProjectInfoEditorStateModified) {
+      emit(
+        (state as ProjectInfoEditorStateModified).copyWith(
           projectInfo: event.project,
         ),
       );
@@ -60,19 +65,21 @@ class ProjectInfoEditorBloc
     if (_identifier == null) {
       return;
     }
-    if (state is _Loading || state is _Failure || event.force) {
+    if (state is ProjectInfoEditorStateLoading ||
+        state is ProjectInfoEditorStateFailure ||
+        event.force) {
       final general = await _projectDataSource.getGeneral(_identifier!);
       if (general.isLeft()) {
-        emit(_Failure(general.asLeft()));
+        emit(ProjectInfoEditorStateFailure(general.asLeft()));
       }
       final resp = await _getOpenedProjectUsecase.call(_identifier!);
 
       resp.fold(
         (error) {
-          emit(_Failure(error));
+          emit(ProjectInfoEditorStateFailure(error));
         },
         (project) {
-          emit(_Success(project, general.asRight()));
+          emit(ProjectInfoEditorStateSuccess(project, general.asRight()));
         },
       );
     }

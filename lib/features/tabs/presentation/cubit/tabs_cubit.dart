@@ -43,18 +43,18 @@ class TabsCubit extends Cubit<TabsState> {
     final context = globalEditorKey.currentContext;
     if (context != null) {
       // setting up all blocs before closing
-      tab.map(
-        projectTab: (value) {
+      switch (tab) {
+        case ProjectTab():
           context
               .read<ProjectInfoEditorBloc>()
               .add(const ProjectInfoEditorEvent.setup(null, true));
-        },
-        characterTab: (value) {
+          break;
+        case CharacterTab(:final characterId):
           context
               .read<CharactersEditorsBloc>()
-              .add(CharactersEditorsEvent.setup(null, [value.characterId]));
-        },
-      );
+              .add(CharactersEditorsEvent.setup(null, [characterId]));
+          break;
+      }
     }
     if (state.openedTabs.any((el) => el.tabId == tab.tabId)) {
       final tabIndex =

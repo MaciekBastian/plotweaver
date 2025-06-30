@@ -9,6 +9,7 @@ import '../../../project/presentation/bloc/project_info_editor/project_info_edit
 import '../../../project/presentation/cubit/project_files_cubit.dart';
 import '../../../project/presentation/screens/project_editor_tab.dart';
 import '../../../tabs/domain/commands/plotweaver_tab_commands.dart';
+import '../../../tabs/domain/entities/tab_entity.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
 import '../../../tabs/presentation/widgets/tab_bar_widget.dart';
 import '../bloc/project_sidebar_bloc.dart';
@@ -48,9 +49,8 @@ class _EditorScreenState extends State<EditorScreen> {
           scaffoldKey: globalEditorKey,
           body: BlocConsumer<ProjectFilesCubit, ProjectFilesState>(
             listener: (context, state) {
-              state.maybeWhen(
-                orElse: () {},
-                active: (projectIdentifier, _) {
+              switch (state) {
+                case ProjectFilesStateActive(:final projectIdentifier):
                   // set up all blocs
                   context
                       .read<ProjectInfoEditorBloc>()
@@ -58,21 +58,27 @@ class _EditorScreenState extends State<EditorScreen> {
                   context
                       .read<CharactersEditorsBloc>()
                       .add(CharactersEditorsEvent.setup(projectIdentifier));
-                },
-              );
+                  break;
+                default:
+              }
             },
-            listenWhen: (previous, current) =>
-                previous.maybeWhen(
-                  orElse: () => false,
-                  loading: () => true,
-                ) &&
-                current.maybeMap(
-                  orElse: () => false,
-                  active: (_) => true,
-                ),
+            listenWhen: (previous, current) {
+              final previousCheck = switch (previous) {
+                ProjectFilesStateLoading() => true,
+                _ => false,
+              };
+              final currentCheck = switch (current) {
+                ProjectFilesStateActive() => true,
+                _ => false,
+              };
+              return previousCheck && currentCheck;
+            },
             builder: (context, state) {
               return Skeletonizer(
-                enabled: state.map(active: (_) => false, loading: (_) => true),
+                enabled: switch (state) {
+                  ProjectFilesStateLoading() => true,
+                  ProjectFilesStateActive() => false,
+                },
                 enableSwitchAnimation: true,
                 child: Row(
                   children: [
@@ -105,16 +111,15 @@ class _EditorScreenState extends State<EditorScreen> {
           if (tab == null) {
             return const BlankEditorTab();
           }
-
-          return tab.map(
-            projectTab: (_) => const ProjectEditorTab(
-              key: Key('project_editor_tab_view'),
-            ),
-            characterTab: (tab) => CharacterEditorTab(
-              characterId: tab.characterId,
-              key: Key('character_editor_tab_${tab.characterId}'),
-            ),
-          );
+          return switch (tab) {
+            ProjectTab() => const ProjectEditorTab(
+                key: Key('project_editor_tab_view'),
+              ),
+            CharacterTab(:final characterId) => CharacterEditorTab(
+                characterId: characterId,
+                key: Key('character_editor_tab_$characterId'),
+              )
+          };
         },
       ),
     );

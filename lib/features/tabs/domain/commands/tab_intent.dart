@@ -6,7 +6,7 @@ import '../entities/tab_entity.dart';
 part 'tab_intent.freezed.dart';
 
 @Freezed(toJson: false, fromJson: false)
-class TabIntent extends Intent with _$TabIntent {
+sealed class TabIntent extends Intent with _$TabIntent {
   const TabIntent._();
 
   const factory TabIntent.save([TabEntity? tab]) = SaveTabIntent;

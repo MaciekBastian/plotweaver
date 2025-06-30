@@ -26,51 +26,46 @@ class QuickStartWidget extends StatelessWidget {
         context
             .read<RecentProjectsBloc>()
             .add(const RecentProjectsEvent.loadRecent());
-        state.map(
-          initial: (_) {
+        switch (state) {
+          case QuickStartStateInitial():
             Navigator.of(context).pop();
-          },
-          success: (value) {
+            break;
+          case QuickStartStateSuccess(
+              :final project,
+              :final identifier,
+              :final path,
+            ):
             // hiding the dialog
             Navigator.of(context).pop();
             context.read<CurrentProjectBloc>().add(
                   CurrentProjectEvent.openProject(
                     CurrentProjectEntity(
-                      projectName: value.project.title,
-                      identifier: value.identifier,
-                      path: value.path,
+                      projectName: project.title,
+                      identifier: identifier,
+                      path: path,
                     ),
                   ),
                 );
-            context
-                .read<ProjectFilesCubit>()
-                .checkAndLoadAllFiles(value.identifier);
+            context.read<ProjectFilesCubit>().checkAndLoadAllFiles(identifier);
             context.replace(PlotweaverRoutes.editor);
-          },
-          failure: (value) {
-            Navigator.of(context).pop();
-            final error = value.error;
-            if (error is IOError) {
-              error.maybeWhen(
-                orElse: () {},
-                fileDoesNotExist: (_) {
-                  showFullscreenError(error);
-                },
-              );
-            }
-          },
-          locked: (value) {
+            break;
+          case QuickStartStateLocked(:final shouldShowBackdrop):
             showDialog(
               context: context,
               barrierDismissible: false,
-              barrierColor:
-                  value.shouldShowBackdrop ? null : Colors.transparent,
+              barrierColor: shouldShowBackdrop ? null : Colors.transparent,
               builder: (context) {
                 return Container();
               },
             );
-          },
-        );
+            break;
+          case QuickStartStateFailure(:final error):
+            Navigator.of(context).pop();
+            if (error is IOFileDoesNotExist) {
+              showFullscreenError(error);
+            }
+            break;
+        }
       },
       builder: (context, state) {
         return Column(
@@ -124,16 +119,16 @@ class QuickStartWidget extends StatelessWidget {
               title: S.of(context).create_project,
             ),
             const SizedBox(height: 10),
-            state.maybeWhen(
-              orElse: SizedBox.shrink,
-              failure: (error) => Text(
-                error.message ?? S.of(context).unknown_error,
-                style: context.textStyle.body.copyWith(
-                  color: context.colors.error,
+            switch (state) {
+              QuickStartStateFailure(:final error) => Text(
+                  error.message ?? S.of(context).unknown_error,
+                  style: context.textStyle.body.copyWith(
+                    color: context.colors.error,
+                  ),
+                  textAlign: TextAlign.left,
                 ),
-                textAlign: TextAlign.left,
-              ),
-            ),
+              _ => const SizedBox.shrink(),
+            },
           ],
         );
       },

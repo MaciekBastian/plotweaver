@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../domain/commands/tab_intent.dart';
 import '../../domain/entities/tab_entity.dart';
-import '../cubit/tabs_cubit.dart';
 
 class CloseTabButton extends StatefulWidget {
   const CloseTabButton({
@@ -65,9 +63,5 @@ class _CloseTabButtonState extends State<CloseTabButton> {
         ),
       ),
     );
-  }
-
-  void _closeTab() {
-    context.read<TabsCubit>().closeTab(widget.tab);
   }
 }

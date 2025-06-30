@@ -7,16 +7,16 @@ part 'project_sidebar_state.dart';
 
 class ProjectSidebarBloc
     extends Bloc<ProjectSidebarEvent, ProjectSidebarState> {
-  ProjectSidebarBloc() : super(const _Visible()) {
+  ProjectSidebarBloc() : super(const ProjectSidebarStateVisible()) {
     on<_ChangeWidth>(_onChangeWidth);
     on<_ToggleVisibility>(_onToggleVisibility);
   }
 
   void _onChangeWidth(_ChangeWidth event, Emitter<ProjectSidebarState> emit) {
-    if (state is _Visible) {
-      emit(_Visible(width: event.width));
+    if (state is ProjectSidebarStateVisible) {
+      emit(ProjectSidebarStateVisible(width: event.width));
     } else {
-      emit(_Hidden(cachedWidth: event.width));
+      emit(ProjectSidebarStateHidden(cachedWidth: event.width));
     }
   }
 
