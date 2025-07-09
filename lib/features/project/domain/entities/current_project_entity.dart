@@ -6,7 +6,7 @@ part 'current_project_entity.freezed.dart';
   fromJson: false,
   toJson: false,
 )
-class CurrentProjectEntity with _$CurrentProjectEntity {
+sealed class CurrentProjectEntity with _$CurrentProjectEntity {
   factory CurrentProjectEntity({
     required String projectName,
     required String path,

@@ -4,19 +4,23 @@ import 'package:flutter/material.dart';
 
 import '../../core/extensions/theme_extension.dart';
 import '../../generated/l10n.dart';
+import '../overlays/search_command_overlay.dart';
 import 'clickable_widget.dart';
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
     required this.body,
+    this.scaffoldKey,
     super.key,
   });
 
   final Widget body;
+  final GlobalKey? scaffoldKey;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: context.colors.scaffoldBackgroundColor,
       body: Column(
         children: [
@@ -69,7 +73,9 @@ class _MacOSTopBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: ClickableWidget(
-                onTap: () {},
+                onTap: () {
+                  showCommandOverlay(context);
+                },
                 borderRadius: BorderRadius.circular(6),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -8,10 +8,13 @@ mixin TabEntityMixin {
 }
 
 @freezed
-class TabEntity with TabEntityMixin, _$TabEntity {
-  factory TabEntity.projectTab({required String tabId}) = _ProjectTab;
+sealed class TabEntity with TabEntityMixin, _$TabEntity {
+  factory TabEntity.projectTab({required String tabId}) = ProjectTab;
 
-  factory TabEntity.characterTab({required String tabId}) = _CharacterTab;
+  factory TabEntity.characterTab({
+    required String tabId,
+    required String characterId,
+  }) = CharacterTab;
 
   const TabEntity._();
 

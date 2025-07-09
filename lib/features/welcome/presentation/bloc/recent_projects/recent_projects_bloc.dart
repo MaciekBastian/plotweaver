@@ -11,7 +11,8 @@ part 'recent_projects_state.dart';
 
 class RecentProjectsBloc
     extends Bloc<RecentProjectsEvent, RecentProjectsState> {
-  RecentProjectsBloc(this._loadRecentUsecase) : super(const _Initial()) {
+  RecentProjectsBloc(this._loadRecentUsecase)
+      : super(const RecentProjectsStateInitial()) {
     on<_LoadRecent>(_onLoadRecent);
   }
 
@@ -21,22 +22,22 @@ class RecentProjectsBloc
     _LoadRecent e,
     Emitter<RecentProjectsState> emit,
   ) async {
-    if (state is _Loading) {
+    if (state is RecentProjectsStateLoading) {
       return;
     }
-    emit(const _Loading());
+    emit(const RecentProjectsStateLoading());
 
     final resp = await _loadRecentUsecase.call();
 
     resp.fold(
       (error) {
-        emit(_Failure(error));
+        emit(RecentProjectsStateFailure(error));
       },
       (projects) {
         if (projects.isEmpty) {
-          emit(const _Empty());
+          emit(const RecentProjectsStateEmpty());
         } else {
-          emit(_Success(projects));
+          emit(RecentProjectsStateSuccess(projects));
         }
       },
     );

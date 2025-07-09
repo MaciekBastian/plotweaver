@@ -17,7 +17,6 @@ import '../../../../core/handlers/error_handler.dart';
 import '../../../../core/services/app_support_directories_service.dart';
 import '../../../../core/services/package_and_device_info_service.dart';
 import '../../../../generated/l10n.dart';
-import '../../../weave_file/data/data_sources/weave_file_data_source.dart';
 import '../../../weave_file/domain/entities/general_entity.dart';
 import '../../../weave_file/domain/usecases/read_weave_file_usecase.dart';
 import '../../../welcome/domain/entities/recent_project_entity.dart';
@@ -25,6 +24,7 @@ import '../../../welcome/domain/usecases/add_recent_usecase.dart';
 import '../../../welcome/domain/usecases/modify_recent_usecase.dart';
 import '../../domain/entities/project_entity.dart';
 import '../../domain/enums/project_enums.dart';
+import '../data_sources/project_data_source.dart';
 
 abstract class ProjectRepository {
   /// Returns PlotweaverError on exception, and ProjectEntity if file was opened successfully. Null if cancelled by the user
@@ -56,12 +56,12 @@ class ProjectRepositoryImpl implements ProjectRepository {
     this._readWeaveFileUsecase,
     this._addRecentUsecase,
     this._modifyRecentUsecase,
-  ) : _dataSource = WeaveFileDataSource();
+  ) : _dataSource = ProjectDataSource();
 
   final ReadWeaveFileUsecase _readWeaveFileUsecase;
   final AddRecentUsecase _addRecentUsecase;
   final ModifyRecentUsecase _modifyRecentUsecase;
-  final WeaveFileDataSource _dataSource;
+  final ProjectDataSource _dataSource;
 
   @override
   Future<Either<PlotweaverError, (ProjectEntity, String, String)?>>
@@ -221,6 +221,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
         return Left(resp.asLeft());
       }
     }
+
+    await _readWeaveFileUsecase.call(file.path);
 
     return Right((projectEntity, projectIdentifier, file.path));
   }

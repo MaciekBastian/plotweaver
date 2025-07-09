@@ -3,8 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/errors/plotweaver_errors.dart';
 import '../../../../../core/extensions/dartz_extension.dart';
-import '../../../../weave_file/data/data_sources/weave_file_data_source.dart';
 import '../../../../weave_file/domain/entities/general_entity.dart';
+import '../../../data/data_sources/project_data_source.dart';
 import '../../../domain/entities/project_entity.dart';
 import '../../../domain/usecases/get_opened_project_usecase.dart';
 import '../../../domain/usecases/modify_project_usecase.dart';
@@ -20,8 +20,8 @@ class ProjectInfoEditorBloc
     this._getOpenedProjectUsecase,
     this._modifyProjectUsecase,
     this._currentProjectBloc,
-  )   : _weaveFileDataSource = WeaveFileDataSource(),
-        super(const _Loading()) {
+  )   : _projectDataSource = ProjectDataSource(),
+        super(const ProjectInfoEditorStateLoading()) {
     on<_Modify>(_onModify);
     on<_Setup>(_onSetup);
   }
@@ -31,7 +31,7 @@ class ProjectInfoEditorBloc
   final GetOpenedProjectUsecase _getOpenedProjectUsecase;
   final ModifyProjectUsecase _modifyProjectUsecase;
   final CurrentProjectBloc _currentProjectBloc;
-  final WeaveFileDataSource _weaveFileDataSource;
+  final ProjectDataSource _projectDataSource;
 
   void _onModify(_Modify event, Emitter<ProjectInfoEditorState> emit) {
     if (_identifier == null) {
@@ -41,11 +41,16 @@ class ProjectInfoEditorBloc
     _currentProjectBloc.add(
       CurrentProjectEvent.toggleUnsavedChangesForTab(event.tabId),
     );
-    if (state is _Success) {
-      emit(_Modified(event.project, (state as _Success).generalInfo));
-    } else if (state is _Modified) {
+    if (state is ProjectInfoEditorStateSuccess) {
       emit(
-        (state as _Modified).copyWith(
+        ProjectInfoEditorStateModified(
+          event.project,
+          (state as ProjectInfoEditorStateSuccess).generalInfo,
+        ),
+      );
+    } else if (state is ProjectInfoEditorStateModified) {
+      emit(
+        (state as ProjectInfoEditorStateModified).copyWith(
           projectInfo: event.project,
         ),
       );
@@ -60,19 +65,21 @@ class ProjectInfoEditorBloc
     if (_identifier == null) {
       return;
     }
-    if (state is _Loading || state is _Failure || event.force) {
-      final general = await _weaveFileDataSource.getGeneral(_identifier!);
+    if (state is ProjectInfoEditorStateLoading ||
+        state is ProjectInfoEditorStateFailure ||
+        event.force) {
+      final general = await _projectDataSource.getGeneral(_identifier!);
       if (general.isLeft()) {
-        emit(_Failure(general.asLeft()));
+        emit(ProjectInfoEditorStateFailure(general.asLeft()));
       }
       final resp = await _getOpenedProjectUsecase.call(_identifier!);
 
       resp.fold(
         (error) {
-          emit(_Failure(error));
+          emit(ProjectInfoEditorStateFailure(error));
         },
         (project) {
-          emit(_Success(project, general.asRight()));
+          emit(ProjectInfoEditorStateSuccess(project, general.asRight()));
         },
       );
     }

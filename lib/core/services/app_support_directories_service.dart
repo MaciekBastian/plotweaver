@@ -17,8 +17,9 @@ abstract class AppSupportDirectoriesService {
   Future<Either<PlotweaverError, Directory>> getWorkingDirectory();
 
   Future<Either<PlotweaverError, Directory>> getProjectDirectory(
-    String identifier,
-  );
+    String identifier, {
+    String? subdirectory,
+  });
 }
 
 @Singleton(as: AppSupportDirectoriesService)
@@ -61,8 +62,9 @@ class AppSupportDirectoriesServiceImpl implements AppSupportDirectoriesService {
 
   @override
   Future<Either<PlotweaverError, Directory>> getProjectDirectory(
-    String identifier,
-  ) async {
+    String identifier, {
+    String? subdirectory,
+  }) async {
     final rootDir = await getWorkingDirectory();
 
     if (rootDir.isLeft()) {
@@ -81,6 +83,24 @@ class AppSupportDirectoriesServiceImpl implements AppSupportDirectoriesService {
       if (resp.isSome()) {
         return Left(resp.asSome());
       }
+    }
+
+    if (subdirectory != null) {
+      final subDir = Directory(
+        p.join(
+          projectDirectory.path,
+          subdirectory,
+        ),
+      );
+
+      if (!subDir.existsSync()) {
+        final resp = handleVoidOperation(subDir.createSync);
+        if (resp.isSome()) {
+          return Left(resp.asSome());
+        }
+      }
+
+      return Right(subDir);
     }
 
     return Right(projectDirectory);

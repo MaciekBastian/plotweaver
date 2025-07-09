@@ -10,7 +10,7 @@ part 'project_entity.freezed.dart';
   toJson: false,
   fromJson: false,
 )
-class ProjectEntity with _$ProjectEntity {
+sealed class ProjectEntity with _$ProjectEntity {
   factory ProjectEntity({
     required String title,
     required ProjectTemplate template,

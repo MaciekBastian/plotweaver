@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/characters/presentation/bloc/characters_editors_bloc.dart';
 import '../../features/editor/presentation/screens/editor_screen.dart';
 import '../../features/project/presentation/bloc/project_info_editor/project_info_editor_bloc.dart';
 import '../config/sl_config.dart';
@@ -25,12 +26,25 @@ final plotweaverRouter = GoRouter(
         context: context,
         state: state,
         // bloc providers for all editors
-        child: BlocProvider(
-          create: (context) => ProjectInfoEditorBloc(
-            sl(),
-            sl(),
-            context.read(),
-          ),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => ProjectInfoEditorBloc(
+                sl(),
+                sl(),
+                context.read(),
+              ),
+            ),
+            BlocProvider(
+              create: (context) => CharactersEditorsBloc(
+                sl(),
+                sl(),
+                sl(),
+                sl(),
+                context.read(),
+              ),
+            ),
+          ],
           child: const EditorScreen(),
         ),
       ),

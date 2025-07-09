@@ -8,17 +8,19 @@ part 'project_file_entity.freezed.dart';
   toJson: false,
   fromJson: false,
 )
-class ProjectFileEntity with _$ProjectFileEntity {
-  factory ProjectFileEntity.projectFile() = _ProjectFile;
+sealed class ProjectFileEntity with _$ProjectFileEntity {
+  factory ProjectFileEntity.projectFile() = ProjectFileEntityProjectFile;
 
-  factory ProjectFileEntity.characterFile() = _CharacterFile;
+  factory ProjectFileEntity.characterFile({
+    required String characterId,
+  }) = ProjectFileEntityCharacterFile;
 
-  factory ProjectFileEntity.placeholder() = _Placeholder;
+  factory ProjectFileEntity.placeholder() = ProjectFileEntityPlaceholder;
 
   factory ProjectFileEntity.fileBundle({
     required List<ProjectFileEntity> files,
     required FileBundleType type,
-  }) = _FileBundle;
+  }) = ProjectFileEntityFileBundle;
 
   const ProjectFileEntity._();
 }

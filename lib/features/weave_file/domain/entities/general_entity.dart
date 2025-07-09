@@ -10,7 +10,7 @@ part 'general_entity.freezed.dart';
   toJson: false,
   fromJson: false,
 )
-class GeneralEntity with _$GeneralEntity {
+sealed class GeneralEntity with _$GeneralEntity {
   factory GeneralEntity({
     required String projectIdentifier,
     required DateTime createdAt,

@@ -18,48 +18,50 @@ class _ProjectSidebarWidgetState extends State<ProjectSidebarWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<ProjectSidebarBloc, ProjectSidebarState>(
       builder: (context, state) {
-        return state.when(
-          visible: (width) => SizedBox(
-            width: width,
-            height: double.infinity,
-            child: Stack(
-              alignment: Alignment.centerRight,
-              children: [
-                Container(
-                  width: width,
-                  padding: const EdgeInsets.only(left: 20),
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.colors.shadedBackgroundColor,
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 30),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: PlotweaverLogoWidget(
-                          radius: 32,
+        switch (state) {
+          case ProjectSidebarStateHidden():
+            return const SizedBox.shrink();
+          case ProjectSidebarStateVisible(:final width):
+            return SizedBox(
+              width: width,
+              height: double.infinity,
+              child: Stack(
+                alignment: Alignment.centerRight,
+                children: [
+                  Container(
+                    width: width,
+                    padding: const EdgeInsets.only(left: 20),
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: context.colors.shadedBackgroundColor,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 30),
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: PlotweaverLogoWidget(
+                            radius: 32,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Divider(color: context.colors.dividerColor),
-                      const Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: ProjectSidebarContent(),
+                        const SizedBox(height: 10),
+                        Divider(color: context.colors.dividerColor),
+                        const Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: ProjectSidebarContent(),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const Positioned(
-                  child: _DragHandle(),
-                ),
-              ],
-            ),
-          ),
-          hidden: (_) => const SizedBox.shrink(),
-        );
+                  const Positioned(
+                    child: _DragHandle(),
+                  ),
+                ],
+              ),
+            );
+        }
       },
     );
   }
@@ -82,10 +84,10 @@ class __DragHandleState extends State<_DragHandle> {
   Widget build(BuildContext context) {
     return BlocSelector<ProjectSidebarBloc, ProjectSidebarState, double>(
       selector: (state) {
-        return state.when(
-          visible: (width) => width,
-          hidden: (cachedWidth) => cachedWidth,
-        );
+        return switch (state) {
+          ProjectSidebarStateVisible(:final width) => width,
+          ProjectSidebarStateHidden(:final cachedWidth) => cachedWidth,
+        };
       },
       builder: (context, state) {
         return MouseRegion(

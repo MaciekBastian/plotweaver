@@ -25,7 +25,7 @@
   "project": "Project",
   "project_author": "Author",
   "project_author_hint": "Name of the project's author or rights owner",
-  "project_description": "Opis",
+  "project_description": "Description",
   "project_description_hint": "Describe your project's outline here",
   "start_typing": "Start typing...",
   "characters": "Characters",
@@ -68,5 +68,46 @@
   "last_modified_at": "Last modified at",
   "weave_file_version": "Weave file version",
   "plotweaver_version": "Plotweaver version",
-  "origin": "Origin"
+  "origin": "Origin",
+  "unnamed_character": "Unnamed character",
+  "character": "Character",
+  "appearance": "Appearance",
+  "appearance_hint": "Describe what the character looks like. This will help you create coherent descriptions. You can also include personality traits and behaviors that are distinctive for the character.",
+  "goals": "Goals",
+  "goals_hint": "Describe what the character wants to achieve — what their motivation is, what they desire, whether they will ultimately achieve their goal, or whether they will have to change their expectations.",
+  "lesson": "Lesson",
+  "lesson_hint": "Describe what the character gains from their experiences - how they change them, what they do, and what conclusions they draw.",
+  "character_name": "Name",
+  "character_name_hint": "Name your character. You can either enter their full name or what they’re usually called like",
+  "character_description": "Description",
+  "character_description_hint": "Describe your character – focus on what kind of person they are, where they come from, and how others see them",
+  "character_age": "Age",
+  "character_age_hint": "It can be either exact number, birthday date or descriptive value",
+  "character_status": "Status",
+  "character_status_hint": "Set what is an existential status of this character",
+  "character_status_unspecified": "Unspecified",
+  "character_status_unknown": "Unknown",
+  "character_status_alive": "Alive",
+  "character_status_deceased": "Deceased",
+  "character_domicile": "Domicile",
+  "character_occupation": "Occupation",
+  "character_portrayed_by": "Portrayed by",
+  "character_gender": "Gender",
+  "character_gender_unspecified": "Unspecified",
+  "character_gender_male": "Male",
+  "character_gender_female": "Female",
+  "character_gender_other": "Other",
+  "do_you_want_to_delete_character": "Do you want to permanently delete character „{name}”?",
+  "@do_you_want_to_delete_character": {
+    "placeholders": {
+      "name": {
+        "example": "Project",
+        "type": "String"
+      }
+    }
+  },
+  "this_action_is_irreversible": "This action is irreversible",
+  "delete_character": "Delete character",
+  "search_for_command_or_file": "Search for command or file",
+  "no_matching_commands": "No matching commands"
 }

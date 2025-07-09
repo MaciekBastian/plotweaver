@@ -77,6 +77,13 @@ class __PromptOverlayWidgetState extends State<_PromptOverlayWidget> {
   }
 
   @override
+  void dispose() {
+    _textEditingController.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 

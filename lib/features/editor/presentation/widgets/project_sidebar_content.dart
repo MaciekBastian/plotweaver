@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../../../core/constants/io_names_constants.dart';
 import '../../../../core/extensions/theme_extension.dart';
 import '../../../../shared/widgets/clickable_widget.dart';
 import '../../../project/domain/entities/project_file_entity.dart';
 import '../../../project/domain/enums/file_bundle_type.dart';
 import '../../../project/presentation/cubit/project_files_cubit.dart';
+import '../../../tabs/domain/commands/tab_intent.dart';
 import '../../../tabs/domain/entities/tab_entity.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
 import '../../../tabs/presentation/widgets/tab_icons_and_names.dart';
@@ -20,14 +22,11 @@ class ProjectSidebarContent extends StatelessWidget {
     return BlocBuilder<ProjectFilesCubit, ProjectFilesState>(
       builder: (context, state) {
         return ListView(
-          children: state.map(
-            active: (value) {
-              return value.projectFiles
-                  .map((file) => mapProjectFileToSidebarFile(context, file))
-                  .toList();
-            },
-            loading: (_) {
-              final placeholders = [
+          children: switch (state) {
+            ProjectFilesStateActive(:final projectFiles) => projectFiles
+                .map((file) => mapProjectFileToSidebarFile(context, file))
+                .toList(),
+            ProjectFilesStateLoading() => [
                 ProjectFileEntity.placeholder(),
                 ProjectFileEntity.fileBundle(
                   type: FileBundleType.characters,
@@ -50,13 +49,10 @@ class ProjectSidebarContent extends StatelessWidget {
                     (_) => ProjectFileEntity.placeholder(),
                   ),
                 ),
-              ];
-
-              return placeholders
+              ]
                   .map((file) => mapProjectFileToSidebarFile(context, file))
-                  .toList();
-            },
-          ),
+                  .toList(),
+          },
         );
       },
     );
@@ -66,8 +62,8 @@ class ProjectSidebarContent extends StatelessWidget {
     BuildContext context,
     ProjectFileEntity file,
   ) {
-    return file.when(
-      projectFile: () {
+    switch (file) {
+      case ProjectFileEntityProjectFile():
         final tab = TabEntity.projectTab(tabId: 'project');
         return _ProjectSidebarFile(
           tab: tab,
@@ -75,24 +71,24 @@ class ProjectSidebarContent extends StatelessWidget {
           icon: getTabIcon(context, tab),
           title: getTabName(context, tab),
         );
-      },
-      placeholder: () {
-        return _ProjectSidebarFile(
-          icon: Container(),
-          title: 'long placeholder text',
+      case ProjectFileEntityCharacterFile(:final characterId):
+        final tab = TabEntity.characterTab(
+          tabId:
+              '${PlotweaverIONamesConstants.directoryNames.characters}$characterId',
+          characterId: characterId,
         );
-      },
-      characterFile: () {
-        // TODO: adjust for characters feature
-        final tab = TabEntity.characterTab(tabId: 'character');
         return _ProjectSidebarFile(
           tab: tab,
           key: Key('sidebar_file_${tab.tabId}'),
           icon: getTabIcon(context, tab),
           title: getTabName(context, tab),
         );
-      },
-      fileBundle: (List<ProjectFileEntity> files, FileBundleType type) {
+      case ProjectFileEntityPlaceholder():
+        return _ProjectSidebarFile(
+          icon: Container(),
+          title: 'long placeholder text',
+        );
+      case ProjectFileEntityFileBundle(:final files, :final type):
         return Column(
           children: [
             _ProjectSidebarFile(
@@ -115,8 +111,7 @@ class ProjectSidebarContent extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
+    }
   }
 }
 
@@ -154,7 +149,7 @@ class _ProjectSidebarFile extends StatelessWidget {
             child: ClickableWidget(
               onTap: () {
                 if (tab != null) {
-                  context.read<TabsCubit>().openTab(tab!);
+                  Actions.invoke(context, TabIntent.open(tab));
                 }
               },
               borderRadius: BorderRadius.circular(8),

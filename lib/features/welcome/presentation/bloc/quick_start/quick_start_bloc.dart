@@ -17,7 +17,7 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
     this._openProjectUsecase,
     this._createProjectUsecase,
     this._deleteRecentUsecase,
-  ) : super(const _Initial()) {
+  ) : super(const QuickStartStateInitial()) {
     on<_OpenProject>(_onOpenProject);
     on<_CreateProject>(_onCreateProject);
   }
@@ -30,26 +30,29 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
     _OpenProject event,
     Emitter<QuickStartState> emit,
   ) async {
-    emit(_Locked(event.recent == null));
+    emit(QuickStartStateLocked(event.recent == null));
     final res = await _openProjectUsecase.call(event.recent?.path);
 
-    res.fold(
-      (error) {
+    await res.fold(
+      (error) async {
         if (error is IOError && event.recent != null) {
-          error.maybeMap(
-            orElse: () {},
-            fileDoesNotExist: (value) async {
+          switch (error) {
+            case IOParseError():
+              break;
+            case IOFileDoesNotExist():
               await _deleteRecentUsecase.call(event.recent!);
-            },
-          );
+              break;
+            case IOUnknownError():
+              break;
+          }
         }
-        emit(_Failure(error));
+        emit(QuickStartStateFailure(error));
       },
       (value) {
         if (value == null) {
-          emit(const _Initial());
+          emit(const QuickStartStateInitial());
         } else {
-          emit(_Success(value.$1, value.$2, value.$3));
+          emit(QuickStartStateSuccess(value.$1, value.$2, value.$3));
         }
       },
     );
@@ -59,18 +62,18 @@ class QuickStartBloc extends Bloc<QuickStartEvent, QuickStartState> {
     _CreateProject event,
     Emitter<QuickStartState> emit,
   ) async {
-    emit(const _Locked(true));
+    emit(const QuickStartStateLocked(true));
     final res = await _createProjectUsecase.call(event.projectName);
 
     res.fold(
       (error) {
-        emit(_Failure(error));
+        emit(QuickStartStateFailure(error));
       },
       (value) {
         if (value == null) {
-          emit(const _Initial());
+          emit(const QuickStartStateInitial());
         } else {
-          emit(_Success(value.$1, value.$2, value.$3));
+          emit(QuickStartStateSuccess(value.$1, value.$2, value.$3));
         }
       },
     );

@@ -16,6 +16,7 @@ final class _PlotweaverFileNamesConstants {
 final class _PlotweaverDirectoryNamesConstants {
   final openedWeaveFiles = 'opened_weave_files';
   final preferences = 'pref';
+  final characters = 'characters';
 }
 
 final class _PlotweaverFileExtensionNamesConstants {

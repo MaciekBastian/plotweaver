@@ -24,11 +24,11 @@ class DropdownElement<T> {
 
 class DropdownPropertyWidget<T extends Object> extends StatefulWidget {
   const DropdownPropertyWidget({
-    required this.description,
     required this.onSelected,
     required this.icon,
     required this.title,
     required this.values,
+    this.description,
     this.allowEmpty = false,
     this.selected,
     this.selectedBuilder,
@@ -41,7 +41,7 @@ class DropdownPropertyWidget<T extends Object> extends StatefulWidget {
   final Widget icon;
   final T? selected;
   final String title;
-  final String description;
+  final String? description;
   final List<DropdownElement<T>> values;
   final bool allowEmpty;
   final void Function(T selected) onSelected;
