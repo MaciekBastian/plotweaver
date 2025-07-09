@@ -13,4 +13,5 @@ sealed class TabIntent extends Intent with _$TabIntent {
   const factory TabIntent.rollback([TabEntity? tab]) = RollbackTabIntent;
   const factory TabIntent.close([TabEntity? tab]) = CloseTabIntent;
   const factory TabIntent.open([TabEntity? tab]) = OpenTabIntent;
+  const factory TabIntent.undo([TabEntity? tab]) = UndoTabIntent;
 }

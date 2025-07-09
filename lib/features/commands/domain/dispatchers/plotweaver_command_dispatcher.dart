@@ -5,6 +5,7 @@ import '../../../tabs/domain/commands/actions/close_tab_action.dart';
 import '../../../tabs/domain/commands/actions/open_tab_action.dart';
 import '../../../tabs/domain/commands/actions/rollback_tab_action.dart';
 import '../../../tabs/domain/commands/actions/save_tab_action.dart';
+import '../../../tabs/domain/commands/actions/undo_tab_action.dart';
 import '../../../tabs/domain/commands/tab_intent.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
 
@@ -55,6 +56,13 @@ class PlotweaverCommandDispatcher extends ActionDispatcher {
           return CloseTabAction(tab ?? currentTab);
         case OpenTabIntent(:final tab):
           return OpenTabAction(tab);
+        case UndoTabIntent(:final tab):
+          final tabsCubit = sl<TabsCubit>();
+          final currentTabId = tabsCubit.state.openedTabId;
+          final currentTab =
+              currentTabId == null ? null : tabsCubit.getTab(currentTabId);
+
+          return UndoTabAction(tab ?? currentTab);
       }
     }
 

@@ -8,6 +8,7 @@ import '../../../tabs/domain/commands/actions/close_tab_action.dart';
 import '../../../tabs/domain/commands/actions/open_tab_action.dart';
 import '../../../tabs/domain/commands/actions/rollback_tab_action.dart';
 import '../../../tabs/domain/commands/actions/save_tab_action.dart';
+import '../../../tabs/domain/commands/actions/undo_tab_action.dart';
 import '../../../tabs/domain/commands/tab_intent.dart';
 import '../enums/plotweaver_command.dart';
 import 'command_entity.dart';
@@ -58,5 +59,16 @@ sealed class TabCommand with _$TabCommand implements CommandEntity {
         command: PlotweaverCommand.openTab,
         intent: const TabIntent.open(),
         action: OpenTabAction(null),
+      );
+
+  factory TabCommand.undo() => _TabCommand(
+        command: PlotweaverCommand.undo,
+        intent: const TabIntent.undo(),
+        action: UndoTabAction(null),
+        shortcut: SingleActivator(
+          LogicalKeyboardKey.keyZ,
+          control: Platform.isWindows,
+          meta: Platform.isMacOS,
+        ),
       );
 }

@@ -6,6 +6,7 @@ import '../../../../core/constants/io_names_constants.dart';
 import '../../../../core/errors/plotweaver_errors.dart';
 import '../../../../core/extensions/dartz_extension.dart';
 import '../../../../generated/l10n.dart';
+import '../../../../shared/entities/version_history.dart';
 import '../../../project/presentation/bloc/current_project/current_project_bloc.dart';
 import '../../../tabs/domain/entities/tab_entity.dart';
 import '../../../tabs/presentation/cubit/tabs_cubit.dart';
@@ -32,6 +33,8 @@ class CharactersEditorsBloc
     on<_Setup>(_onSetup);
     on<_Create>(_onCreate);
     on<_Delete>(_onDelete);
+    on<_Undo>(_onUndo);
+    on<_Redo>(_onRedo);
   }
 
   final GetAllCharactersUsecase _getAllCharactersUsecase;
@@ -50,11 +53,9 @@ class CharactersEditorsBloc
       projectIdentifier: _projectIdentifier!,
       character: event.character,
     );
-    _currentProjectBloc.add(
-      CurrentProjectEvent.toggleUnsavedChangesForTab(event.tabId),
-    );
 
-    final List<CharacterEntity> currentCharacters = switch (state) {
+    final List<VersionHistory<CharacterEntity>> currentCharacters =
+        switch (state) {
       CharactersEditorsStateLoading() => [],
       CharactersEditorsStateSuccess(:final _characters) => _characters,
       CharactersEditorsStateFailure() => [],
@@ -62,16 +63,14 @@ class CharactersEditorsBloc
     };
 
     final newCharacters = [...currentCharacters];
-    final index = newCharacters.indexWhere((el) => el.id == event.character.id);
-    if (index == -1) {
-      return;
-    }
-    newCharacters
-      ..removeAt(index)
-      ..insert(
-        index,
-        event.character,
-      );
+    final index =
+        newCharacters.indexWhere((el) => el.current.id == event.character.id);
+
+    newCharacters[index].addState(event.character);
+
+    _currentProjectBloc.add(
+      CurrentProjectEvent.toggleUnsavedChangesForTab(event.tabId),
+    );
 
     emit(CharactersEditorsStateModified(newCharacters));
   }
@@ -104,16 +103,21 @@ class CharactersEditorsBloc
               final character =
                   characters.where((el) => el.id == element).firstOrNull;
 
-              final index = newCharacters.indexWhere((el) => el.id == element);
+              final index =
+                  newCharacters.indexWhere((el) => el.current.id == element);
               if (character != null && index != -1) {
                 newCharacters
                   ..removeAt(index)
-                  ..insert(index, character);
+                  ..insert(index, VersionHistory(character));
               }
             }
             emit(CharactersEditorsStateModified(newCharacters));
           } else {
-            emit(CharactersEditorsStateSuccess(characters));
+            emit(
+              CharactersEditorsStateSuccess(
+                characters.map(VersionHistory.new).toList(),
+              ),
+            );
           }
         },
       );
@@ -143,14 +147,22 @@ class CharactersEditorsBloc
       event.then(null, resp.asSome());
       return;
     }
-    final List<CharacterEntity> currentCharacters = switch (state) {
+    final List<VersionHistory<CharacterEntity>> currentCharacters =
+        switch (state) {
       CharactersEditorsStateLoading() => [],
       CharactersEditorsStateSuccess(:final _characters) => _characters,
       CharactersEditorsStateFailure() => [],
       CharactersEditorsStateModified(:final _characters) => _characters,
     };
 
-    emit(CharactersEditorsStateModified([...currentCharacters, character]));
+    emit(
+      CharactersEditorsStateModified(
+        [
+          ...currentCharacters,
+          VersionHistory(character),
+        ],
+      ),
+    );
 
     final tabId =
         '${PlotweaverIONamesConstants.directoryNames.characters}${character.id}';
@@ -166,12 +178,15 @@ class CharactersEditorsBloc
   }
 
   CharacterEntity? getCharacter(String characterId) => switch (state) {
-        CharactersEditorsStateLoading() => null,
-        CharactersEditorsStateSuccess(:final _characters) =>
-          _characters.where((el) => el.id == characterId).firstOrNull,
-        CharactersEditorsStateFailure() => null,
-        CharactersEditorsStateModified(:final _characters) =>
-          _characters.where((el) => el.id == characterId).firstOrNull,
+        CharactersEditorsStateSuccess(:final _characters) => _characters
+            .where((el) => el.current.id == characterId)
+            .firstOrNull
+            ?.current,
+        CharactersEditorsStateModified(:final _characters) => _characters
+            .where((el) => el.current.id == characterId)
+            .firstOrNull
+            ?.current,
+        _ => null,
       };
 
   Future<void> _onDelete(
@@ -193,14 +208,14 @@ class CharactersEditorsBloc
       event.then(resp.asSome());
       return;
     }
-    final List<CharacterEntity> currentCharacters = [
+    final List<VersionHistory<CharacterEntity>> currentCharacters = [
       ...switch (state) {
         CharactersEditorsStateLoading() => [],
         CharactersEditorsStateSuccess(:final _characters) => _characters,
         CharactersEditorsStateFailure() => [],
         CharactersEditorsStateModified(:final _characters) => _characters,
       },
-    ]..removeWhere((el) => el.id == event.characterId);
+    ]..removeWhere((el) => el.current.id == event.characterId);
 
     emit(CharactersEditorsStateModified([...currentCharacters]));
 
@@ -215,5 +230,72 @@ class CharactersEditorsBloc
     );
 
     event.then(null);
+  }
+
+  Future<void> _onUndo(
+    _Undo event,
+    Emitter<CharactersEditorsState> emit,
+  ) async {
+    if (_projectIdentifier == null) {
+      return;
+    }
+
+    final List<VersionHistory<CharacterEntity>> currentCharacters =
+        switch (state) {
+      CharactersEditorsStateLoading() => [],
+      CharactersEditorsStateSuccess(:final _characters) => _characters,
+      CharactersEditorsStateFailure() => [],
+      CharactersEditorsStateModified(:final _characters) => _characters,
+    };
+
+    final index = currentCharacters
+        .indexWhere((el) => el.current.id == event.characterId);
+    if (index == -1) {
+      return;
+    }
+    final character = currentCharacters[index];
+    if (!character.canUndo) {
+      event.then(false);
+      return;
+    }
+    character.undo();
+
+    final modifyEvent = _Modify(character.current, event.tabId);
+    _onModify(modifyEvent, emit);
+    event.then(true);
+  }
+
+  Future<void> _onRedo(
+    _Redo event,
+    Emitter<CharactersEditorsState> emit,
+  ) async {
+    if (_projectIdentifier == null) {
+      return;
+    }
+
+    final List<VersionHistory<CharacterEntity>> currentCharacters =
+        switch (state) {
+      CharactersEditorsStateLoading() => [],
+      CharactersEditorsStateSuccess(:final _characters) => _characters,
+      CharactersEditorsStateFailure() => [],
+      CharactersEditorsStateModified(:final _characters) => _characters,
+    };
+
+    final index = currentCharacters
+        .indexWhere((el) => el.current.id == event.characterId);
+    if (index == -1) {
+      return;
+    }
+    final character = currentCharacters[index];
+    if (!character.canRedo) {
+      event.then(false);
+      return;
+    }
+    character.redo();
+
+    final modifyEvent = _Modify(character.current, event.tabId);
+    _onModify(modifyEvent, emit);
+
+    event.then(true);
   }
 }

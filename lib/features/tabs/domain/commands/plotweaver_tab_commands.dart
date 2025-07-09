@@ -8,5 +8,6 @@ class PlotweaverTabCommands extends PlotweaverCommands {
         TabCommand.rollback(),
         TabCommand.close(),
         TabCommand.open(),
+        TabCommand.undo(),
       ];
 }

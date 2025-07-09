@@ -4,6 +4,8 @@ enum PlotweaverCommand {
   closeTab,
   rollbackTab,
   openTab,
+  undo,
+  redo,
 
   // general
   showCommandSearchBar,

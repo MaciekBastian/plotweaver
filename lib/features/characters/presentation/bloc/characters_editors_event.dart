@@ -22,4 +22,16 @@ class CharactersEditorsEvent with _$CharactersEditorsEvent {
     required String projectFilePath,
     required void Function(PlotweaverError? error) then,
   }) = _Delete;
+
+  const factory CharactersEditorsEvent.undo({
+    required String characterId,
+    required void Function(bool success) then,
+    required String tabId,
+  }) = _Undo;
+
+  const factory CharactersEditorsEvent.redo({
+    required String characterId,
+    required void Function(bool success) then,
+    required String tabId,
+  }) = _Redo;
 }
