@@ -1,0 +1,23 @@
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+
+import '../../../../core/errors/plotweaver_errors.dart';
+import '../../data/repositories/characters_repository.dart';
+
+@lazySingleton
+class DeleteCharacterUsecase {
+  const DeleteCharacterUsecase(this._charactersRepository);
+
+  final CharactersRepository _charactersRepository;
+
+  Future<Option<PlotweaverError>> call({
+    required String projectIdentifier,
+    required String projectFilePath,
+    required String characterId,
+  }) =>
+      _charactersRepository.deleteCharacter(
+        characterId: characterId,
+        projectIdentifier: projectIdentifier,
+        projectFilePath: projectFilePath,
+      );
+}

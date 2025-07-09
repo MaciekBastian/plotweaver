@@ -1,4 +1,0 @@
-enum PlotweaverGuide {
-  characterDevelopment,
-  plotDevelopment,
-}
